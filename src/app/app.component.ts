@@ -12,4 +12,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class AppComponent {
   task = '';
+
+  showMessage() {
+    alert('Button clicked');
+  }
 }
