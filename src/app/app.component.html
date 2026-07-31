@@ -3,7 +3,7 @@
 
   <input type="text" placeholder="Enter your task..." [(ngModel)]="task" />
 
-  <button>Add task</button>
+  <button (click)="showMessage()">Add task</button>
 
   <p>{{ task }}</p>
 </div>
