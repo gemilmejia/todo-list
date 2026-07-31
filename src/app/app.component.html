@@ -1,7 +1,9 @@
 <div class="container">
   <h1>My Todo List</h1>
 
-  <input type="text" placeholder="Enter your task..." />
+  <input type="text" placeholder="Enter your task..." [(ngModel)]="task" />
 
   <button>Add task</button>
+
+  <p>{{ task }}</p>
 </div>
