@@ -40,4 +40,8 @@ export class AppComponent {
   deleteTodo(id: number) {
     this.todos = this.todos.filter((todo) => todo.id !== id); // mean this.todo(means the current todo) = this.todos.filter(means the current todos array).filter(means filter the todos array and return a new array that only includes the todos that do not have the same id as the one passed in as an argument)
   }
+
+  toggleCompleted(todo: Todo) {
+    todo.completed = !todo.completed; // The completed status of this todo Replace it with The ! means NOT.
+  }
 }
