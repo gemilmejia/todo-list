@@ -13,7 +13,9 @@ import { FormsModule } from '@angular/forms';
 export class AppComponent {
   task = '';
 
-  showMessage() {
-    alert('Button clicked');
+  todos: string[] = [];
+
+  addTask() {
+    this.todos.push(this.task);
   }
 }
