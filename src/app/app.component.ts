@@ -16,6 +16,12 @@ export class AppComponent {
   todos: string[] = [];
 
   addTask() {
+    if (this.task.trim() === '') {
+      // remove whitespace from the task string and check if it's empty
+      return;
+    }
+
     this.todos.push(this.task);
+    this.task = '';
   }
 }
