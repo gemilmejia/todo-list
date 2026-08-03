@@ -12,24 +12,32 @@ import { Todo } from './models/todo.model'; // 2
   styleUrl: './app.component.css',
 })
 export class AppComponent {
+  // Define a property to hold the task input value
   task = '';
 
+  // Define a property to hold the list of todos
   todos: Todo[] = []; // 3
 
+  // Define a method to add a new todo item to the list
   addTask() {
     if (this.task.trim() === '') {
       // remove whitespace from the task string and check if it's empty
       return;
     }
 
-    // 4 - create a new Todo object using the Todo interface
+    // create a new Todo object using the Todo interface
     const newTodo: Todo = {
-      id: Date.now(), // generate a unique id based on the current timestamp
+      id: Date.now(),
       title: this.task,
       completed: false,
     };
-
-    this.todos.push(newTodo); // 5 - add the new Todo object to the todos array
+    // add the new Todo object to the todos array
+    this.todos.push(newTodo);
     this.task = '';
+  }
+
+  // Delete a todo item from the list based on its id
+  deleteTodo(id: number) {
+    this.todos = this.todos.filter((todo) => todo.id !== id); // mean this.todo(means the current todo) = this.todos.filter(means the current todos array).filter(means filter the todos array and return a new array that only includes the todos that do not have the same id as the one passed in as an argument)
   }
 }
