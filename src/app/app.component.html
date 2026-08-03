@@ -1,13 +1,21 @@
 <div class="container">
+  <!-- Header -->
   <h1>My Todo List</h1>
-
+  <!-- Input field for adding a new task -->
   <input type="text" placeholder="Enter your task..." [(ngModel)]="task" />
-
+  <!-- Button to trigger the addTask() method when clicked -->
   <button (click)="addTask()">Add task</button>
-
+  <!-- Unordered list to display the list of todos -->
   <ul>
+    <!-- Loop through each todo item and display it -->
     @for (todo of todos; track $index) {
-      <li>{{ todo.title }}</li>
+      <li>
+        <!-- Display the todo title -->
+        {{ todo.title }}
+
+        <!-- Delete button to remove the task from the list -->
+        <button (click)="deleteTodo(todo.id)">Delete</button>
+      </li>
     }
   </ul>
 
