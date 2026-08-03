@@ -3,7 +3,13 @@
 
   <input type="text" placeholder="Enter your task..." [(ngModel)]="task" />
 
-  <button (click)="showMessage()">Add task</button>
+  <button (click)="addTask()">Add task</button>
 
-  <p>{{ task }}</p>
+  <ul>
+    @for (todo of todos; track $index) {
+      <li>{{ todo }}</li>
+    }
+  </ul>
+
+  <!-- <p>{{ task }}</p> -->
 </div>
