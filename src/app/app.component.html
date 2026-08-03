@@ -11,7 +11,9 @@
     @for (todo of todos; track $index) {
       <li>
         <!-- Display the todo title -->
-        {{ todo.title }}
+        {{ todo.completed ? "✅" : "⬜" }} {{ todo.title }}
+
+        <button (click)="toggleCompleted(todo)">Complete</button>
 
         <!-- Delete button to remove the task from the list -->
         <button (click)="deleteTodo(todo.id)">Delete</button>
