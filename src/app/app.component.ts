@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 // import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Todo } from './models/todo.model'; // 2
-
+import { Todo } from './models/todo.model';
+import { TodoService } from './services/todo.service'; // 2 import the TodoService to use its methods in this component
 @Component({
   selector: 'app-root',
   // standalone: true,
@@ -16,7 +16,9 @@ export class AppComponent {
   task = '';
 
   // Define a property to hold the list of todos
-  todos: Todo[] = []; // 3
+  todos: Todo[] = [];
+
+  constructor(private todoService: TodoService) {} // 3 Constructor injection of the TodoService to use its methods in this component
 
   // Define a method to add a new todo item to the list
   addTask() {
