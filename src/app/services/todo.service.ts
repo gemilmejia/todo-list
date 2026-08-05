@@ -5,7 +5,9 @@ import { Todo } from '../models/todo.model'; // import the Todo interface to use
   providedIn: 'root',
 })
 export class TodoService {
-  constructor() {}
+  constructor() {
+    this.loadTodos(); // Load the todos from local storage when the service is initialized
+  }
 
   todos: Todo[] = []; // Define a property to hold the list of todos
 
@@ -31,11 +33,15 @@ export class TodoService {
   // Delete a todo item from the list based on its id
   deleteTodo(id: number) {
     this.todos = this.todos.filter((todo) => todo.id !== id);
+
+    this.saveTodos(); // Save the updated todos array to local storage after deleting a todo
   }
 
   // Toggle the completed status of a todo item
   toggleCompleted(todo: Todo) {
     todo.completed = !todo.completed;
+
+    this.saveTodos(); // Save the updated todos array to local storage after toggling the completed status
   }
 
   // Save the current list of todos to local storage as a JSON string
@@ -44,5 +50,15 @@ export class TodoService {
       'todos', // "Key": The name of the item to store in local storage
       JSON.stringify(this.todos), // "Value": Convert the todos array to a JSON string
     );
+  }
+
+  // Load the list of todos from local storage and parse it back into an array of Todo objects
+  loadTodos() {
+    const savedTodos = localStorage.getItem('todos'); // Get the item from local storage with the key "todos"
+
+    if (savedTodos) {
+      // If the item exists in local storage (i.e., it's not null), parse the JSON string back into an array of Todo objects and assign it to the todos property
+      this.todos = JSON.parse(savedTodos); // Convert the JSON string back into an array of Todo objects
+    }
   }
 }
