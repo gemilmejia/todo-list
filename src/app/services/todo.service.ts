@@ -25,4 +25,12 @@ export class TodoService {
     // add the new Todo object to the todos array
     this.todos.push(newTodo);
   }
+
+  deleteTodo(id: number) {
+    this.todos = this.todos.filter((todo) => todo.id !== id);
+  }
+
+  toggleCompleted(todo: Todo) {
+    todo.completed = !todo.completed;
+  }
 }
