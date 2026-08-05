@@ -12,38 +12,25 @@ import { TodoService } from './services/todo.service'; // 2 import the TodoServi
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  // Define a property to hold the task input value
   task = '';
 
-  // Define a property to hold the list of todos
-  todos: Todo[] = [];
+  get todos() {
+    return this.todoService.todos;
+  }
 
-  constructor(private todoService: TodoService) {} // 3 Constructor injection of the TodoService to use its methods in this component
+  constructor(private todoService: TodoService) {}
 
-  // Define a method to add a new todo item to the list
   addTask() {
-    if (this.task.trim() === '') {
-      // remove whitespace from the task string and check if it's empty
-      return;
-    }
+    this.todoService.addTask(this.task);
 
-    // create a new Todo object using the Todo interface
-    const newTodo: Todo = {
-      id: Date.now(),
-      title: this.task,
-      completed: false,
-    };
-    // add the new Todo object to the todos array
-    this.todos.push(newTodo);
     this.task = '';
   }
 
-  // Delete a todo item from the list based on its id
   deleteTodo(id: number) {
-    this.todos = this.todos.filter((todo) => todo.id !== id); // mean this.todo(means the current todo) = this.todos.filter(means the current todos array).filter(means filter the todos array and return a new array that only includes the todos that do not have the same id as the one passed in as an argument)
+    this.todoService.deleteTodo(id);
   }
 
   toggleCompleted(todo: Todo) {
-    todo.completed = !todo.completed; // The completed status of this todo Replace it with The ! means NOT.
+    this.todoService.toggleCompleted(todo);
   }
 }
