@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -10,7 +10,13 @@ import { FormsModule } from '@angular/forms';
 export class TodoInputComponent {
   task = '';
 
+  @Output()
+  taskAdded = new EventEmitter<string>();
+
   addTask() {
-    console.log(this.task);
+    this taskAdded.emit(this.task); // Emit the taskAdded event with the current task value
+
+    this.task = ''; // Clear the input field after emitting the event
   }
+
 }
