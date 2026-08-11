@@ -5,8 +5,8 @@
   
   <button (click)="addTask()">Add task</button> -->
 
-  <app-todo-input>
-    (taskAdded)="onTaskAdded($event)"
+  <app-todo-input
+    (taskAdded)="onTaskAdded($event)">
     <!-- Listen for the taskAdded event and call the onTaskAdded method with the emitted value -->
   </app-todo-input>
 
