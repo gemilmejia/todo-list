@@ -1,1 +1,12 @@
-<p>todo-list works!</p>
+<ul>
+  @for (todo of todos; track $index) {
+    <li>
+      {{ todo.title }}
+
+      <button>Complete</button>
+
+      <button>Delete</button>
+    </li>
+  }
+</ul>
+>
