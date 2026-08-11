@@ -10,19 +10,7 @@
     <!-- Listen for the taskAdded event and call the onTaskAdded method with the emitted value -->
   </app-todo-input>
 
-  <ul>
-    @for (todo of todos; track $index) {
-      <li>
-        <!-- Display the todo title -->
-        {{ todo.completed ? "✅" : "⬜" }} {{ todo.title }}
-
-        <button (click)="toggleCompleted(todo)">Complete</button>
-
-        <!-- Delete button to remove the task from the list -->
-        <button (click)="deleteTodo(todo.id)">Delete</button>
-      </li>
-    }
-  </ul>
-
-  <!-- <p>{{ task }}</p> -->
+  <app todo-list
+    [todos]="todos">
+  </app-todo-list>
 </div>
