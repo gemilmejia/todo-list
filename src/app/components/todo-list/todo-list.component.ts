@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { Todo } from '../../models/todo.model';
+import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 
 @Component({
   selector: 'app-todo-list',
-  imports: [],
+  imports: [TodoItemComponent], // Import the TodoItemComponent to use it within this component's template
   templateUrl: './todo-list.component.html',
   styleUrl: './todo-list.component.css',
 })
