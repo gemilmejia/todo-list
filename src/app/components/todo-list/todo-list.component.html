@@ -1,12 +1,5 @@
 <ul>
   @for (todo of todos; track $index) {
-    <li>
-      {{ todo.title }}
-
-      <button>Complete</button>
-
-      <button>Delete</button>
-    </li>
+    <app-todo-item [todo]="todo"></app-todo-item>
   }
 </ul>
->
