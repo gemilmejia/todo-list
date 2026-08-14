@@ -8,7 +8,6 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './todo-input.component.css',
 })
 export class TodoInputComponent {
-  
   task = '';
 
   @Output()
