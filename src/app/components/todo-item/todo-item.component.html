@@ -1,7 +1,11 @@
 <li>
+  {{ todo.completed ? "✅" : "⬜" }}
   {{ todo.title }}
 
-  <button>Complete</button>
+  <button (click)="completeTodo()">
+    {{ todo.completed ? "Undo" : "Complete" }}
+    <!-- Condition ? valueIfTrue : valueIfFalse -->
+  </button>
 
   <button (click)="deleteTodo()">Delete</button>
 </li>
