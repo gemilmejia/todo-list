@@ -1,7 +1,10 @@
 <ul>
   @for (todo of todos; track $index) {
-    <app-todo-item [todo]="todo" (deleteClicked)="deleteTodo($event)"
-      ><!--  I'm listening for the child's deleteClicked event. and "Call my deleteTodo method using that ID." -->
+    <app-todo-item 
+    [todo]="todo" 
+    (deleteClicked)="deleteTodo($event)" // I'm listening for the child's deleteClicked event. and "Call my deleteTodo method using that ID."
+    (completeClicked)="completeTodo($event)" // I'm listening for the child's completeClicked event. and "Call my completeTodo method using that ID."
+      >
     </app-todo-item>
   }
 </ul>
