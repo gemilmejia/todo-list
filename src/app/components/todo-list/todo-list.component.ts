@@ -15,4 +15,12 @@ export class TodoListComponent {
   deleteTodo(id: number) {
     this.todos = this.todos.filter((todo) => todo.id !== id); // Filter out the todo item with the specified id from the todos array. This effectively removes the todo item from the list when the delete button is clicked in the child component amd not delete permanently from the database. This is a temporary deletion that only affects the local state of the component.
   }
+
+  completeTodo(id: number) {
+    const todo = this.todos.find((todo) => todo.id === id); // Find the todo item with the specified id in the todos array
+
+    if (todo) {
+      todo.completed = !todo.completed; // Toggle the completed status of the found todo item. If it was previously marked as completed, it will now be marked as not completed, and vice versa. or simply: "Change completed to the opposite of what it currently is."
+    }
+  }
 }
