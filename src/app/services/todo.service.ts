@@ -39,6 +39,7 @@ export class TodoService {
 
   // Toggle the completed status of a todo item
   toggleCompleted(todo: Todo) {
+    // todo: The Todo object whose completed status needs to be toggled
     todo.completed = !todo.completed;
 
     this.saveTodos(); // Save the updated todos array to local storage after toggling the completed status

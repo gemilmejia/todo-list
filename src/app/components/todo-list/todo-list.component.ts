@@ -22,8 +22,10 @@ export class TodoListComponent {
   completeTodo(id: number) {
     const todo = this.todos.find((todo) => todo.id === id); // Find the todo item with the specified id in the todos array
 
+    // logic to toggle the completed status of the todo item
     if (todo) {
-      todo.completed = !todo.completed; // Toggle the completed status of the found todo item. If it was previously marked as completed, it will now be marked as not completed, and vice versa. or simply: "Change completed to the opposite of what it currently is."
+      // if we found it ...
+      this.todoService.toggleCompleted(todo); // read: "Tell TodoService to toggle this Todo's completed status. This ensures that the change is reflected in the service's todos array and saved to local storage, maintaining consistency across the application. read: "Tell my TodoService to toggle this Todo's completed status." (4)
     }
   }
 }
