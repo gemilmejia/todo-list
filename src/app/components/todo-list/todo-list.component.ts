@@ -16,7 +16,7 @@ export class TodoListComponent {
   todos: Todo[] = []; // Define an input property to receive the list of todos from the parent component
 
   deleteTodo(id: number) {
-    this.todos = this.todos.filter((todo) => todo.id !== id); // Filter out the todo item with the specified id from the todos array. This effectively removes the todo item from the list when the delete button is clicked in the child component amd not delete permanently from the database. This is a temporary deletion that only affects the local state of the component.
+    this.todoService.deleteTodo(id); // Call the deleteTodo method from the TodoService to remove the todo item from the service's todos array and update local storage. This ensures that the deletion is persistent and reflects in the overall application state. read: "Tell my TodoService to delete the Todo with this ID." (3)
   }
 
   completeTodo(id: number) {
