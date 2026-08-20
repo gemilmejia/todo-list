@@ -15,6 +15,11 @@ export class TodoListComponent {
   @Input() // Parent to child communication: This decorator allows the parent component to pass data (the list of todos) to this child component. The parent component can bind its todos property to this input property, enabling the child component to access and display the list of todos.
   todos: Todo[] = []; // Define an input property to receive the list of todos from the parent component
 
+  // "When someone asks me for todosFromService..." then // "Give them the todos from TodoService." //
+  get todosFromService() {
+    return this.todoService.todos;
+  }
+
   deleteTodo(id: number) {
     this.todoService.deleteTodo(id); // Call the deleteTodo method from the TodoService to remove the todo item from the service's todos array and update local storage. This ensures that the deletion is persistent and reflects in the overall application state. read: "Tell my TodoService to delete the Todo with this ID." (3)
   }
