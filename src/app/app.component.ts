@@ -17,6 +17,7 @@ import { TodoListComponent } from './components/todo-list/todo-list.component'; 
 export class AppComponent {
   task = '';
 
+  // "Whenever someone asks AppComponent for todos, give them the todos from TodoService." //
   get todos() {
     return this.todoService.todos;
   }
@@ -29,6 +30,7 @@ export class AppComponent {
     this.task = '';
   }
 
+  // "AppComponent received a delete request → tell TodoService to handle it." //
   deleteTodo(id: number) {
     this.todoService.deleteTodo(id);
   }
