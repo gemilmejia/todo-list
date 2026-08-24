@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { Todo } from '../../models/todo.model';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component (1)
@@ -12,9 +12,6 @@ import { TodoService } from '../../services/todo.service'; // Import the TodoSer
 export class TodoListComponent {
   constructor(private todoService: TodoService) {} // Inject the TodoService into the component's constructor to use its methods and properties (2) read: "Give this component access to TodoService."
 
-  @Input() // Parent to child communication: This decorator allows the parent component to pass data (the list of todos) to this child component. The parent component can bind its todos property to this input property, enabling the child component to access and display the list of todos.
-  todos: Todo[] = []; // Define an input property to receive the list of todos from the parent component
-
   // "When someone asks me for todosFromService..." then // "Give them the todos from TodoService." //
   get todosFromService() {
     return this.todoService.todos;
@@ -25,7 +22,7 @@ export class TodoListComponent {
   }
 
   completeTodo(id: number) {
-    const todo = this.todos.find((todo) => todo.id === id); // Find the todo item with the specified id in the todos array
+    const todo = this.todoService.todos.find((todo) => todo.id === id); // Find the todo item with the specified id in the todos array
 
     // logic to toggle the completed status of the todo item
     if (todo) {
