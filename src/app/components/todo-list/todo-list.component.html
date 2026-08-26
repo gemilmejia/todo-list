@@ -1,5 +1,5 @@
 <ul>
-  @for (todo of todosFromService; track $index) {
+  @for (todo of filteredTodos; track $index) {
     <app-todo-item
       [todo]="todo"
       (deleteClicked)="deleteTodo($event)"
