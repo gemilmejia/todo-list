@@ -2,6 +2,8 @@
   {{ todo.completed ? "✅" : "⬜" }}
   {{ todo.title }}
 
+  <button (click)="startEditing()">Edit</button>
+
   <button (click)="completeTodo()">
     {{ todo.completed ? "Undo" : "Complete" }}
     <!-- Condition ? valueIfTrue : valueIfFalse -->
