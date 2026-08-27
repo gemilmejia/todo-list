@@ -1,7 +1,18 @@
 <div class="filters">
-  <button (click)="filter = 'all'">All</button>
-  <button (click)="filter = 'active'">Active</button>
-  <button (click)="filter = 'completed'">Completed</button>
+  <button (click)="filter = 'all'" [class.active]="filter === 'all'">
+    All
+  </button>
+
+  <button (click)="filter = 'active'" [class.active]="filter === 'active'">
+    Active
+  </button>
+
+  <button
+    (click)="filter = 'completed'"
+    [class.active]="filter === 'completed'"
+  >
+    Completed
+  </button>
 </div>
 
 <ul>
