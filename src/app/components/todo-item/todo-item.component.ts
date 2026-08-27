@@ -17,6 +17,10 @@ export class TodoItemComponent {
   @Output()
   completeClicked = new EventEmitter<number>(); // Define an output property to emit an event when the complete button is clicked. This allows the child component to communicate with the parent component and notify it that the complete action has been triggered for this specific todo item.
 
+  startEditing() {
+    console.log('Editing:', this.todo.title);
+  }
+
   deleteTodo() {
     this.deleteClicked.emit(this.todo.id); // Emit the deleteClicked event with the id of the todo item when the delete button is clicked. This allows the parent component to handle the deletion of the todo item based on its id. or simply: "Parent, delete the todo with this ID."
   }
