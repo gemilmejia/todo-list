@@ -20,7 +20,8 @@ export class TodoItemComponent {
   completeClicked = new EventEmitter<number>(); // Define an output property to emit an event when the complete button is clicked. This allows the child component to communicate with the parent component and notify it that the complete action has been triggered for this specific todo item.
 
   startEditing() {
-    console.log('Editing:', this.todo.title);
+    this.isEditing = true; // Set the isEditing property to true when the edit button is clicked. This will trigger the display of the input field for editing the todo item.
+    // console.log('Editing:', this.todo.title);
   }
 
   deleteTodo() {
