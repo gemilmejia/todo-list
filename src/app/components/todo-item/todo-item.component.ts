@@ -8,6 +8,8 @@ import { Todo } from '../../models/todo.model';
   styleUrl: './todo-item.component.css',
 })
 export class TodoItemComponent {
+  isEditing = false; // "I'm not Editing and when we change this to true, the input field will be displayed and the user can edit the todo item. "
+
   @Input() // Parent to child communication: This decorator allows the parent component to pass data (the individual todo item) to this child component. The parent component can bind its todo property to this input property, enabling the child component to access and display the details of the todo item.
   todo!: Todo; // Define an input property to receive the individual todo item from the parent component
 
