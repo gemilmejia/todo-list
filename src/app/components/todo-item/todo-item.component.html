@@ -1,3 +1,9 @@
+@if (isEditing) {
+  <input type="text" [(ngModel)]="todo.title" />
+
+  <button>Save</button>
+  <button>Cancel</button>
+}
 <li>
   {{ todo.completed ? "✅" : "⬜" }}
   {{ todo.title }}
