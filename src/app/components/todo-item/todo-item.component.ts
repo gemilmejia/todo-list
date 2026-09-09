@@ -34,4 +34,8 @@ export class TodoItemComponent {
   completeTodo() {
     this.completeClicked.emit(this.todo.id); // Emit the completeClicked event with the id of the todo item when the complete button is clicked. This allows the parent component to handle the completion of the todo item based on its id.
   }
+
+  cancelEditing() {
+    this.isEditing = false; // Set the isEditing property to false when the cancel button is clicked. This will hide the input field and revert back to displaying the todo item without any changes.
+  }
 }
