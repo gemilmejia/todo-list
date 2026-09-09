@@ -38,4 +38,9 @@ export class TodoItemComponent {
   cancelEditing() {
     this.isEditing = false; // Set the isEditing property to false when the cancel button is clicked. This will hide the input field and revert back to displaying the todo item without any changes.
   }
+
+  saveEditing() {
+    this.todo.title = this.editTitle; // Update the title of the todo item with the value from the editTitle property when the save button is clicked. This allows the user to save their changes to the todo item.
+    this.isEditing = false; // Set the isEditing property to false when the save button is clicked. This will hide the input field and revert back to displaying the updated todo item.
+  }
 }
