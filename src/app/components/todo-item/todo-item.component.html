@@ -1,7 +1,7 @@
 @if (isEditing) {
   <input type="text" [(ngModel)]="editTitle" />
 
-  <button>Save</button>
+  <button (click)="saveEditing()">Save</button>
   <button (click)="cancelEditing()">Cancel</button>
 }
 
