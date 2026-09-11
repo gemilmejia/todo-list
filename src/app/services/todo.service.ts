@@ -62,4 +62,13 @@ export class TodoService {
       this.todos = JSON.parse(savedTodos); // Convert the JSON string back into an array of Todo objects
     }
   }
+
+  updateTodo(id: number, title: string) {
+    const todo = this.todos.find((todo) => todo.id === id); // Find the todo item in the todos array with the matching id
+
+    if (todo) {
+      todo.title = title; // If the todo item is found, update its title with the new title provided
+      this.saveTodos(); // Save the updated todos array to local storage after updating the title
+    }
+  }
 }
