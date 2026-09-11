@@ -21,6 +21,7 @@
       [todo]="todo"
       (deleteClicked)="deleteTodo($event)"
       (completeClicked)="completeTodo($event)"
+      (editSaved)="updateTodo($event)"
     >
     </app-todo-item>
   }
