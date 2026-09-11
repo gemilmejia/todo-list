@@ -48,7 +48,6 @@ export class TodoListComponent {
   }
 
   updateTodo(data: { id: number; title: string }) {
-    // We will connect this to TodoService in the next step.
-    console.log('Update Todo:', data); // Log the data received from the child component when the edit is saved. This will help in debugging and verifying that the correct data is being passed up from the child component.
+    this.todoService.updateTodo(data.id, data.title); // Call the updateTodo method from the TodoService to update the title of the todo item with the specified id. This ensures that the change is reflected in the service's todos array and saved to local storage, maintaining consistency across the application. read: "Tell my TodoService to update this Todo's title." (5)
   }
 }
