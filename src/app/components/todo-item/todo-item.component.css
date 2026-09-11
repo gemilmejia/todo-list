@@ -1,0 +1,9 @@
+li {
+  display: flex; /*Puts the Todo content and buttons into a flexible row.*/
+  align-items: center; /*Vertically centers everything.*/
+  gap: 10px; /*Adds spacing between the elements.*/
+  padding: 12px; /*Creates space inside each Todo item.*/
+  margin-bottom: 10px; /*Creates space between Todo items.*/
+  border: 1px solid #ddd; /*Adds a subtle border.*/
+  border-radius: 8px; /*Rounds the corners of the border.*/
+}

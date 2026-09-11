@@ -1,3 +1,10 @@
 .filters .active {
   font-weight: bold;
 }
+
+/*Normally, <ul> has browser-default bullets and padding. We're removing those because our Todo application doesn't need bullet points.*/
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
