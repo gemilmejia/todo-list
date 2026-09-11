@@ -7,3 +7,21 @@ li {
   border: 1px solid #ddd; /*Adds a subtle border.*/
   border-radius: 8px; /*Rounds the corners of the border.*/
 }
+
+button {
+  padding: 6px 12px; /*Makes the buttons easier to click.*/
+  border: none; /*Removes the default button border.*/
+  border-radius: 5px; /*Makes the corners slightly rounded.*/
+  cursor: pointer; /*Shows the hand cursor when hovering over the button.*/
+}
+
+/*Add hover feedback*/
+button:hover {
+  opacity: 0.8;
+}
+
+input {
+  flex: 1;
+  padding: 8px;
+  font-size: 16px;
+}
