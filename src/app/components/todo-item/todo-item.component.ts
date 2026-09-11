@@ -21,6 +21,9 @@ export class TodoItemComponent {
   @Output()
   completeClicked = new EventEmitter<number>(); // Define an output property to emit an event when the complete button is clicked. This allows the child component to communicate with the parent component and notify it that the complete action has been triggered for this specific todo item.
 
+  @Output()
+  editSaved = new EventEmitter<{ id: number; title: string }>(); // Define an output property to emit an event when the save button is clicked after editing. This allows the child component to communicate with the parent component and notify it that the edit action has been completed for this specific todo item, along with the updated title. in simply: "Parent, update the todo with this ID and new title."
+
   startEditing() {
     this.editTitle = this.todo.title; // Set the editTitle property to the current title of the todo item when the edit button is clicked. This allows the input field to be pre-filled with the existing title, making it easier for the user to edit.
     this.isEditing = true; // Set the isEditing property to true when the edit button is clicked. This will trigger the display of the input field for editing the todo item.
@@ -40,7 +43,8 @@ export class TodoItemComponent {
   }
 
   saveEditing() {
-    this.todo.title = this.editTitle; // Update the title of the todo item with the value from the editTitle property when the save button is clicked. This allows the user to save their changes to the todo item.
+    this.editSaved.emit({ id: this.todo.id, title: this.editTitle }); //
+
     this.isEditing = false; // Set the isEditing property to false when the save button is clicked. This will hide the input field and revert back to displaying the updated todo item.
   }
 }
