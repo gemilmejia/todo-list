@@ -1,0 +1,20 @@
+/* Open the input component CSS */
+.todo-input {
+  display: flex; /*Places the input and button beside each other. */
+  gap: 10px; /*Creates space between them.*/
+  margin-bottom: 20px; /*Creates space between the input area and the filters/list below it.*/
+}
+
+/* Style the input field */
+.todo-input input {
+  flex: 1; /*"Take up the remaining available space."*/
+  padding: 10px;
+  font-size: 16px;
+}
+
+/* Style the Add button */
+.todo-input button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer; /*cursor: pointer makes the mouse cursor become a hand when hovering over the button. */
+}
