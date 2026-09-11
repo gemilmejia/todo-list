@@ -1,0 +1,10 @@
+.container {
+  max-width: 600px; /*Keeps the Todo app from becoming extremely wide on a large screen.*/
+  margin: 50px auto; /*The "50px" gives space above/below.  "auto" centers the container horizontally.*/
+  padding: 30px; /*Adds space inside the container. */
+}
+
+h1 {
+  text-align: center; /*This centers the heading.*/
+  margin-bottom: 30px;
+}
