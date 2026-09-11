@@ -46,4 +46,9 @@ export class TodoListComponent {
       this.todoService.toggleCompleted(todo); // read: "Tell TodoService to toggle this Todo's completed status. This ensures that the change is reflected in the service's todos array and saved to local storage, maintaining consistency across the application. read: "Tell my TodoService to toggle this Todo's completed status." (4)
     }
   }
+
+  updateTodo(data: { id: number; title: string }) {
+    // We will connect this to TodoService in the next step.
+    console.log('Update Todo:', data); // Log the data received from the child component when the edit is saved. This will help in debugging and verifying that the correct data is being passed up from the child component.
+  }
 }
