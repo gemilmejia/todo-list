@@ -42,3 +42,7 @@ li.completed {
   text-decoration: line-through; /*Adds the strikethrough.*/
   opacity: 0.6; /*Makes completed tasks look less prominent.*/
 }
+
+.todo-title {
+  flex: 1;
+}
