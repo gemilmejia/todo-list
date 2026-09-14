@@ -17,7 +17,17 @@ button {
 
 /*Add hover feedback*/
 button:hover {
-  opacity: 0.8;
+  opacity: 0.85; /*Slightly fades the button when hovered.*/
+}
+
+button {
+  transition:
+    opacity 0.2s ease,
+    transform 0.1s ease;
+}
+
+button:active {
+  transform: scale(0.96);
 }
 
 input {
