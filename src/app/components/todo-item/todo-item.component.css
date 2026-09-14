@@ -37,3 +37,8 @@ input {
     font-size: 14px;
   }
 }
+
+li.completed {
+  text-decoration: line-through; /*Adds the strikethrough.*/
+  opacity: 0.6; /*Makes completed tasks look less prominent.*/
+}
