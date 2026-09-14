@@ -8,3 +8,26 @@ h1 {
   text-align: center; /*This centers the heading.*/
   margin-bottom: 30px;
 }
+
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filters button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+.filters button:hover {
+  background: #f5f5f5;
+}
+
+.filters .active {
+  font-weight: bold;
+}
