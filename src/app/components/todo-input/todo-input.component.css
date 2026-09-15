@@ -18,3 +18,10 @@
   font-size: 16px;
   cursor: pointer; /*cursor: pointer makes the mouse cursor become a hand when hovering over the button. */
 }
+
+/* Style the disabled button - (Class, CSS pseudo-class)*/
+.todo-input button:disabled {
+  /* background-color: #ccc; Gray background for disabled state. */
+  opacity: 0.5; /*Makes the button look faded when disabled.*/
+  cursor: not-allowed; /*Changes the cursor to indicate the button is not clickable.*/
+}
