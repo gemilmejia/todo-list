@@ -33,3 +33,13 @@
   font-size: 13px;
   color: #777;
 }
+
+.character-count.warning {
+  color: #ff9800; /* Orange color for warning state */
+  font-weight: bold;
+}
+
+.character-count.limit {
+  color: #f44336; /* Red color for limit state */
+  font-weight: bold;
+}

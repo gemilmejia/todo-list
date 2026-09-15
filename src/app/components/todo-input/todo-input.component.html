@@ -11,7 +11,14 @@
   <button (click)="addTask()" [disabled]="task.trim() === ''">Add task</button>
 </div>
 
-<div class="character-count">{{ task.length }}/100</div>
+<!-- [class.CLASS_NAME]="CONDITION" -->
+<div
+  class="character-count"
+  [class.warning]="task.length >= 80"
+  [class.limit]="task.length === 100"
+>
+  {{ task.length }}/100
+</div>
 
 @if (errorMessage) {
   <div class="error-message">⚠️ {{ errorMessage }}</div>
