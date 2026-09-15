@@ -10,10 +10,19 @@ import { FormsModule } from '@angular/forms';
 export class TodoInputComponent {
   task = '';
 
+  errorMessage = '';
+
   @Output()
   taskAdded = new EventEmitter<string>();
 
   addTask() {
+    if (this.task.trim() === '') {
+      this.errorMessage = 'Please enter a task.';
+      return;
+    }
+
+    this.errorMessage = ''; // removes the previous error.
+
     this.taskAdded.emit(this.task); // Emit the taskAdded event with the current task value
 
     this.task = ''; // Clear the input field after emitting the event

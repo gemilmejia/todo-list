@@ -9,3 +9,7 @@
 
   <button (click)="addTask()">Add task</button>
 </div>
+
+@if (errorMessage) {
+  <div class="error-message">⚠️ {{ errorMessage }}</div>
+}
