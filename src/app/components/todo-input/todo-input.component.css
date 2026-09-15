@@ -25,3 +25,11 @@
   opacity: 0.5; /*Makes the button look faded when disabled.*/
   cursor: not-allowed; /*Changes the cursor to indicate the button is not clickable.*/
 }
+
+/* Character count styling */
+.character-count {
+  text-align: right;
+  margin-top: 5px;
+  font-size: 13px;
+  color: #777;
+}
