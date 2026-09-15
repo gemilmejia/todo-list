@@ -27,4 +27,8 @@ export class TodoInputComponent {
 
     this.task = ''; // Clear the input field after emitting the event
   }
+
+  clearError() {
+    this.errorMessage = ''; // Clear the error message when the user starts typing
+  }
 }
