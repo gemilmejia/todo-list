@@ -1,6 +1,11 @@
 <!-- Check your HTML -->
 <div class="todo-input">
-  <input type="text" placeholder="Enter your task..." [(ngModel)]="task" />
+  <input
+    type="text"
+    placeholder="Enter your task..."
+    [(ngModel)]="task"
+    maxlength="100"
+  />
 
   <button (click)="addTask()">Add task</button>
 </div>
