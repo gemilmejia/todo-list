@@ -15,14 +15,18 @@
   </button>
 </div>
 
-<ul>
-  @for (todo of filteredTodos; track $index) {
-    <app-todo-item
-      [todo]="todo"
-      (deleteClicked)="deleteTodo($event)"
-      (completeClicked)="completeTodo($event)"
-      (editSaved)="updateTodo($event)"
-    >
-    </app-todo-item>
-  }
-</ul>
+@if (filteredTodos.length === 0) {
+  <div class="empty-state">📝 No tasks yet. Add your first task!</div>
+} @else {
+  <ul>
+    @for (todo of filteredTodos; track $index) {
+      <app-todo-item
+        [todo]="todo"
+        (deleteClicked)="deleteTodo($event)"
+        (completeClicked)="completeTodo($event)"
+        (editSaved)="updateTodo($event)"
+      >
+      </app-todo-item>
+    }
+  </ul>
+}
