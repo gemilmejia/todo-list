@@ -16,7 +16,15 @@
 </div>
 
 @if (filteredTodos.length === 0) {
-  <div class="empty-state">📝 No tasks yet. Add your first task!</div>
+  <div class="empty-state">
+    @if (filter === "all") {
+      📝 No tasks yet. Add your first task!
+    } @else if (filter === "active") {
+      🎉 No active tasks!
+    } @else if (filter === "completed") {
+      ✅ No completed tasks yet!
+    }
+  </div>
 } @else {
   <ul>
     @for (todo of filteredTodos; track $index) {
