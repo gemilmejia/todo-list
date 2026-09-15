@@ -8,7 +8,7 @@
     (input)="clearError()"
   />
 
-  <button (click)="addTask()">Add task</button>
+  <button (click)="addTask()" [disabled]="task.trim() === ''">Add task</button>
 </div>
 
 @if (errorMessage) {
