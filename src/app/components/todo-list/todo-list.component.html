@@ -1,7 +1,14 @@
 <!-- Todo count -->
 
+<!-- activeTodoCount === 1 ? 'task' : 'tasks' is called a ternary operator.-->
 <div class="todo-count">
-  {{ activeTodoCount }} {{ activeTodoCount === 1 ? "task" : "tasks" }} remaining
+  @if (activeTodoCount === 0) {
+    🎉 All tasks completed!
+  } @else {
+    {{ activeTodoCount }}
+    {{ activeTodoCount === 1 ? "task" : "tasks" }}
+    remaining
+  }
 </div>
 
 <!-- Filter buttons  -->
