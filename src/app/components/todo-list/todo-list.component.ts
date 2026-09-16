@@ -49,6 +49,15 @@ export class TodoListComponent {
     return this.todoService.todos.length;
   }
 
+  // "When someone asks me for completionPercentage..." then // "Give them the percentage of completed todos from TodoService." //
+  get completionPercentage() {
+    if (this.totalTodoCount === 0) {
+      return 0;
+    }
+
+    return Math.round((this.completedTodoCount / this.totalTodoCount) * 100);
+  }
+
   deleteTodo(id: number) {
     this.todoService.deleteTodo(id); // Call the deleteTodo method from the TodoService to remove the todo item from the service's todos array and update local storage. This ensures that the deletion is persistent and reflects in the overall application state. read: "Tell my TodoService to delete the Todo with this ID." (3)
   }
