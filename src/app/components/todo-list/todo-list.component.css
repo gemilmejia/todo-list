@@ -17,3 +17,11 @@ ul {
   border-radius: 8px;
   margin-top: 20px;
 }
+
+/* Style the task counter */
+.todo-count {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #777;
+}
