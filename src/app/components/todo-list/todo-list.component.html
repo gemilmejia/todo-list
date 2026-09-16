@@ -1,6 +1,8 @@
 <!-- Todo count -->
 
-<div class="todo-count">{{ activeTodoCount }} tasks remaining</div>
+<div class="todo-count">
+  {{ activeTodoCount }} {{ activeTodoCount === 1 ? "task" : "tasks" }} remaining
+</div>
 
 <!-- Filter buttons  -->
 

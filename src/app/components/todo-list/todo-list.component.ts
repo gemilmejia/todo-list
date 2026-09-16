@@ -33,6 +33,12 @@ export class TodoListComponent {
     return this.todoService.todos;
   }
 
+  // "When someone asks me for activeTodoCount..." then // "Give them the count of todos from TodoService that are not completed." //
+  // gets all your todos. then keeps only unfinished tasks. counts them. //
+  get activeTodoCount() {
+    return this.todoService.todos.filter((todo) => !todo.completed).length;
+  }
+
   deleteTodo(id: number) {
     this.todoService.deleteTodo(id); // Call the deleteTodo method from the TodoService to remove the todo item from the service's todos array and update local storage. This ensures that the deletion is persistent and reflects in the overall application state. read: "Tell my TodoService to delete the Todo with this ID." (3)
   }
