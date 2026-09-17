@@ -29,7 +29,9 @@
   aria-valuemax="100"
   [attr.aria-label]="'Task completion: ' + completionPercentage + '%'"
 >
-  <div class="progress-fill" [style.width.%]="completionPercentage"></div>
+  <div class="progress-fill" [style.width.%]="completionPercentage">
+    <span>{{ completionPercentage }}%</span>
+  </div>
 </div>
 
 <!-- Filter buttons  -->
