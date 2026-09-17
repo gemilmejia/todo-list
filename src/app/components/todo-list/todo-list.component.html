@@ -30,8 +30,14 @@
   [attr.aria-label]="'Task completion: ' + completionPercentage + '%'"
 >
   <div class="progress-fill" [style.width.%]="completionPercentage">
-    <span>{{ completionPercentage }}%</span>
+    @if (completionPercentage > 0) {
+      <span>{{ completionPercentage }}%</span>
+    }
   </div>
+
+  @if (completionPercentage === 0) {
+    <span class="progress-zero-label">0%</span>
+  }
 </div>
 
 <!-- Filter buttons  -->
