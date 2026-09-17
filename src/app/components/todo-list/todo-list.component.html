@@ -21,7 +21,14 @@
 <div class="completion-percentage">{{ completionPercentage }}% complete</div>
 
 <!--[style.width.%]="completionPercentage" - This is Angular property binding. -->
-<div class="progress-bar">
+<div
+  class="progress-bar"
+  role="progressbar"
+  [attr.aria-valuenow]="completionPercentage"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  [attr.aria-label]="'Task completion: ' + completionPercentage + '%'"
+>
   <div class="progress-fill" [style.width.%]="completionPercentage"></div>
 </div>
 
