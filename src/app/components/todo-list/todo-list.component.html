@@ -20,6 +20,11 @@
 <!-- Add the progress bar/completion percentage -->
 <div class="completion-percentage">{{ completionPercentage }}% complete</div>
 
+<!--[style.width.%]="completionPercentage" - This is Angular property binding. -->
+<div class="progress-bar">
+  <div class="progress-fill" [style.width.%]="completionPercentage"></div>
+</div>
+
 <!-- Filter buttons  -->
 
 <div class="filters">
