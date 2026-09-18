@@ -77,6 +77,14 @@ export class TodoListComponent {
   }
 
   clearCompleted() {
-    this.todoService.clearCompleted(); // Call the clearCompleted method from the TodoService to remove all completed todo items from the service's todos array and update local storage. This ensures that the clearing of completed tasks is persistent and reflects in the overall application state. read: "Tell my TodoService to clear all completed Todos." (6)
+    // Prompt the user for confirmation before clearing completed tasks to prevent accidental deletion of completed todos. This is a safety measure to ensure that users do not lose their completed tasks unintentionally. //
+    const confirmed = confirm(
+      'Are you sure you want to clear all completed tasks? This action cannot be undone.',
+    );
+
+    // If the user confirms the action, call the clearCompleted method from the TodoService to remove all completed todo items from the service's todos array and update local storage. This ensures that the clearing of completed tasks is persistent and reflects in the overall application state. //
+    if (confirmed) {
+      this.todoService.clearCompleted(); // Call the clearCompleted method from the TodoService to remove all completed todo items from the service's todos array and update local storage. This ensures that the clearing of completed tasks is persistent and reflects in the overall application state. read: "Tell my TodoService to clear all completed Todos." (6)
+    }
   }
 }
