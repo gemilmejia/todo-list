@@ -65,3 +65,17 @@ ul {
   font-size: 12px;
   font-weight: bold;
 }
+
+@media (max-width: 600px) {
+  .progress-bar {
+    height: 20px;
+  }
+
+  .progress-fill {
+    font-size: 11px;
+  }
+
+  .progress-zero-label {
+    font-size: 11px;
+  }
+}
