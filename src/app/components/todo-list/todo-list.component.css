@@ -94,3 +94,11 @@ ul {
 .clear-completed:hover {
   opacity: 0.85;
 }
+
+/* Style the message that appears when there are tasks but no completed tasks */
+.no-completed-message {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #777;
+}

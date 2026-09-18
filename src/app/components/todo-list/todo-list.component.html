@@ -17,6 +17,13 @@
   {{ completedTodoCount }} of {{ totalTodoCount }} tasks completed
 </div>
 
+<!-- Show this message only when there are tasks AND zero completed tasks. -->
+@if (totalTodoCount > 0 && completedTodoCount === 0) {
+  <div class="no-completed-message">
+    💡 Complete a task to see your progress here.
+  </div>
+}
+
 <!-- Add the progress bar/completion percentage -->
 <div class="completion-percentage">{{ completionPercentage }}% complete</div>
 
