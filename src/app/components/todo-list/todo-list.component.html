@@ -40,9 +40,11 @@
   }
 </div>
 
-<button class="clear-completed" (click)="clearCompleted()">
-  Clear Completed
-</button>
+@if (completedTodoCount > 0) {
+  <button class="clear-completed" (click)="clearCompleted()">
+    Clear Completed
+  </button>
+}
 
 <!-- Filter buttons  -->
 
