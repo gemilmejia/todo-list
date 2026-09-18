@@ -71,4 +71,9 @@ export class TodoService {
       this.saveTodos(); // Save the updated todos array to local storage after updating the title
     }
   }
+
+  clearCompleted() {
+    this.todos = this.todos.filter((todo) => !todo.completed); // Filter out the completed todos and keep only the active ones
+    this.saveTodos(); // Save the updated todos array to local storage after clearing completed todos
+  }
 }
