@@ -23,6 +23,7 @@ export class TodoService {
       id: Date.now(),
       title: task,
       completed: false,
+      completedAt: null, // Set the completedAt property to null when a new todo is created
     };
     // add the new Todo object to the todos array
     this.todos.push(newTodo);
@@ -41,6 +42,12 @@ export class TodoService {
   toggleCompleted(todo: Todo) {
     // todo: The Todo object whose completed status needs to be toggled
     todo.completed = !todo.completed;
+
+    if (todo.completed) {
+      todo.completedAt = new Date().toISOString(); // Set the completedAt property to the current date and time when a todo is marked as completed
+    } else {
+      todo.completedAt = null; // Set the completedAt property to null when a todo is marked as not completed.
+    }
 
     this.saveTodos(); // Save the updated todos array to local storage after toggling the completed status
   }
