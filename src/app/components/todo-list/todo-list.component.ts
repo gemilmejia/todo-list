@@ -78,8 +78,9 @@ export class TodoListComponent {
 
   clearCompleted() {
     // Prompt the user for confirmation before clearing completed tasks to prevent accidental deletion of completed todos. This is a safety measure to ensure that users do not lose their completed tasks unintentionally. //
+    // The confirmation message dynamically includes the count of completed tasks to provide context to the user about the action they are about to take. //
     const confirmed = confirm(
-      'Are you sure you want to clear all completed tasks? This action cannot be undone.',
+      `Are you sure you want to clear ${this.completedTodoCount} completed ${this.completedTodoCount === 1 ? 'task' : 'tasks'}?`,
     );
 
     // If the user confirms the action, call the clearCompleted method from the TodoService to remove all completed todo items from the service's todos array and update local storage. This ensures that the clearing of completed tasks is persistent and reflects in the overall application state. //
