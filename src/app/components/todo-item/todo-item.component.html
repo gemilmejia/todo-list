@@ -8,9 +8,15 @@
 <li [class.completed]="todo.completed">
   {{ todo.completed ? "✅" : "⬜" }}
 
-  <span class="todo-title">
-    {{ todo.title }}
-  </span>
+<div class="todo-content">
+  <span class="todo-title">{{ todo.title }}</span>
+
+  @if (todo.completed && todo.completedAt) {
+    <small class="completed-date">
+      Completed: {{ todo.completedAt | date:'medium' }}
+    </small>
+  }
+</div>
 
   <button (click)="startEditing()">Edit</button>
 
