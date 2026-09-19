@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Todo } from '../../models/todo.model';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-todo-item',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './todo-item.component.html',
   styleUrl: './todo-item.component.css',
 })
