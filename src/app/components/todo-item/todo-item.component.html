@@ -13,7 +13,7 @@
 
   @if (todo.completed && todo.completedAt) {
     <small class="completed-date">
-      Completed: {{ todo.completedAt | date:'medium' }}
+      Completed: {{ todo.completedAt | date:'mediumDate' }}
     </small>
   }
 </div>
