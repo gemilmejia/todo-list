@@ -1,32 +1,38 @@
 @if (isEditing) {
-  <input type="text" [(ngModel)]="editTitle" (ngModelChange)="editError = ''" placeholder="Edit todo title" />
+  <div class="edit-form">
+    <input
+      type="text"
+      [(ngModel)]="editTitle"
+      (ngModelChange)="editError = ''"
+    />
 
-  @if (editError) {
-    <small class="edit-error">
-      ⚠️ {{ editError }}
-    </small>
-  }
+    @if (editError) {
+      <small class="edit-error"> ⚠️ {{ editError }} </small>
+    }
 
-  <button (click)="saveEditing()">Save</button>
-  <button (click)="cancelEditing()">Cancel</button>
+    <div class="edit-actions">
+      <button (click)="saveEditing()">Save</button>
+      <button (click)="cancelEditing()">Cancel</button>
+    </div>
+  </div>
 }
 
 <li [class.completed]="todo.completed">
   {{ todo.completed ? "✅" : "⬜" }}
 
-<div class="todo-content">
-  <span class="todo-title">{{ todo.title }}</span>
+  <div class="todo-content">
+    <span class="todo-title">{{ todo.title }}</span>
 
-  @if (todo.completed && todo.completedAt) {
-    <small class="completed-date">
-      Completed: {{ todo.completedAt | date:'mediumDate' }}
-    </small>
+    @if (todo.completed && todo.completedAt) {
+      <small class="completed-date">
+        Completed: {{ todo.completedAt | date: "mediumDate" }}
+      </small>
 
-    <small class="completion-relative-time">
-      🕐 {{ getCompletedTimeText() }}
-    </small>
-  }
-</div>
+      <small class="completion-relative-time">
+        🕐 {{ getCompletedTimeText() }}
+      </small>
+    }
+  </div>
 
   <button (click)="startEditing()">Edit</button>
 
