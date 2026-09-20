@@ -48,4 +48,17 @@ export class TodoItemComponent {
 
     this.isEditing = false; // Set the isEditing property to false when the save button is clicked. This will hide the input field and revert back to displaying the updated todo item.
   }
+
+  isRecentlyCompleted(): boolean {
+    if (!this.todo.completedAt) {
+      return false;
+    }
+
+    const completedTime = new Date(this.todo.completedAt).getTime();
+    const currentTime = Date.now();
+
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+
+    return currentTime - completedTime <= twentyFourHours;
+  }
 }

@@ -56,3 +56,11 @@ li.completed {
 .todo-title {
   flex: 1;
 }
+
+
+/* Style for the completed date */
+.recently-completed {
+  font-size: 11px;
+  color: #777;
+  font-style: italic;
+}
