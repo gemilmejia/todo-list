@@ -64,3 +64,13 @@ li.completed {
   color: #777;
   font-style: italic;
 }
+
+
+/* Style for the edit error message */
+.edit-error {
+  display: block;
+  width: 100%;
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: -5px;
+}

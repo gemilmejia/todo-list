@@ -1,5 +1,11 @@
 @if (isEditing) {
-  <input type="text" [(ngModel)]="editTitle" />
+  <input type="text" [(ngModel)]="editTitle" (ngModelChange)="editError = ''" placeholder="Edit todo title" />
+
+  @if (editError) {
+    <small class="edit-error">
+      ⚠️ {{ editError }}
+    </small>
+  }
 
   <button (click)="saveEditing()">Save</button>
   <button (click)="cancelEditing()">Cancel</button>

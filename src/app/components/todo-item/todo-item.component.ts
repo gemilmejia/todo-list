@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 export class TodoItemComponent {
   isEditing = false; // "I'm not Editing and when we change this to true, the input field will be displayed and the user can edit the todo item. "
   editTitle = ''; // "This property will hold the updated title of the todo item when the user edits it. It will be bound to the input field in the template, allowing the user to modify the title."
+  editError = ''; // "This property will hold any error message related to editing the todo item. If the user tries to save an empty title, this property will be set to an appropriate error message, which can be displayed in the template to inform the user about the issue."
 
   @Input() // Parent to child communication: This decorator allows the parent component to pass data (the individual todo item) to this child component. The parent component can bind its todo property to this input property, enabling the child component to access and display the details of the todo item.
   todo!: Todo; // Define an input property to receive the individual todo item from the parent component
@@ -26,6 +27,7 @@ export class TodoItemComponent {
   editSaved = new EventEmitter<{ id: number; title: string }>(); // Define an output property to emit an event when the save button is clicked after editing. This allows the child component to communicate with the parent component and notify it that the edit action has been completed for this specific todo item, along with the updated title. in simply: "Parent, update the todo with this ID and new title."
 
   startEditing() {
+
     this.editTitle = this.todo.title; // Set the editTitle property to the current title of the todo item when the edit button is clicked. This allows the input field to be pre-filled with the existing title, making it easier for the user to edit.
     this.isEditing = true; // Set the isEditing property to true when the edit button is clicked. This will trigger the display of the input field for editing the todo item.
     // console.log('Editing:', this.todo.title);
@@ -44,11 +46,13 @@ export class TodoItemComponent {
   }
 
   saveEditing() {
-
+    // remove whitespace from the editTitle string and check if it's empty
     if (this.editTitle.trim() === '') {
-      // remove whitespace from the editTitle string and check if it's empty
+      this.editError = 'Task title cannot be empty.';
       return; // If the editTitle is empty after trimming, we don't proceed with saving the changes. This prevents saving an empty title for the todo item.
     }
+
+    this.editError = ''; // Reset the editError property to an empty string when the save button is clicked. This ensures that any previous error messages are cleared when the user attempts to save the changes again.
 
     this.editSaved.emit({ id: this.todo.id, title: this.editTitle }); //
 
