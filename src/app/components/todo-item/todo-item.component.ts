@@ -61,4 +61,33 @@ export class TodoItemComponent {
 
     return currentTime - completedTime <= twentyFourHours;
   }
+
+  getCompletedTimeText(): string {
+    if (!this.todo.completedAt) {
+      return '';
+    }
+
+    const completedTime = new Date(this.todo.completedAt).getTime();
+    const currentTime = Date.now();
+
+    const difference = currentTime - completedTime;
+
+    const minutes = Math.floor(difference / (60 * 1000));
+
+    if (minutes < 1) {
+      return 'Completed just now';
+    }
+
+    if (minutes < 60) {
+      return `Completed ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+
+    if (hours < 24) {
+      return `Completed ${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    }
+
+    return 'Completed more than a day ago';
+  }
 }
