@@ -68,11 +68,17 @@ export class TodoItemComponent {
     }
 
     const completedTime = new Date(this.todo.completedAt).getTime();
+
+    // Invalid timestamp check: If the completedAt property is not a valid date string, the getTime() method will return NaN. In that case, we return an empty string to avoid displaying incorrect information.
+    if (isNaN(completedTime)) {
+      return '';
+    }
+
     const currentTime = Date.now();
 
     const difference = currentTime - completedTime;
 
-    // Check if the completed time is in the future (which shouldn't happen, but just in case) //
+    // Future timestamp check: If the completedAt property is set to a future date (which should not happen in normal circumstances), the difference will be negative. In that case, we return a message indicating that the todo was completed just now.
     if (difference < 0) {
       return 'Completed just now';
     }
