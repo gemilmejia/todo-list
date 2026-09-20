@@ -44,23 +44,16 @@ export class TodoItemComponent {
   }
 
   saveEditing() {
+
+    if (this.editTitle.trim() === '') {
+      // remove whitespace from the editTitle string and check if it's empty
+      return; // If the editTitle is empty after trimming, we don't proceed with saving the changes. This prevents saving an empty title for the todo item.
+    }
+
     this.editSaved.emit({ id: this.todo.id, title: this.editTitle }); //
 
     this.isEditing = false; // Set the isEditing property to false when the save button is clicked. This will hide the input field and revert back to displaying the updated todo item.
   }
-
-  // isRecentlyCompleted(): boolean {
-  //   if (!this.todo.completedAt) {
-  //     return false;
-  //   }
-
-  //   const completedTime = new Date(this.todo.completedAt).getTime();
-  //   const currentTime = Date.now();
-
-  //   const twentyFourHours = 24 * 60 * 60 * 1000;
-
-  //   return currentTime - completedTime <= twentyFourHours;
-  // }
 
   getCompletedTimeText(): string {
     if (!this.todo.completedAt) {
