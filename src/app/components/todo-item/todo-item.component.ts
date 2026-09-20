@@ -72,8 +72,14 @@ export class TodoItemComponent {
 
     const difference = currentTime - completedTime;
 
+    // Check if the completed time is in the future (which shouldn't happen, but just in case) //
+    if (difference < 0) {
+      return 'Completed just now';
+    }
+
     const minutes = Math.floor(difference / (60 * 1000));
 
+    // Check if the completed time is less than 1 minute//
     if (minutes < 1) {
       return 'Completed just now';
     }
