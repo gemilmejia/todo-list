@@ -16,11 +16,9 @@
       Completed: {{ todo.completedAt | date:'mediumDate' }}
     </small>
 
-  @if (isRecentlyCompleted()) {
-    <small class="recently-completed">
+    <small class="completion-relative-time">
       🕐 {{ getCompletedTimeText() }}
     </small>
-  }
   }
 </div>
 

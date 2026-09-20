@@ -58,8 +58,8 @@ li.completed {
 }
 
 
-/* Style for the completed date */
-.recently-completed {
+/* Style for the completed date changed name from recently-completed into completion-relative-time */
+.completion-relative-time {
   font-size: 11px;
   color: #777;
   font-style: italic;
