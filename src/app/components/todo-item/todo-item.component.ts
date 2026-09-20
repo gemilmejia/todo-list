@@ -88,6 +88,14 @@ export class TodoItemComponent {
       return `Completed ${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
     }
 
-    return 'Completed more than a day ago';
+    const days = Math.floor(hours / 24);
+
+    if (days < 7) {
+      return `Completed ${days} ${days === 1 ? 'day' : 'days'} ago`;
+    }
+
+    const weeks = Math.floor(days / 7);
+
+    return `Completed ${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
   }
 }
