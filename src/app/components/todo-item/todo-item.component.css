@@ -20,6 +20,11 @@ button:hover {
   opacity: 0.85; /*Slightly fades the button when hovered.*/
 }
 
+button:focus-visible {
+  outline: 3px solid #1976d2;
+  outline-offset: 2px;
+}
+
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
