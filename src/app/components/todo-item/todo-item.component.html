@@ -4,15 +4,17 @@
       type="text"
       [(ngModel)]="editTitle"
       maxlength="100"
+      aria-label="Edit task title"
       (ngModelChange)="editError = ''"
     />
 
-    <small class="edit-character-count" [class.warning]="editTitle.length >= 80 && editTitle.length < 100" [class.limit]="editTitle.length >= 100">
+    <small class="edit-character-count" aria-live="polite" [class.warning]="editTitle.length >= 80 && editTitle.length < 100" [class.limit]="editTitle.length >= 100">
       {{ editTitle.length }}/100
     </small>
 
+    <!-- Display error message if editError is not empty -->
     @if (editError) {
-      <small class="edit-error"> ⚠️ {{ editError }} </small>
+      <small class="edit-error" role="alert"> ⚠️ {{ editError }} </small>
     }
 
     <div class="edit-actions">
