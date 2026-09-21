@@ -21,10 +21,10 @@
     }
 
     <div class="edit-actions">
-      <button (click)="saveEditing()" [disabled]="editTitle.trim() === ''">
+      <button type="button" (click)="saveEditing()" [disabled]="editTitle.trim() === ''" aria-label="Saved edited task.">
         Save
       </button>
-      <button (click)="cancelEditing()">Cancel</button>
+      <button type="button" (click)="cancelEditing()" aria-label="Cancel editing task.">Cancel</button>
     </div>
   </div>
 }
@@ -46,12 +46,12 @@
     }
   </div>
 
-  <button (click)="startEditing()">Edit</button>
+  <button type="button" (click)="startEditing()" aria-label="Edit task">Edit</button>
 
-  <button (click)="completeTodo()">
+  <button type="button" (click)="completeTodo()" [attr.aria-label]="todo.completed ? 'Mark task as active' : 'Mark task as completed'">
     {{ todo.completed ? "Undo" : "Complete" }}
     <!-- Condition ? valueIfTrue : valueIfFalse -->
   </button>
 
-  <button (click)="deleteTodo()">Delete</button>
+  <button type="button" (click)="deleteTodo()" aria-label="Delete task">Delete</button>
 </li>
