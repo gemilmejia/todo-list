@@ -6,6 +6,8 @@
       maxlength="100"
       aria-label="Edit task title"
       (ngModelChange)="editError = ''"
+      (keydown.enter)="saveEditing()"
+      (keydown.escape)="cancelEditing()"
     />
 
     <small class="edit-character-count" aria-live="polite" [class.warning]="editTitle.length >= 80 && editTitle.length < 100" [class.limit]="editTitle.length >= 100">
