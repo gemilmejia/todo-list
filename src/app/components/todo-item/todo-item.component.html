@@ -11,7 +11,7 @@
     }
 
     <div class="edit-actions">
-      <button (click)="saveEditing()">Save</button>
+      <button (click)="saveEditing()" [disabled]="editTitle.trim() === ''">Save</button>
       <button (click)="cancelEditing()">Cancel</button>
     </div>
   </div>
