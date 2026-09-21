@@ -46,6 +46,11 @@ input {
   font-size: 16px;
 }
 
+input:focus-visible {
+  outline: 3px solid #1976d2;
+  outline-offset: 2px;
+}
+
 /* Make the Todo App Responsive */
 @media (max-width: 600px) {
   li {
