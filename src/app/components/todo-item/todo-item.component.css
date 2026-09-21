@@ -117,3 +117,23 @@ li.completed {
   display: flex;
   gap: 6px;
 }
+
+
+/* Style for the character count in the edit form */
+.edit-character-count {
+  width: 100%;
+  text-align: right;
+  font-size: 11px;
+  color: #777;
+}
+
+
+/* Add warning and limit styles for character count */
+.edit-character-count.warning {
+  color: #f57c00;
+}
+
+.edit-character-count.limit {
+  color: #d32f2f;
+  font-weight: bold;
+}

@@ -3,15 +3,22 @@
     <input
       type="text"
       [(ngModel)]="editTitle"
+      maxlength="100"
       (ngModelChange)="editError = ''"
     />
+
+    <small class="edit-character-count" [class.warning]="editTitle.length >= 80 && editTitle.length < 100" [class.limit]="editTitle.length >= 100">
+      {{ editTitle.length }}/100
+    </small>
 
     @if (editError) {
       <small class="edit-error"> ⚠️ {{ editError }} </small>
     }
 
     <div class="edit-actions">
-      <button (click)="saveEditing()" [disabled]="editTitle.trim() === ''">Save</button>
+      <button (click)="saveEditing()" [disabled]="editTitle.trim() === ''">
+        Save
+      </button>
       <button (click)="cancelEditing()">Cancel</button>
     </div>
   </div>
