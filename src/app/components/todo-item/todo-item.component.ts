@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
 import { Todo } from '../../models/todo.model';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +10,9 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './todo-item.component.css',
 })
 export class TodoItemComponent {
+  @ViewChild('editInput') // This decorator allows us to access the input element in the template using a reference variable. It enables us to programmatically focus on the input field when the user starts editing a todo item.
+  editInput!: ElementRef<HTMLInputElement>; // This property will hold a reference to the input element in the template. The ElementRef type is used to access the native DOM element, allowing us to manipulate it directly (e.g., focusing on it).
+
   isEditing = false; // "I'm not Editing and when we change this to true, the input field will be displayed and the user can edit the todo item. "
   editTitle = ''; // "This property will hold the updated title of the todo item when the user edits it. It will be bound to the input field in the template, allowing the user to modify the title."
   editError = ''; // "This property will hold any error message related to editing the todo item. If the user tries to save an empty title, this property will be set to an appropriate error message, which can be displayed in the template to inform the user about the issue."
@@ -31,6 +34,11 @@ export class TodoItemComponent {
     this.editTitle = this.todo.title; // Set the editTitle property to the current title of the todo item when the edit button is clicked. This allows the input field to be pre-filled with the existing title, making it easier for the user to edit.
     this.isEditing = true; // Set the isEditing property to true when the edit button is clicked. This will trigger the display of the input field for editing the todo item.
     // console.log('Editing:', this.todo.title);
+
+    setTimeout(() => {
+      this.editInput?.nativeElement.focus(); // Focus on the input field after a short delay to ensure that the input element is rendered and available in the DOM. This improves the user experience by allowing them to start typing immediately without having to click on the input field.
+      this.editInput?.nativeElement.select(); // Typing immediately replaces the text.
+    });
   }
 
   deleteTodo() {
