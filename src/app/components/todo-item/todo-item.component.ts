@@ -8,6 +8,9 @@ import { FormsModule } from '@angular/forms';
   imports: [FormsModule, DatePipe],
   templateUrl: './todo-item.component.html',
   styleUrl: './todo-item.component.css',
+  host: {
+    role: 'listitem',
+  },
 })
 export class TodoItemComponent {
   @ViewChild('editInput') // This decorator allows us to access the input element in the template using a reference variable. It enables us to programmatically focus on the input field when the user starts editing a todo item.
