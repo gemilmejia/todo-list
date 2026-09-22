@@ -99,7 +99,7 @@
     </div>
   } @else {
     <ul aria-labelledby="todo-list-heading">
-      @for (todo of filteredTodos; track $index) {
+      @for (todo of filteredTodos; track todo.id) {
         <app-todo-item
           [todo]="todo"
           (deleteClicked)="deleteTodo($event)"
