@@ -2,6 +2,11 @@
   font-weight: bold;
 }
 
+.filters button:focus-visible {
+  outline: 3px solid #1976d2;
+  outline-offset: 2px;
+}
+
 /*Normally, <ul> has browser-default bullets and padding. We're removing those because our Todo application doesn't need bullet points.*/
 ul {
   list-style: none;
