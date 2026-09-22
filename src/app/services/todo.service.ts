@@ -60,15 +60,20 @@ export class TodoService {
     );
   }
 
-  // Load the list of todos from local storage and parse it back into an array of Todo objects
   loadTodos() {
-    const savedTodos = localStorage.getItem('todos'); // Get the item from local storage with the key "todos"
+  const savedTodos = localStorage.getItem('todos');
 
-    if (savedTodos) {
-      // If the item exists in local storage (i.e., it's not null), parse the JSON string back into an array of Todo objects and assign it to the todos property
-      this.todos = JSON.parse(savedTodos); // Convert the JSON string back into an array of Todo objects
-    }
+  if (!savedTodos) {
+    return;
   }
+
+  try {
+    this.todos = JSON.parse(savedTodos);
+  } catch (error) {
+    console.error('Failed to load todos from localStorage:', error);
+    this.todos = [];
+  }
+}
 
   updateTodo(id: number, title: string) {
     const todo = this.todos.find((todo) => todo.id === id); // Find the todo item in the todos array with the matching id
