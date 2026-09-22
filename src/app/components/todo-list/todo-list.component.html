@@ -56,17 +56,29 @@
 <!-- Filter buttons  -->
 
 <div class="filters">
-  <button (click)="filter = 'all'" [class.active]="filter === 'all'">
+  <button
+    type="button"
+    (click)="filter = 'all'"
+    [class.active]="filter === 'all'"
+    [attr.aria-pressed]="filter === 'all'"
+  >
     All
   </button>
 
-  <button (click)="filter = 'active'" [class.active]="filter === 'active'">
+  <button
+    type="button"
+    (click)="filter = 'active'"
+    [class.active]="filter === 'active'"
+    [attr.aria-pressed]="filter === 'active'"
+  >
     Active
   </button>
 
   <button
+    type="button"
     (click)="filter = 'completed'"
     [class.active]="filter === 'completed'"
+    [attr.aria-pressed]="filter === 'completed'"
   >
     Completed
   </button>
