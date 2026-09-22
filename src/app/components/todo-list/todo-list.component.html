@@ -1,109 +1,113 @@
-<!-- Todo count -->
+<section aria-labelledby="todo-list-heading">
+  <h2 id="todo-list-heading">Your Tasks</h2>
 
-<!-- activeTodoCount === 1 ? 'task' : 'tasks' is called a ternary operator.-->
-<div class="todo-count">
-  @if (activeTodoCount === 0) {
-    🎉 All tasks completed!
+  <!-- Todo count -->
+
+  <!-- activeTodoCount === 1 ? 'task' : 'tasks' is called a ternary operator.-->
+  <div class="todo-count">
+    @if (activeTodoCount === 0) {
+      🎉 All tasks completed!
+    } @else {
+      {{ activeTodoCount }}
+      {{ activeTodoCount === 1 ? "task" : "tasks" }}
+      remaining
+    }
+  </div>
+
+  <!-- Add the progress text -->
+  <div class="todo-progress">
+    <!-- {{ completedTodoCount }} of {{ todoService.todos.length }} tasks completed -->
+    {{ completedTodoCount }} of {{ totalTodoCount }} tasks completed
+  </div>
+
+  <!-- Show this message only when there are tasks AND zero completed tasks. -->
+  @if (totalTodoCount > 0 && completedTodoCount === 0) {
+    <div class="no-completed-message">
+      💡 Complete a task to see your progress here.
+    </div>
+  }
+
+  <!-- Add the progress bar/completion percentage -->
+  <div class="completion-percentage">{{ completionPercentage }}% complete</div>
+
+  <!--[style.width.%]="completionPercentage" - This is Angular property binding. -->
+  <div
+    class="progress-bar"
+    role="progressbar"
+    [attr.aria-valuenow]="completionPercentage"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [attr.aria-label]="'Task completion: ' + completionPercentage + '%'"
+  >
+    <div class="progress-fill" [style.width.%]="completionPercentage">
+      @if (completionPercentage > 0) {
+        <span>{{ completionPercentage }}%</span>
+      }
+    </div>
+
+    @if (completionPercentage === 0) {
+      <span class="progress-zero-label">0%</span>
+    }
+  </div>
+
+  @if (completedTodoCount > 0) {
+    <button class="clear-completed" (click)="clearCompleted()">
+      Clear Completed ({{ completedTodoCount }})
+    </button>
+  }
+
+  <!-- Filter buttons  -->
+
+  <div class="filters">
+    <button
+      type="button"
+      (click)="filter = 'all'"
+      [class.active]="filter === 'all'"
+      [attr.aria-pressed]="filter === 'all'"
+    >
+      All
+    </button>
+
+    <button
+      type="button"
+      (click)="filter = 'active'"
+      [class.active]="filter === 'active'"
+      [attr.aria-pressed]="filter === 'active'"
+    >
+      Active
+    </button>
+
+    <button
+      type="button"
+      (click)="filter = 'completed'"
+      [class.active]="filter === 'completed'"
+      [attr.aria-pressed]="filter === 'completed'"
+    >
+      Completed
+    </button>
+  </div>
+
+  @if (filteredTodos.length === 0) {
+    <div class="empty-state">
+      @if (filter === "all") {
+        📝 No tasks yet. Add your first task!
+      } @else if (filter === "active") {
+        🎉 No active tasks!
+      } @else if (filter === "completed") {
+        ✅ No completed tasks yet!
+      }
+    </div>
   } @else {
-    {{ activeTodoCount }}
-    {{ activeTodoCount === 1 ? "task" : "tasks" }}
-    remaining
+    <ul>
+      @for (todo of filteredTodos; track $index) {
+        <app-todo-item
+          [todo]="todo"
+          (deleteClicked)="deleteTodo($event)"
+          (completeClicked)="completeTodo($event)"
+          (editSaved)="updateTodo($event)"
+        >
+        </app-todo-item>
+      }
+    </ul>
   }
-</div>
-
-<!-- Add the progress text -->
-<div class="todo-progress">
-  <!-- {{ completedTodoCount }} of {{ todoService.todos.length }} tasks completed -->
-  {{ completedTodoCount }} of {{ totalTodoCount }} tasks completed
-</div>
-
-<!-- Show this message only when there are tasks AND zero completed tasks. -->
-@if (totalTodoCount > 0 && completedTodoCount === 0) {
-  <div class="no-completed-message">
-    💡 Complete a task to see your progress here.
-  </div>
-}
-
-<!-- Add the progress bar/completion percentage -->
-<div class="completion-percentage">{{ completionPercentage }}% complete</div>
-
-<!--[style.width.%]="completionPercentage" - This is Angular property binding. -->
-<div
-  class="progress-bar"
-  role="progressbar"
-  [attr.aria-valuenow]="completionPercentage"
-  aria-valuemin="0"
-  aria-valuemax="100"
-  [attr.aria-label]="'Task completion: ' + completionPercentage + '%'"
->
-  <div class="progress-fill" [style.width.%]="completionPercentage">
-    @if (completionPercentage > 0) {
-      <span>{{ completionPercentage }}%</span>
-    }
-  </div>
-
-  @if (completionPercentage === 0) {
-    <span class="progress-zero-label">0%</span>
-  }
-</div>
-
-@if (completedTodoCount > 0) {
-  <button class="clear-completed" (click)="clearCompleted()">
-    Clear Completed ({{ completedTodoCount }})
-  </button>
-}
-
-<!-- Filter buttons  -->
-
-<div class="filters">
-  <button
-    type="button"
-    (click)="filter = 'all'"
-    [class.active]="filter === 'all'"
-    [attr.aria-pressed]="filter === 'all'"
-  >
-    All
-  </button>
-
-  <button
-    type="button"
-    (click)="filter = 'active'"
-    [class.active]="filter === 'active'"
-    [attr.aria-pressed]="filter === 'active'"
-  >
-    Active
-  </button>
-
-  <button
-    type="button"
-    (click)="filter = 'completed'"
-    [class.active]="filter === 'completed'"
-    [attr.aria-pressed]="filter === 'completed'"
-  >
-    Completed
-  </button>
-</div>
-
-@if (filteredTodos.length === 0) {
-  <div class="empty-state">
-    @if (filter === "all") {
-      📝 No tasks yet. Add your first task!
-    } @else if (filter === "active") {
-      🎉 No active tasks!
-    } @else if (filter === "completed") {
-      ✅ No completed tasks yet!
-    }
-  </div>
-} @else {
-  <ul>
-    @for (todo of filteredTodos; track $index) {
-      <app-todo-item
-        [todo]="todo"
-        (deleteClicked)="deleteTodo($event)"
-        (completeClicked)="completeTodo($event)"
-        (editSaved)="updateTodo($event)"
-      >
-      </app-todo-item>
-    }
-  </ul>
-}
+</section>
