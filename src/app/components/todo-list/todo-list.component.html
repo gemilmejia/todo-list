@@ -98,7 +98,7 @@
       }
     </div>
   } @else {
-    <ul>
+    <ul aria-labelledby="todo-list-heading">
       @for (todo of filteredTodos; track $index) {
         <app-todo-item
           [todo]="todo"
