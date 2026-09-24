@@ -102,13 +102,20 @@ export class TodoService {
 
   // "If this function returns true, TypeScript can treat todo as a Todo." //
   // private isValidtodo. Change isValidTodo() from a public method to a private method.
-  private isValidTodo(todo: any): todo is Todo {
+  private isValidTodo(todo: unknown): todo is Todo {
+    if (typeof todo !== 'object' || todo === null) {
+      return false;
+    }
+
+    const candidate = todo as Record<string, unknown>;
+
     return (
-      typeof todo.id === 'number' &&
-      typeof todo.title === 'string' &&
-      todo.title.trim() !== '' &&
-      typeof todo.completed === 'boolean' &&
-      (typeof todo.completedAt === 'string' || todo.completedAt === null)
+      typeof candidate['id'] === 'number' &&
+      typeof candidate['title'] === 'string' &&
+      candidate['title'].trim() !== '' &&
+      typeof candidate['completed'] === 'boolean' &&
+      (typeof candidate['completedAt'] === 'string' ||
+        candidate['completedAt'] === null)
     );
   }
 
