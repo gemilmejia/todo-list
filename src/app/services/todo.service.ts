@@ -19,6 +19,13 @@ export class TodoService {
       return;
     }
 
+    // Prevent Duplicate Todo IDs
+    let newId = Date.now();
+
+    while (this.todos.some((todo) => todo.id === newId)) {
+      newId++;
+    }
+
     // create a new Todo object using the Todo interface
     const newTodo: Todo = {
       id: Date.now(),
