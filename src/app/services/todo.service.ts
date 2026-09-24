@@ -100,7 +100,8 @@ export class TodoService {
     }
   }
 
-  isValidTodo(todo: any): boolean {
+  // "If this function returns true, TypeScript can treat todo as a Todo."
+  isValidTodo(todo: any): todo is Todo {
     return (
       typeof todo.id === 'number' &&
       typeof todo.title === 'string' &&
