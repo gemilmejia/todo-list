@@ -13,15 +13,16 @@ export class TodoService {
 
   // Add a new todo item to the list
   addTask(task: string) {
-    if (task.trim() === '') {
-      // remove whitespace from the task string and check if it's empty
+    const trimmedTask = task.trim();
+
+    if (trimmedTask === '') {
       return;
     }
 
     // create a new Todo object using the Todo interface
     const newTodo: Todo = {
       id: Date.now(),
-      title: task,
+      title: trimmedTask,
       completed: false,
       completedAt: null, // Set the completedAt property to null when a new todo is created
     };
