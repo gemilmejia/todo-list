@@ -100,8 +100,9 @@ export class TodoService {
     }
   }
 
-  // "If this function returns true, TypeScript can treat todo as a Todo."
-  isValidTodo(todo: any): todo is Todo {
+  // "If this function returns true, TypeScript can treat todo as a Todo." //
+  // private isValidtodo. Change isValidTodo() from a public method to a private method.
+  private isValidTodo(todo: any): todo is Todo {
     return (
       typeof todo.id === 'number' &&
       typeof todo.title === 'string' &&
