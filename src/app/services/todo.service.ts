@@ -93,10 +93,17 @@ export class TodoService {
   }
 
   updateTodo(id: number, title: string) {
+    const trimmedTitle = title.trim(); // Clean the title using trim
+
+    // Reject Blank Titles
+    if (trimmedTitle === '') {
+      return;
+    }
+
     const todo = this.todos.find((todo) => todo.id === id); // Find the todo item in the todos array with the matching id
 
     if (todo) {
-      todo.title = title; // If the todo item is found, update its title with the new title provided
+      todo.title = trimmedTitle; // If the todo item is found, update its title with the new title provided / changed from title into trimmedTitle
       this.saveTodos(); // Save the updated todos array to local storage after updating the title
     }
   }
