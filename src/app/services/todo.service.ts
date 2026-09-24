@@ -68,7 +68,23 @@ export class TodoService {
   }
 
   try {
-    this.todos = JSON.parse(savedTodos);
+    const parsedTodos = JSON.parse(savedTodos);
+
+    if (!Array.isArray(parsedTodos)) {
+      console.error('Invalid todo data: expected an array.');
+      this.todos = [];
+      return;
+    }
+
+    this.todos = parsedTodos.filter((todo) => {
+      return (
+        typeof todo.id === 'number' &&
+        typeof todo.title === 'string' &&
+        typeof todo.completed === 'boolean' &&
+        (typeof todo.completedAt === 'string' ||
+          todo.completedAt === null)
+      );
+    });
   } catch (error) {
     console.error('Failed to load todos from localStorage:', error);
     this.todos = [];
