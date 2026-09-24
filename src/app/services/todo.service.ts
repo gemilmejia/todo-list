@@ -61,35 +61,35 @@ export class TodoService {
   }
 
   loadTodos() {
-  const savedTodos = localStorage.getItem('todos');
+    const savedTodos = localStorage.getItem('todos');
 
-  if (!savedTodos) {
-    return;
-  }
-
-  try {
-    const parsedTodos = JSON.parse(savedTodos);
-
-    if (!Array.isArray(parsedTodos)) {
-      console.error('Invalid todo data: expected an array.');
-      this.todos = [];
+    if (!savedTodos) {
       return;
     }
 
-    this.todos = parsedTodos.filter((todo) => {
-      return (
-        typeof todo.id === 'number' &&
-        typeof todo.title === 'string' &&
-        typeof todo.completed === 'boolean' &&
-        (typeof todo.completedAt === 'string' ||
-          todo.completedAt === null)
-      );
-    });
-  } catch (error) {
-    console.error('Failed to load todos from localStorage:', error);
-    this.todos = [];
+    try {
+      const parsedTodos = JSON.parse(savedTodos);
+
+      if (!Array.isArray(parsedTodos)) {
+        console.error('Invalid todo data: expected an array.');
+        this.todos = [];
+        return;
+      }
+
+      this.todos = parsedTodos.filter((todo) => {
+        return (
+          typeof todo.id === 'number' &&
+          typeof todo.title === 'string' &&
+          todo.title.trim() !== '' &&
+          typeof todo.completed === 'boolean' &&
+          (typeof todo.completedAt === 'string' || todo.completedAt === null)
+        );
+      });
+    } catch (error) {
+      console.error('Failed to load todos from localStorage:', error);
+      this.todos = [];
+    }
   }
-}
 
   updateTodo(id: number, title: string) {
     const todo = this.todos.find((todo) => todo.id === id); // Find the todo item in the todos array with the matching id
