@@ -84,19 +84,30 @@ export class TodoService {
         return;
       }
 
-      this.todos = parsedTodos.filter((todo) => {
-        return (
-          typeof todo.id === 'number' &&
-          typeof todo.title === 'string' &&
-          todo.title.trim() !== '' &&
-          typeof todo.completed === 'boolean' &&
-          (typeof todo.completedAt === 'string' || todo.completedAt === null)
-        );
-      });
+      // this.todos = parsedTodos.filter((todo) => {
+      //   return (
+      //     typeof todo.id === 'number' &&
+      //     typeof todo.title === 'string' &&
+      //     todo.title.trim() !== '' &&
+      //     typeof todo.completed === 'boolean' &&
+      //     (typeof todo.completedAt === 'string' || todo.completedAt === null)
+      //   );
+      // });
+      this.todos = parsedTodos.filter((todo) => this.isValidTodo(todo));
     } catch (error) {
       console.error('Failed to load todos from localStorage:', error);
       this.todos = [];
     }
+  }
+
+  isValidTodo(todo: any): boolean {
+    return (
+      typeof todo.id === 'number' &&
+      typeof todo.title === 'string' &&
+      todo.title.trim() !== '' &&
+      typeof todo.completed === 'boolean' &&
+      (typeof todo.completedAt === 'string' || todo.completedAt === null)
+    );
   }
 
   updateTodo(id: number, title: string) {
