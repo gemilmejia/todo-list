@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 
@@ -8,8 +8,14 @@ import { TodoService } from '../../services/todo.service'; // Import the TodoSer
   templateUrl: './todo-list.component.html',
   styleUrl: './todo-list.component.css',
 })
-export class TodoListComponent {
+export class TodoListComponent implements OnInit {
   constructor(private todoService: TodoService) {} // Inject the TodoService into the component's constructor to use its methods and properties (2) read: "Give this component access to TodoService."
+
+  ngOnInit() {
+    this.todoService.getStatus().subscribe((message) => {
+      console.log(message);
+    });
+  }
 
   filter = 'all'; // Define a property to hold the current filter state (all, active, completed) (1) read: "The current filter is All".
 

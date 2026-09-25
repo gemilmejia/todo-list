@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Todo } from '../models/todo.model'; // import the Todo interface to use it in this service
+import { Observable } from 'rxjs'; // Reactive Extensions for JavaScript.
 
 @Injectable({
   providedIn: 'root',
@@ -14,6 +15,14 @@ export class TodoService {
   // Get the Todo list.
   getTodos(): Todo[] {
     return this.todos;
+  }
+
+  getStatus(): Observable<string> {
+    // Creating a new Observable.
+    return new Observable((subscriber) => {
+      // "Send this value to the subscriber."
+      subscriber.next('Todo service is ready!');
+    });
   }
 
   // Add a new todo item to the list
