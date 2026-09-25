@@ -19,7 +19,7 @@ export class AppComponent {
 
   // "Whenever someone asks AppComponent for todos, give them the todos from TodoService." //
   get todos() {
-    return this.todoService.todos;
+    return this.todoService.getTodos;
   }
 
   constructor(private todoService: TodoService) {}

@@ -9,7 +9,7 @@ export class TodoService {
     this.loadTodos(); // Load the todos from local storage when the service is initialized
   }
 
-  todos: Todo[] = []; // Define a property to hold the list of todos
+  private todos: Todo[] = []; // Define a property to hold the list of todos
 
   // Get the Todo list.
   getTodos(): Todo[] {
