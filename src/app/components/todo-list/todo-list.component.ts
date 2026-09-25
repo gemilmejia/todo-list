@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-// import { Todo } from '../../models/todo.model';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 
@@ -13,11 +12,6 @@ export class TodoListComponent {
   constructor(private todoService: TodoService) {} // Inject the TodoService into the component's constructor to use its methods and properties (2) read: "Give this component access to TodoService."
 
   filter = 'all'; // Define a property to hold the current filter state (all, active, completed) (1) read: "The current filter is All".
-
-  // // "When someone asks me for todosFromService..." then // "Give them the todos from TodoService." //
-  // get todosFromService() {
-  //   return this.todoService.getTodos();
-  // }
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos() {

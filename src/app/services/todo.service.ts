@@ -11,6 +11,11 @@ export class TodoService {
 
   todos: Todo[] = []; // Define a property to hold the list of todos
 
+  // Get the Todo list.
+  getTodos(): Todo[] {
+    return this.todos;
+  }
+
   // Add a new todo item to the list
   addTask(task: string) {
     const trimmedTask = task.trim();
