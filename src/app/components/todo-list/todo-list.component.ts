@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Todo } from '../../models/todo.model';
+// import { Todo } from '../../models/todo.model';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 
@@ -14,39 +14,40 @@ export class TodoListComponent {
 
   filter = 'all'; // Define a property to hold the current filter state (all, active, completed) (1) read: "The current filter is All".
 
-  // "When someone asks me for todosFromService..." then // "Give them the todos from TodoService." //
-  get todosFromService() {
-    return this.todoService.todos;
-  }
+  // // "When someone asks me for todosFromService..." then // "Give them the todos from TodoService." //
+  // get todosFromService() {
+  //   return this.todoService.getTodos();
+  // }
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos() {
+    const todos = this.todoService.getTodos();
     // If the filter is set to 'completed', return only the todos that are completed
     if (this.filter === 'completed') {
-      return this.todoService.todos.filter((todo) => todo.completed);
+      return todos.filter((todo) => todo.completed);
     }
     // If the filter is set to 'active', return only the todos that are not completed
     if (this.filter === 'active') {
-      return this.todoService.todos.filter((todo) => !todo.completed);
+      return todos.filter((todo) => !todo.completed);
     }
     // all other cases (including 'all') return all todos from the service
-    return this.todoService.todos;
+    return todos;
   }
 
   // "When someone asks me for activeTodoCount..." then // "Give them the count of todos from TodoService that are not completed." //
   // gets all your todos. then keeps only unfinished tasks. counts them. //
   get activeTodoCount() {
-    return this.todoService.todos.filter((todo) => !todo.completed).length;
+    return this.todoService.getTodos().filter((todo) => !todo.completed).length;
   }
 
   // "When someone asks me for completedTodoCount..." then // "Give them the count of todos from TodoService that are completed." //
   get completedTodoCount() {
-    return this.todoService.todos.filter((todo) => todo.completed).length;
+    return this.todoService.getTodos().filter((todo) => todo.completed).length;
   }
 
   // "When someone asks me for totalTodoCount..." then // "Give them the total count of todos from TodoService." //
   get totalTodoCount() {
-    return this.todoService.todos.length;
+    return this.todoService.getTodos().length;
   }
 
   // "When someone asks me for completionPercentage..." then // "Give them the percentage of completed todos from TodoService." //
@@ -63,12 +64,10 @@ export class TodoListComponent {
   }
 
   completeTodo(id: number) {
-    const todo = this.todoService.todos.find((todo) => todo.id === id); // Find the todo item with the specified id in the todos array
+    const todo = this.todoService.getTodos().find((todo) => todo.id === id);
 
-    // logic to toggle the completed status of the todo item
     if (todo) {
-      // if we found it ...
-      this.todoService.toggleCompleted(todo); // read: "Tell TodoService to toggle this Todo's completed status. This ensures that the change is reflected in the service's todos array and saved to local storage, maintaining consistency across the application. read: "Tell my TodoService to toggle this Todo's completed status." (4)
+      this.todoService.toggleCompleted(todo);
     }
   }
 
