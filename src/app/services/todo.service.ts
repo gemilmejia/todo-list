@@ -84,16 +84,14 @@ export class TodoService {
         return;
       }
 
-      // this.todos = parsedTodos.filter((todo) => {
-      //   return (
-      //     typeof todo.id === 'number' &&
-      //     typeof todo.title === 'string' &&
-      //     todo.title.trim() !== '' &&
-      //     typeof todo.completed === 'boolean' &&
-      //     (typeof todo.completedAt === 'string' || todo.completedAt === null)
-      //   );
-      // });
-      this.todos = parsedTodos.filter((todo) => this.isValidTodo(todo));
+      this.todos = parsedTodos
+        // This removes invalid data.
+        .filter((todo) => this.isValidTodo(todo))
+        // This creates a normalized Todo.
+        .map((todo) => ({
+          ...todo,
+          completedAt: todo.completedAt ?? null,
+        }));
     } catch (error) {
       console.error('Failed to load todos from localStorage:', error);
       this.todos = [];
