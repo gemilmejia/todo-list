@@ -17,6 +17,14 @@ export class TodoService {
     return this.todos;
   }
 
+  // Observable is a way of representing a stream of asynchronous values.:
+  // HTTP requests
+  // User events
+  // Timers
+  // WebSocket messages
+  // Form changes
+  // Route changes
+  // Application state
   // Get message stream
   getStatus(): Observable<string> {
     // Creating a new Observable.
