@@ -17,6 +17,7 @@ export class TodoService {
     return this.todos;
   }
 
+  // Stream Message
   getStatus(): Observable<string> {
     // Creating a new Observable.
     return new Observable((subscriber) => {
@@ -24,6 +25,8 @@ export class TodoService {
       subscriber.next('Todo service is starting...');
       subscriber.next('Todo service is loading data...');
       subscriber.next('Todo service is ready!');
+
+      subscriber.complete();
     });
   }
 

@@ -12,12 +12,16 @@ export class TodoListComponent implements OnInit {
   constructor(private todoService: TodoService) {} // Inject the TodoService into the component's constructor to use its methods and properties (2) read: "Give this component access to TodoService."
 
   ngOnInit() {
-    this.todoService.getStatus().subscribe((message) => {
-      console.log(message);
+    this.todoService.getStatus().subscribe({
+      next: (message) => {
+        console.log(message);
+      },
+      complete: () => {
+        console.log('Todo status stream completed');
+      },
     });
   }
-
-  filter = 'all'; // Define a property to hold the current filter state (all, active, completed) (1) read: "The current filter is All".
+  filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos() {
