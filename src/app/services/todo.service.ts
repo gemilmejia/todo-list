@@ -21,6 +21,8 @@ export class TodoService {
     // Creating a new Observable.
     return new Observable((subscriber) => {
       // "Send this value to the subscriber."
+      subscriber.next('Todo service is starting...');
+      subscriber.next('Todo service is loading data...');
       subscriber.next('Todo service is ready!');
     });
   }
