@@ -20,7 +20,17 @@ export class TodoListComponent implements OnInit {
         console.log('Todo status stream completed');
       },
     });
+
+    this.todoService.getStatusWithError().subscribe({
+      next: (message) => {
+        console.log(message);
+      },
+      error: (error) => {
+        console.error('Todo status stream failed:', error);
+      },
+    });
   }
+
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //

@@ -17,7 +17,7 @@ export class TodoService {
     return this.todos;
   }
 
-  // Stream Message
+  // Get message stream
   getStatus(): Observable<string> {
     // Creating a new Observable.
     return new Observable((subscriber) => {
@@ -27,6 +27,16 @@ export class TodoService {
       subscriber.next('Todo service is ready!');
 
       subscriber.complete();
+    });
+  }
+
+  // Get Error
+  getStatusWithError(): Observable<string> {
+    return new Observable((subscriber) => {
+      subscriber.next('Todo service is starting...');
+      subscriber.next('Todo service is loading data...');
+
+      subscriber.error('Something went wrong while loading the Todo service.');
     });
   }
 
