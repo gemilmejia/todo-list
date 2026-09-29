@@ -29,6 +29,18 @@ export class TodoListComponent implements OnInit {
         console.error('Todo status stream failed:', error);
       },
     });
+
+    this.todoService.getTodosFromApi().subscribe({
+      next: (todos) => {
+        console.log('Todos received from API:', todos);
+      },
+      error: (error) => {
+        console.error('Failed to load todos from API:', error);
+      },
+      complete: () => {
+        console.log('API request completed.');
+      },
+    });
   }
 
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".

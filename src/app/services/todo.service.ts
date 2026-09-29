@@ -66,7 +66,7 @@ export class TodoService {
 
     // create a new Todo object using the Todo interface
     const newTodo: Todo = {
-      id: Date.now(),
+      id: newId,
       title: trimmedTask,
       completed: false,
       completedAt: null, // Set the completedAt property to null when a new todo is created
@@ -174,5 +174,10 @@ export class TodoService {
   clearCompleted() {
     this.todos = this.todos.filter((todo) => !todo.completed); // Filter out the completed todos and keep only the active ones
     this.saveTodos(); // Save the updated todos array to local storage after clearing completed todos
+  }
+
+  // "This method returns an Observable that is expected to emit an array of Todo objects."
+  getTodosFromApi(): Observable<Todo[]> {
+    return this.http.get<Todo[]>('https://jsonplaceholder.typicode.com/todos');
   }
 }
