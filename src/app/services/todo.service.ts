@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Todo } from '../models/todo.model'; // import the Todo interface to use it in this service
-import { Observable } from 'rxjs'; // Reactive Extensions for JavaScript.
+import { JsonPlaceholderTodo } from '../models/jsonplaceholder-todo.model';
+import { Observable, map } from 'rxjs'; // Reactive Extensions for JavaScript.
 
 @Injectable({
   providedIn: 'root',
@@ -178,6 +179,22 @@ export class TodoService {
 
   // "This method returns an Observable that is expected to emit an array of Todo objects."
   getTodosFromApi(): Observable<Todo[]> {
-    return this.http.get<Todo[]>('https://jsonplaceholder.typicode.com/todos');
+    return (
+      this.http
+        .get<JsonPlaceholderTodo[]>(
+          'https://jsonplaceholder.typicode.com/todos',
+        )
+        //RxJS pipe() allows us to put operators into our Observable processing chain.
+        .pipe(
+          map((apiTodos) =>
+            apiTodos.map((todo) => ({
+              id: todo.id,
+              title: todo.title,
+              completed: todo.completed,
+              completedAt: null,
+            })),
+          ),
+        )
+    );
   }
 }
