@@ -178,23 +178,19 @@ export class TodoService {
   }
 
   // "This method returns an Observable that is expected to emit an array of Todo objects."
+  // .pipe(//RxJS pipe() allows us to put operators into our Observable processing chain.)
   getTodosFromApi(): Observable<Todo[]> {
-    return (
-      this.http
-        .get<JsonPlaceholderTodo[]>(
-          'https://jsonplaceholder.typicode.com/todos',
-        )
-        //RxJS pipe() allows us to put operators into our Observable processing chain.
-        .pipe(
-          map((apiTodos) =>
-            apiTodos.map((todo) => ({
-              id: todo.id,
-              title: todo.title,
-              completed: todo.completed,
-              completedAt: null,
-            })),
-          ),
-        )
-    );
+    return this.http
+      .get<JsonPlaceholderTodo[]>('https://jsonplaceholder.typicode.com/todos')
+      .pipe(
+        map((apiTodos) =>
+          apiTodos.map((todo) => ({
+            id: todo.id,
+            title: todo.title,
+            completed: todo.completed,
+            completedAt: null,
+          })),
+        ),
+      );
   }
 }
