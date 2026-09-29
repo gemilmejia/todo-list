@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Todo } from '../models/todo.model'; // import the Todo interface to use it in this service
 import { Observable } from 'rxjs'; // Reactive Extensions for JavaScript.
 
@@ -6,7 +7,7 @@ import { Observable } from 'rxjs'; // Reactive Extensions for JavaScript.
   providedIn: 'root',
 })
 export class TodoService {
-  constructor() {
+  constructor(private http: HttpClient) {
     this.loadTodos(); // Load the todos from local storage when the service is initialized
   }
 
