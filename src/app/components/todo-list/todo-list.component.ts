@@ -31,8 +31,8 @@ export class TodoListComponent implements OnInit {
     });
 
     this.todoService.getTodosFromApi().subscribe({
-      next: (todos) => {
-        console.log('Todos received from API:', todos);
+      next: (apiTodos) => {
+        console.log('Todos received from API:', apiTodos);
       },
       error: (error) => {
         console.error('Failed to load todos from API:', error);
