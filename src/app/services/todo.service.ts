@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Todo } from '../models/todo.model'; // import the Todo interface to use it in this service
 import { JsonPlaceholderTodo } from '../models/jsonplaceholder-todo.model';
-import { Observable, catchError, map, of } from 'rxjs'; // Reactive Extensions for JavaScript.
+import { Observable, catchError, map, throwError } from 'rxjs'; // Reactive Extensions for JavaScript.
 
 @Injectable({
   providedIn: 'root',
@@ -194,7 +194,7 @@ export class TodoService {
         catchError((error) => {
           console.error('Failed to load todos from API:', error);
 
-          return of([]);
+          return throwError(() => error);
         }),
       );
   }
