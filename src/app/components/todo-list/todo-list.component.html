@@ -1,4 +1,10 @@
 <section aria-labelledby="todo-list-heading">
+  @if (isApiLoading) {
+    <div class="api-loading" role="status" aria-live="polite">
+      Loading todos from API...
+    </div>
+  }
+
   <h2 id="todo-list-heading" class="todo-list-heading">Your Tasks</h2>
 
   <!-- Todo count -->

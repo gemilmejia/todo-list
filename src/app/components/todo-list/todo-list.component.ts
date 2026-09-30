@@ -30,6 +30,8 @@ export class TodoListComponent implements OnInit {
       },
     });
 
+    this.isApiLoading = true;
+
     this.todoService.getTodosFromApi().subscribe({
       next: (apiTodos) => {
         console.log('Todos received from API:', apiTodos);
@@ -39,11 +41,14 @@ export class TodoListComponent implements OnInit {
       },
       complete: () => {
         console.log('API request completed.');
+
+        this.isApiLoading = false;
       },
     });
   }
 
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
+  isApiLoading = false;
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos() {
