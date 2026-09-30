@@ -5,6 +5,10 @@
     </div>
   }
 
+  @if (apiErrorMessage) {
+    <div class="api-error" role="alert">⚠️ {{ apiErrorMessage }}</div>
+  }
+
   <h2 id="todo-list-heading" class="todo-list-heading">Your Tasks</h2>
 
   <!-- Todo count -->
