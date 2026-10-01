@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
+import { Todo } from '../../models/todo.model'; // Import the Todo interface to use it within this component
 
 @Component({
   selector: 'app-todo-list',
@@ -37,6 +38,7 @@ export class TodoListComponent implements OnInit {
       next: (apiTodos) => {
         console.log('Todos received from API:', apiTodos);
 
+        this.apiTodos = apiTodos;
         this.apiErrorMessage = null;
       },
       error: (error) => {
@@ -57,6 +59,7 @@ export class TodoListComponent implements OnInit {
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   isApiLoading = false;
   apiErrorMessage: string | null = null;
+  apiTodos: Todo[] = [];
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos() {
@@ -77,6 +80,10 @@ export class TodoListComponent implements OnInit {
   // gets all your todos. then keeps only unfinished tasks. counts them. //
   get activeTodoCount() {
     return this.todoService.getTodos().filter((todo) => !todo.completed).length;
+  }
+
+  get apiTodoCount(): number {
+    return this.apiTodos.length;
   }
 
   // "When someone asks me for completedTodoCount..." then // "Give them the count of todos from TodoService that are completed." //

@@ -129,3 +129,9 @@ ul {
   border-radius: 6px;
   font-size: 14px;
 }
+
+.api-info {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 14px;
+}

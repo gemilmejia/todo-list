@@ -9,6 +9,10 @@
     <div class="api-error" role="alert">⚠️ {{ apiErrorMessage }}</div>
   }
 
+  @if (apiTodos.length > 0) {
+    <div class="api-info">API returned {{ apiTodoCount }} todos.</div>
+  }
+
   <h2 id="todo-list-heading" class="todo-list-heading">Your Tasks</h2>
 
   <!-- Todo count -->
