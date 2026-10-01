@@ -13,6 +13,23 @@
     <div class="api-info">API returned {{ apiTodoCount }} todos.</div>
   }
 
+  @if (apiTodos.length > 0) {
+    <section class="api-todos" aria-labelledby="api-todos-heading">
+      <h3 id="api-todos-heading">API Todos</h3>
+
+      <ul>
+        @for (todo of apiTodos; track todo.id) {
+          <li>
+            <span class="api-todos-status">
+              {{ todo.completed ? "✅" : "⬜" }}
+            </span>
+
+            <span> {{ todo.title }} </span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
   <h2 id="todo-list-heading" class="todo-list-heading">Your Tasks</h2>
 
   <!-- Todo count -->
