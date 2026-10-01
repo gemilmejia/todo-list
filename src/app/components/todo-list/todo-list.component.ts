@@ -31,6 +31,10 @@ export class TodoListComponent implements OnInit {
       },
     });
 
+    this.loadApiTodos();
+  }
+
+  loadApiTodos(): void {
     this.isApiLoading = true;
     this.apiErrorMessage = null;
 
