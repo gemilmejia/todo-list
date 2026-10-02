@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Todo } from '../models/todo.model'; // import the Todo interface to use it in this service
 import { JsonPlaceholderTodo } from '../models/jsonplaceholder-todo.model';
-import { Observable, catchError, map, throwError } from 'rxjs'; // Reactive Extensions for JavaScript.
+import { Observable, catchError, map, retry, throwError } from 'rxjs'; // Reactive Extensions for JavaScript.
 
 @Injectable({
   providedIn: 'root',
@@ -183,6 +183,7 @@ export class TodoService {
     return this.http
       .get<JsonPlaceholderTodo[]>('https://jsonplaceholder.typicode.com/todos')
       .pipe(
+        retry(2),
         map((apiTodos) =>
           apiTodos.map((todo) => ({
             id: todo.id,
