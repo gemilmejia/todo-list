@@ -183,7 +183,10 @@ export class TodoService {
     return this.http
       .get<JsonPlaceholderTodo[]>('https://jsonplaceholder.typicode.com/todos')
       .pipe(
-        retry(2),
+        retry({
+          count: 2,
+          delay: 1000,
+        }),
         map((apiTodos) =>
           apiTodos.map((todo) => ({
             id: todo.id,
