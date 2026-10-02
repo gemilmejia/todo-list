@@ -10,7 +10,18 @@
   }
 
   @if (apiTodos.length > 0) {
-    <div class="api-info">API returned {{ apiTodoCount }} todos.</div>
+    <div class="api-info">
+      API returned {{ apiTodoCount }} todos.
+
+      <button
+        type="button"
+        class="api-refresh"
+        (click)="loadApiTodos()"
+        [disabled]="isApiLoading"
+      >
+        🔄 Refresh API Todos
+      </button>
+    </div>
   }
 
   @if (apiTodos.length > 0) {
