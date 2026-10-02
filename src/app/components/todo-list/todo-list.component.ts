@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 import { Todo } from '../../models/todo.model'; // Import the Todo interface to use it within this component
+import { finalize } from 'rxjs'; // this is for .pipe()
 
 @Component({
   selector: 'app-todo-list',
@@ -38,26 +39,33 @@ export class TodoListComponent implements OnInit {
     this.isApiLoading = true;
     this.apiErrorMessage = null;
 
-    this.todoService.getTodosFromApi().subscribe({
-      next: (apiTodos) => {
-        console.log('Todos received from API:', apiTodos);
+    this.todoService
+      .getTodosFromApi()
+      .pipe(
+        finalize(() => {
+          this.isApiLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (apiTodos) => {
+          console.log('Todos received from API:', apiTodos);
 
-        this.apiTodos = apiTodos;
-        this.apiErrorMessage = null;
-      },
-      error: (error) => {
-        console.error('Failed to load todos from API:', error);
+          this.apiTodos = apiTodos;
+          this.apiErrorMessage = null;
+        },
+        error: (error: unknown) => {
+          console.error('Failed to load todos from API:', error);
 
-        this.isApiLoading = false;
-        this.apiErrorMessage =
-          'Failed to load todos from the API. Please try again.';
-      },
-      complete: () => {
-        console.log('API request completed.');
+          // this.isApiLoading = false;
+          this.apiErrorMessage =
+            'Failed to load todos from the API. Please try again.';
+        },
+        // complete: () => {
+        //   console.log('API request completed.');
 
-        this.isApiLoading = false;
-      },
-    });
+        //   this.isApiLoading = false;
+        // },
+      });
   }
 
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
