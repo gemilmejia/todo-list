@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Todo } from '../models/todo.model'; // import the Todo interface to use it in this service
 import { JsonPlaceholderTodo } from '../models/jsonplaceholder-todo.model';
+import { ApiError } from '../models/api-error.model';
 import { Observable, catchError, map, retry, throwError, timer } from 'rxjs'; // Reactive Extensions for JavaScript.
 
 @Injectable({
@@ -30,7 +31,34 @@ export class TodoService {
   private handleApiError(error: unknown): Observable<never> {
     console.error('Todo API error:', error);
 
-    return throwError(() => error);
+    if (error instanceof HttpErrorResponse) {
+      let message = 'Something went wrong while loading the Todo data.';
+
+      if (error.status === 0) {
+        message =
+          'Unable to connect to the server. Please check your internet connection.';
+      } else if (error.status === 404) {
+        message = 'The requested todo data was not found.';
+      } else if (error.status >= 500) {
+        message = 'The server encountered a problem.';
+      }
+
+      // Create an ApiError object with the error message and status code
+      const apiError: ApiError = {
+        message,
+        status: error.status,
+      };
+
+      return throwError(() => apiError);
+    }
+
+    // If the error is not an instance of HttpErrorResponse, create a generic ApiError object
+    const apiError: ApiError = {
+      message: 'Something went wrong while loading the Todo data.',
+      status: 0,
+    };
+
+    return throwError(() => apiError);
   }
 
   // Get the Todo list.

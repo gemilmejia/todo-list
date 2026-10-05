@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 import { Todo } from '../../models/todo.model'; // Import the Todo interface to use it within this component
+import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
 import { finalize } from 'rxjs'; // this is for .pipe()
 
 @Component({
@@ -53,16 +54,11 @@ export class TodoListComponent implements OnInit {
           this.apiTodos = apiTodos;
           this.apiErrorMessage = null;
         },
-        error: (error: unknown) => {
-          console.error('Failed to load todos from API:', error);
 
-          if (error instanceof Error) {
-            this.apiErrorMessage = error.message;
-          } else {
-            // this.isApiLoading = false;
-            this.apiErrorMessage =
-              'Failed to load todos from the API. Please try again.';
-          }
+        error: (error: ApiError) => {
+          console.error('Failed to load todos from API:', error);
+          // Set the error message to display in the template
+          this.apiErrorMessage = error.message;
         },
         // complete: () => {
         //   console.log('API request completed.');
