@@ -33,20 +33,25 @@ export class TodoService {
 
     if (error instanceof HttpErrorResponse) {
       let message = 'Something went wrong while loading the Todo data.';
+      let type: ApiError['type'] = 'unknown'; // means: "The type variable must use the same type as the type property inside ApiError."
 
       if (error.status === 0) {
         message =
           'Unable to connect to the server. Please check your internet connection.';
+        type = 'network';
       } else if (error.status === 404) {
         message = 'The requested todo data was not found.';
+        type = 'not-found';
       } else if (error.status >= 500) {
         message = 'The server encountered a problem.';
+        type = 'server';
       }
 
       // Create an ApiError object with the error message and status code
       const apiError: ApiError = {
         message,
         status: error.status,
+        type,
       };
 
       return throwError(() => apiError);
@@ -56,6 +61,7 @@ export class TodoService {
     const apiError: ApiError = {
       message: 'Something went wrong while loading the Todo data.',
       status: 0,
+      type: 'unknown',
     };
 
     return throwError(() => apiError);
