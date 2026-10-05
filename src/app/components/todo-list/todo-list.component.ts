@@ -71,6 +71,25 @@ export class TodoListComponent implements OnInit {
       });
   }
 
+  getApiErrorTitle(): string {
+    switch (this.apiErrorType) {
+      case 'network':
+        return 'Connection Problem';
+
+      case 'not-found':
+        return 'Todo Data Not Found';
+
+      case 'server':
+        return 'Server Problem';
+
+      case 'unknown':
+        return 'Unexpected Error';
+
+      default:
+        return 'API Error';
+    }
+  }
+
   // State properties //
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   isApiLoading = false;

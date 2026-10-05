@@ -6,7 +6,10 @@
   }
 
   @if (apiErrorMessage) {
-    <div class="api-error" role="alert">⚠️ {{ apiErrorMessage }}</div>
+    <div class="api-error" role="alert">
+      <strong>{{ getApiErrorTitle() }}</strong>
+      ⚠️ {{ apiErrorMessage }}
+    </div>
   }
 
   @if (apiTodos.length > 0) {
