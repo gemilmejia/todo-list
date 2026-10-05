@@ -39,6 +39,7 @@ export class TodoListComponent implements OnInit {
   loadApiTodos(): void {
     this.isApiLoading = true;
     this.apiErrorMessage = null;
+    this.apiErrorType = null; // Clear the error type when loading starts
 
     this.todoService
       .getTodosFromApi()
@@ -53,12 +54,14 @@ export class TodoListComponent implements OnInit {
 
           this.apiTodos = apiTodos;
           this.apiErrorMessage = null;
+          this.apiErrorType = null; // Clear the error type when loading is successful
         },
 
         error: (error: ApiError) => {
           console.error('Failed to load todos from API:', error);
           // Set the error message to display in the template
           this.apiErrorMessage = error.message;
+          this.apiErrorType = error.type; // Set the error type to display in the template
         },
         // complete: () => {
         //   console.log('API request completed.');
@@ -68,9 +71,11 @@ export class TodoListComponent implements OnInit {
       });
   }
 
+  // State properties //
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   isApiLoading = false;
   apiErrorMessage: string | null = null;
+  apiErrorType: ApiError['type'] | null = null;
   apiTodos: Todo[] = [];
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
