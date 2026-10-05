@@ -30,25 +30,7 @@ export class TodoService {
   private handleApiError(error: unknown): Observable<never> {
     console.error('Todo API error:', error);
 
-    if (error instanceof HttpErrorResponse) {
-      if (error.status === 0) {
-        return throwError(() => new Error('Unable to connect to the server.'));
-      }
-
-      if (error.status === 404) {
-        return throwError(
-          () => new Error('The requested Todo data was not found.'),
-        );
-      }
-
-      if (error.status >= 500) {
-        return throwError(() => new Error('The server encountered a problem.'));
-      }
-    }
-
-    return throwError(
-      () => new Error('Something went wrong while loading the Todo data.'),
-    );
+    return throwError(() => error);
   }
 
   // Get the Todo list.

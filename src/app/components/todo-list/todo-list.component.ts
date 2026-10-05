@@ -56,9 +56,13 @@ export class TodoListComponent implements OnInit {
         error: (error: unknown) => {
           console.error('Failed to load todos from API:', error);
 
-          // this.isApiLoading = false;
-          this.apiErrorMessage =
-            'Failed to load todos from the API. Please try again.';
+          if (error instanceof Error) {
+            this.apiErrorMessage = error.message;
+          } else {
+            // this.isApiLoading = false;
+            this.apiErrorMessage =
+              'Failed to load todos from the API. Please try again.';
+          }
         },
         // complete: () => {
         //   console.log('API request completed.');
