@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Todo } from '../models/todo.model'; // import the Todo interface to use it in this service
 import { JsonPlaceholderTodo } from '../models/jsonplaceholder-todo.model';
-import { Observable, catchError, map, retry, throwError } from 'rxjs'; // Reactive Extensions for JavaScript.
+import { Observable, catchError, map, retry, throwError, timer } from 'rxjs'; // Reactive Extensions for JavaScript.
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +13,25 @@ export class TodoService {
   }
 
   private todos: Todo[] = []; // Define a property to hold the list of todos
+
+  private retryConfig = {
+    count: 2,
+    delay: (error: HttpErrorResponse, retryCount: number) => {
+      if (error.status === 0 || error.status >= 500) {
+        console.log(`Retry attempt ${retryCount} in 1 second...`);
+
+        return timer(1000);
+      }
+
+      return throwError(() => error);
+    },
+  };
+
+  private handleApiError(error: unknown): Observable<never> {
+    console.error('Todo API error:', error);
+
+    return throwError(() => error);
+  }
 
   // Get the Todo list.
   getTodos(): Todo[] {
@@ -181,12 +200,11 @@ export class TodoService {
   // .pipe(//RxJS pipe() allows us to put operators into our Observable processing chain.)
   getTodosFromApi(): Observable<Todo[]> {
     return this.http
-      .get<JsonPlaceholderTodo[]>('https://jsonplaceholder.typicode.com/todos')
+      .get<
+        JsonPlaceholderTodo[]
+      >('https://jsonplaceholder.typicode.com/todos-invalid')
       .pipe(
-        retry({
-          count: 2,
-          delay: 1000,
-        }),
+        retry(this.retryConfig),
         map((apiTodos) =>
           apiTodos.map((todo) => ({
             id: todo.id,
@@ -195,11 +213,7 @@ export class TodoService {
             completedAt: null,
           })),
         ),
-        catchError((error) => {
-          console.error('Failed to load todos from API:', error);
-
-          return throwError(() => error);
-        }),
+        catchError((error) => this.handleApiError(error)),
       );
   }
 }

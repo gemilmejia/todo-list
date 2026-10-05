@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { Todo } from '../../models/todo.model';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +37,6 @@ export class TodoItemComponent {
   editSaved = new EventEmitter<{ id: number; title: string }>(); // Define an output property to emit an event when the save button is clicked after editing. This allows the child component to communicate with the parent component and notify it that the edit action has been completed for this specific todo item, along with the updated title. in simply: "Parent, update the todo with this ID and new title."
 
   startEditing() {
-
     this.editTitle = this.todo.title; // Set the editTitle property to the current title of the todo item when the edit button is clicked. This allows the input field to be pre-filled with the existing title, making it easier for the user to edit.
     this.isEditing = true; // Set the isEditing property to true when the edit button is clicked. This will trigger the display of the input field for editing the todo item.
     // console.log('Editing:', this.todo.title);
