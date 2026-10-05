@@ -9,6 +9,15 @@
     <div class="api-error" role="alert">
       <strong>{{ getApiErrorTitle() }}</strong>
       ⚠️ {{ apiErrorMessage }}
+
+      <button
+        type="button"
+        class="api-retry"
+        (click)="loadApiTodos()"
+        [disabled]="isApiLoading"
+      >
+        🔄 Try Again
+      </button>
     </div>
   }
 
