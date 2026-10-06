@@ -16,7 +16,8 @@
         (click)="loadApiTodos()"
         [disabled]="isApiLoading"
       >
-        🔄 Try Again
+        <!-- 🔄 Try Again -->
+        {{ getApiErrorActionLabel() }}
       </button>
     </div>
   }
