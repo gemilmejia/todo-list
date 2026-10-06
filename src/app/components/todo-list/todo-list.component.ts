@@ -107,6 +107,26 @@ export class TodoListComponent implements OnInit {
     }
   }
 
+  // Get the appropriate error message based on the API error type. This method returns a string that represents the detailed error message to be displayed to the user. The message is determined by the type of API error encountered, providing context-specific information about the error and potential next steps for the user. //
+  getApiErrorTypeLabel(): string {
+    switch (this.apiErrorType) {
+      case 'network':
+        return 'Network Error';
+
+      case 'not-found':
+        return 'Not Found';
+
+      case 'server':
+        return 'Server Error';
+
+      case 'unknown':
+        return 'Unknown Error';
+
+      default:
+        return 'API Error';
+    }
+  }
+
   // State properties //
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   isApiLoading = false;

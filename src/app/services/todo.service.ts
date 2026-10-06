@@ -233,19 +233,30 @@ export class TodoService {
   // "This method returns an Observable that is expected to emit an array of Todo objects."
   // .pipe(//RxJS pipe() allows us to put operators into our Observable processing chain.)
   getTodosFromApi(): Observable<Todo[]> {
-    return this.http
-      .get<JsonPlaceholderTodo[]>('https://jsonplaceholder.typicode.com/todos')
-      .pipe(
-        retry(this.retryConfig),
-        map((apiTodos) =>
-          apiTodos.map((todo) => ({
-            id: todo.id,
-            title: todo.title,
-            completed: todo.completed,
-            completedAt: null,
-          })),
-        ),
-        catchError((error) => this.handleApiError(error)),
-      );
+    return (
+      this.http
+        // change the URL to 'https://jsonplaceholder.typicode.com/todos' to fetch todos from the JSONPlaceholder API. This URL returns an array of JsonPlaceholderTodo objects, which we will then map to our Todo interface.
+        // change the URL to 'https://jsonplaceholder.typicode.com/todos-invalid' to simulate an API error for testing purposes. This URL will return a 404 error, allowing us to test our error handling logic.
+
+        .get<JsonPlaceholderTodo[]>(
+          'https://jsonplaceholder.typicode.com/todos',
+        )
+        // .get<JsonPlaceholderTodo[]>(
+        //   'https://jsonplaceholder.typicode.com/todos-invalid',
+        // )
+
+        .pipe(
+          retry(this.retryConfig),
+          map((apiTodos) =>
+            apiTodos.map((todo) => ({
+              id: todo.id,
+              title: todo.title,
+              completed: todo.completed,
+              completedAt: null,
+            })),
+          ),
+          catchError((error) => this.handleApiError(error)),
+        )
+    );
   }
 }

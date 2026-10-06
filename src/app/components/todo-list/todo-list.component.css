@@ -186,3 +186,11 @@ ul {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* Style the API error type label */
+.api-error-type {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
