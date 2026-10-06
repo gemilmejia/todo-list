@@ -37,9 +37,8 @@ export class TodoListComponent implements OnInit {
   }
 
   loadApiTodos(): void {
-    this.isApiLoading = true;
-    this.apiErrorMessage = null;
-    this.apiErrorType = null; // Clear the error type when loading starts
+    this.isApiLoading = true; // show the loading spinner while the API request is in progress
+    this.apiError = null; // Clear any previous API error before making a new request
 
     this.todoService
       .getTodosFromApi()
@@ -53,15 +52,13 @@ export class TodoListComponent implements OnInit {
           console.log('Todos received from API:', apiTodos);
 
           this.apiTodos = apiTodos;
-          this.apiErrorMessage = null;
-          this.apiErrorType = null; // Clear the error type when loading is successful
+          this.apiError = null; // Clear any previous API error when the request is successful
         },
 
         error: (error: ApiError) => {
           console.error('Failed to load todos from API:', error);
           // Set the error message to display in the template
-          this.apiErrorMessage = error.message;
-          this.apiErrorType = error.type; // Set the error type to display in the template
+          this.apiError = error;
         },
         // complete: () => {
         //   console.log('API request completed.');
@@ -73,7 +70,7 @@ export class TodoListComponent implements OnInit {
 
   // Get the appropriate title based on the API error type. This method returns a string that represents the title of the error message to be displayed to the user. The title is determined by the type of API error encountered, providing context-specific information about the error. //
   getApiErrorTitle(): string {
-    switch (this.apiErrorType) {
+    switch (this.apiError?.type) {
       case 'network':
         return 'Connection Problem';
 
@@ -93,7 +90,7 @@ export class TodoListComponent implements OnInit {
 
   // Get the appropriate action label based on the API error type. This method returns a string that represents the action the user can take to address the error, such as reloading data or trying again. The action label is determined by the type of API error encountered, providing context-specific guidance to the user. //
   getApiErrorActionLabel(): string {
-    switch (this.apiErrorType) {
+    switch (this.apiError?.type) {
       case 'not-found':
         return '🔄 Reload Data';
 
@@ -109,7 +106,7 @@ export class TodoListComponent implements OnInit {
 
   // Get the appropriate error message based on the API error type. This method returns a string that represents the detailed error message to be displayed to the user. The message is determined by the type of API error encountered, providing context-specific information about the error and potential next steps for the user. //
   getApiErrorTypeLabel(): string {
-    switch (this.apiErrorType) {
+    switch (this.apiError?.type) {
       case 'network':
         return 'Network Error';
 
@@ -130,8 +127,7 @@ export class TodoListComponent implements OnInit {
   // State properties //
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   isApiLoading = false;
-  apiErrorMessage: string | null = null;
-  apiErrorType: ApiError['type'] | null = null;
+  apiError: ApiError | null = null;
   apiTodos: Todo[] = [];
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //

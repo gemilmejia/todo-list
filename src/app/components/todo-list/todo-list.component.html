@@ -5,14 +5,14 @@
     </div>
   }
 
-  @if (apiErrorMessage) {
+  @if (apiError) {
     <div class="api-error" role="alert">
       <strong>{{ getApiErrorTitle() }}</strong>
       <br />
 
       <span class="api-error-type">{{ getApiErrorTypeLabel() }}</span>
 
-      <p>⚠️ {{ apiErrorMessage }}</p>
+      <p>⚠️ {{ apiError.message }}</p>
 
       <button
         type="button"
