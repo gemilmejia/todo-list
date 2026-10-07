@@ -1,5 +1,5 @@
-<div class="api-error">
-  <strong>{{ title() }}</strong>
+<div class="api-error" role="alert" aria-labelledby="api-error-title">
+  <strong id="api-error-title">{{ title() }}</strong>
 
   <span class="api-error-type">
     {{ getTypeLabel() }}
@@ -7,7 +7,12 @@
 
   <p>{{ message() ?? error().message }}</p>
 
-  <button type="button" class="api-retry" (click)="onRetry()">
+  <button
+    type="button"
+    class="api-retry"
+    [attr.aria-label]="actionLabel()"
+    (click)="onRetry()"
+  >
     {{ actionLabel() }}
   </button>
 </div>
