@@ -39,7 +39,7 @@ export class TodoListComponent implements OnInit {
 
   loadApiTodos(): void {
     this.isApiLoading = true; // show the loading spinner while the API request is in progress
-    this.apiError = null; // Clear any previous API error before making a new request
+    // this.apiError = null; // Clear any previous API error before making a new request
 
     this.todoService
       .getTodosFromApi()

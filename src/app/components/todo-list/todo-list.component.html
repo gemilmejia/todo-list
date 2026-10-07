@@ -13,6 +13,7 @@
       [actionLabel]="'Reload Todo Data'"
       [message]="'We could not load your Todo data. Please try again.'"
       [isLoading]="isApiLoading"
+      [loadingMessage]="'Refreshing Todo data...'"
       (retry)="loadApiTodos()"
     ></app-api-error>
   }

@@ -238,7 +238,7 @@ export class TodoService {
         // change the URL to 'https://jsonplaceholder.typicode.com/todos' to fetch todos from the JSONPlaceholder API. This URL returns an array of JsonPlaceholderTodo objects, which we will then map to our Todo interface.
         // change the URL to 'https://jsonplaceholder.typicode.com/todos-invalid' to simulate an API error for testing purposes. This URL will return a 404 error, allowing us to test our error handling logic.
         .get<JsonPlaceholderTodo[]>(
-          'https://jsonplaceholder.typicode.com/todos',
+          'https://jsonplaceholder.typicode.com/todos-invalid',
         )
 
         .pipe(
