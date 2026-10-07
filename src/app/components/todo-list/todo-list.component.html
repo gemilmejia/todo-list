@@ -12,6 +12,7 @@
       [title]="'Todo API Error'"
       [actionLabel]="'Reload Todo Data'"
       [message]="'We could not load your Todo data. Please try again.'"
+      [isLoading]="isApiLoading"
       (retry)="loadApiTodos()"
     ></app-api-error>
   }

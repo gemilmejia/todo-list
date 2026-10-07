@@ -13,6 +13,7 @@ export class ApiErrorComponent {
   title = input('API Error'); // input means "This component expects its parent to give it a title. or This component expects its parent to provide a title as input."
   actionLabel = input('Try Again'); // input means "This component expects its parent to give it an action label. or This component expects its parent to provide an action label as input."
   message = input<string>(); // input means "This component expects its parent to give it a message. or This component expects its parent to provide a message as input."
+  isLoading = input(false); // input means "This component expects its parent to give it a loading state. or This component expects its parent to provide a loading state as input."
   retry = output<void>(); // output means "This component can notify its parent that the user wants to retry. or This component can emit a value to its parent."
 
   getTypeLabel(): string {

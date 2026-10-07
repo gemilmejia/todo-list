@@ -121,15 +121,6 @@ ul {
   font-size: 14px;
 }
 
-.api-error {
-  text-align: center;
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
 .api-info {
   text-align: center;
   margin-bottom: 15px;
@@ -173,24 +164,4 @@ ul {
 .api-refresh:disabled {
   cursor: not-allowed;
   opacity: 0.6;
-}
-
-/* Style the API retry button */
-.api-retry {
-  margin-top: 10px;
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-.api-retry:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Style the API error type label */
-.api-error-type {
-  display: inline-block;
-  margin-top: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
 }

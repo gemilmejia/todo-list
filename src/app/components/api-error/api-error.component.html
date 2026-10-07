@@ -11,8 +11,9 @@
     type="button"
     class="api-retry"
     [attr.aria-label]="actionLabel()"
+    [disabled]="isLoading()"
     (click)="onRetry()"
   >
-    {{ actionLabel() }}
+    {{ isLoading() ? "Loading..." : actionLabel() }}
   </button>
 </div>
