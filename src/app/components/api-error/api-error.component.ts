@@ -10,26 +10,8 @@ import { ApiError } from '../../models/api-error.model';
 })
 export class ApiErrorComponent {
   error = input.required<ApiError>(); // input means "This component expects its parent to give it an ApiError. or This component expects its parent to provide an ApiError as input."
+  title = input('API Error'); // input means "This component expects its parent to give it a title. or This component expects its parent to provide a title as input."
   retry = output<void>(); // output means "This component can notify its parent that the user wants to retry. or This component can emit a value to its parent."
-
-  getTitle(): string {
-    switch (this.error().type) {
-      case 'network':
-        return 'Connection Problem';
-
-      case 'not-found':
-        return 'Todo Data Not Found';
-
-      case 'server':
-        return 'Server Problem';
-
-      case 'unknown':
-        return 'Unexpected Error';
-
-      default:
-        return 'API Error';
-    }
-  }
 
   getTypeLabel(): string {
     switch (this.error().type) {

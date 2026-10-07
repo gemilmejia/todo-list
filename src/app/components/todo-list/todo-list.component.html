@@ -7,7 +7,11 @@
 
   <!-- [error]="apiError" - parent-to-child binding and (retry)="loadApiTodos()" - child-to-parent binding -->
   @if (apiError) {
-    <app-api-error [error]="apiError" (retry)="loadApiTodos()"></app-api-error>
+    <app-api-error
+      [error]="apiError"
+      [title]="'Todo API Error'"
+      (retry)="loadApiTodos()"
+    ></app-api-error>
   }
 
   @if (apiTodos.length > 0) {
