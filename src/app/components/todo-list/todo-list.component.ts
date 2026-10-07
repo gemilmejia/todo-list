@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
+import { ApiErrorComponent } from '../api-error/api-error.component'; // Import the ApiErrorComponent to use it within this component's template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 import { Todo } from '../../models/todo.model'; // Import the Todo interface to use it within this component
 import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
@@ -7,7 +8,7 @@ import { finalize } from 'rxjs'; // this is for .pipe()
 
 @Component({
   selector: 'app-todo-list',
-  imports: [TodoItemComponent], // Import the TodoItemComponent to use it within this component's template
+  imports: [TodoItemComponent, ApiErrorComponent], // Import the TodoItemComponent and ApiErrorComponent to use them within this component's template
   templateUrl: './todo-list.component.html',
   styleUrl: './todo-list.component.css',
 })
@@ -66,62 +67,6 @@ export class TodoListComponent implements OnInit {
         //   this.isApiLoading = false;
         // },
       });
-  }
-
-  // Get the appropriate title based on the API error type. This method returns a string that represents the title of the error message to be displayed to the user. The title is determined by the type of API error encountered, providing context-specific information about the error. //
-  getApiErrorTitle(): string {
-    switch (this.apiError?.type) {
-      case 'network':
-        return 'Connection Problem';
-
-      case 'not-found':
-        return 'Todo Data Not Found';
-
-      case 'server':
-        return 'Server Problem';
-
-      case 'unknown':
-        return 'Unexpected Error';
-
-      default:
-        return 'API Error';
-    }
-  }
-
-  // Get the appropriate action label based on the API error type. This method returns a string that represents the action the user can take to address the error, such as reloading data or trying again. The action label is determined by the type of API error encountered, providing context-specific guidance to the user. //
-  getApiErrorActionLabel(): string {
-    switch (this.apiError?.type) {
-      case 'not-found':
-        return '🔄 Reload Data';
-
-      case 'network':
-      case 'server':
-      case 'unknown':
-        return '🔄 Try Again';
-
-      default:
-        return '🔄 Try Again';
-    }
-  }
-
-  // Get the appropriate error message based on the API error type. This method returns a string that represents the detailed error message to be displayed to the user. The message is determined by the type of API error encountered, providing context-specific information about the error and potential next steps for the user. //
-  getApiErrorTypeLabel(): string {
-    switch (this.apiError?.type) {
-      case 'network':
-        return 'Network Error';
-
-      case 'not-found':
-        return 'Not Found';
-
-      case 'server':
-        return 'Server Error';
-
-      case 'unknown':
-        return 'Unknown Error';
-
-      default:
-        return 'API Error';
-    }
   }
 
   // State properties //

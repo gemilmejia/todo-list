@@ -5,25 +5,9 @@
     </div>
   }
 
+  <!-- [error]="apiError" - parent-to-child binding and (retry)="loadApiTodos()" - child-to-parent binding -->
   @if (apiError) {
-    <div class="api-error" role="alert">
-      <strong>{{ getApiErrorTitle() }}</strong>
-      <br />
-
-      <span class="api-error-type">{{ getApiErrorTypeLabel() }}</span>
-
-      <p>⚠️ {{ apiError.message }}</p>
-
-      <button
-        type="button"
-        class="api-retry"
-        (click)="loadApiTodos()"
-        [disabled]="isApiLoading"
-      >
-        <!-- 🔄 Try Again -->
-        {{ getApiErrorActionLabel() }}
-      </button>
-    </div>
+    <app-api-error [error]="apiError" (retry)="loadApiTodos()"></app-api-error>
   }
 
   @if (apiTodos.length > 0) {

@@ -1,0 +1,13 @@
+<div class="api-error">
+  <strong>{{ getTitle() }}</strong>
+
+  <span class="api-error-type">
+    {{ getTypeLabel() }}
+  </span>
+
+  <p>{{ error().message }}</p>
+
+  <button type="button" class="api-retry" (click)="onRetry()">
+    {{ getActionLabel() }}
+  </button>
+</div>

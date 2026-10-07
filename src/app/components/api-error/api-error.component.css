@@ -1,0 +1,22 @@
+.api-error {
+  margin: 20px 0;
+  padding: 15px;
+}
+
+.api-error-type {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.api-retry {
+  margin-top: 10px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.api-retry:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
