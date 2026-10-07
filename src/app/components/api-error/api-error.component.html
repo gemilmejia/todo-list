@@ -5,7 +5,7 @@
     {{ getTypeLabel() }}
   </span>
 
-  <p>{{ error().message }}</p>
+  <p>{{ message() ?? error().message }}</p>
 
   <button type="button" class="api-retry" (click)="onRetry()">
     {{ actionLabel() }}
