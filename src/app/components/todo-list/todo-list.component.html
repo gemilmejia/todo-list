@@ -10,6 +10,7 @@
     <app-api-error
       [error]="apiError"
       [title]="'Todo API Error'"
+      [actionLabel]="'Reload Todo Data'"
       (retry)="loadApiTodos()"
     ></app-api-error>
   }

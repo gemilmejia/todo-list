@@ -11,6 +11,7 @@ import { ApiError } from '../../models/api-error.model';
 export class ApiErrorComponent {
   error = input.required<ApiError>(); // input means "This component expects its parent to give it an ApiError. or This component expects its parent to provide an ApiError as input."
   title = input('API Error'); // input means "This component expects its parent to give it a title. or This component expects its parent to provide a title as input."
+  actionLabel = input('Try Again'); // input means "This component expects its parent to give it an action label. or This component expects its parent to provide an action label as input."
   retry = output<void>(); // output means "This component can notify its parent that the user wants to retry. or This component can emit a value to its parent."
 
   getTypeLabel(): string {
@@ -29,21 +30,6 @@ export class ApiErrorComponent {
 
       default:
         return 'API Error';
-    }
-  }
-
-  getActionLabel(): string {
-    switch (this.error().type) {
-      case 'not-found':
-        return '🔄 Reload Data';
-
-      case 'network':
-      case 'server':
-      case 'unknown':
-        return '🔄 Try Again';
-
-      default:
-        return '🔄 Try Again';
     }
   }
 
