@@ -52,7 +52,7 @@ export class TodoListComponent implements OnInit {
         next: (apiTodos) => {
           console.log('Todos received from API:', apiTodos);
 
-          this.apiTodos = apiTodos; // Update the apiTodos property with the received todos from the API
+          this.apiTodos = apiTodos; // change from apiTodos to [] for testing the loading spinner and error handling.
           this.hasLoadedApiTodos = true; // Set the flag to true to indicate that API todos have been loaded
           this.apiError = null; // Clear any previous API error when the request is successful
         },

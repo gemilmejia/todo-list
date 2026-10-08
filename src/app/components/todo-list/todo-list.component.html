@@ -22,7 +22,7 @@
     ></app-api-error>
   }
 
-  @if (apiTodos.length > 0) {
+  @if (hasLoadedApiTodos && !apiError) {
     <div class="api-info">
       API returned {{ apiTodoCount }} todos.
 
@@ -32,11 +32,12 @@
         (click)="loadApiTodos()"
         [disabled]="isApiLoading"
       >
-        🔄 Refresh API Todos
+        {{ isApiLoading ? "Refreshing API Todos..." : "🔄 Refresh API Todos" }}
       </button>
     </div>
   }
 
+  <!-- Show this message only when the API has finished loading, there are no todos, and there is no error. -->
   @if (
     hasLoadedApiTodos && apiTodos.length === 0 && !isApiLoading && !apiError
   ) {
