@@ -37,6 +37,15 @@
     </div>
   }
 
+  @if (
+    hasLoadedApiTodos && apiTodos.length === 0 && !isApiLoading && !apiError
+  ) {
+    <section class="api-empty" aria-labelledby="api-empty-heading">
+      <h3 id="api-empty-heading">No API todos found</h3>
+      <p>The server returned an empty Todo list.</p>
+    </section>
+  }
+
   @if (apiTodos.length > 0) {
     <section class="api-todos" aria-labelledby="api-todos-heading">
       <h3 id="api-todos-heading">API Todos</h3>

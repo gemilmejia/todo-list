@@ -165,3 +165,20 @@ ul {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* Style the message that appears when there are no API todos */
+.api-empty {
+  margin: 20px 0;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.api-empty h3 {
+  margin-bottom: 8px;
+}
+
+.api-empty p {
+  margin: 0;
+}
