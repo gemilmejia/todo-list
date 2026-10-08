@@ -5,6 +5,10 @@
     </div>
   }
 
+  @if (isApiLoading && !apiError && apiTodos.length === 0) {
+    <p role="status" aria-live="polite">Loading API todos...</p>
+  }
+
   <!-- [error]="apiError" - parent-to-child binding and (retry)="loadApiTodos()" - child-to-parent binding -->
   @if (apiError) {
     <app-api-error
