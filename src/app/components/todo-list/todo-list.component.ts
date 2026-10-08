@@ -38,6 +38,14 @@ export class TodoListComponent implements OnInit {
   }
 
   loadApiTodos(): void {
+    console.log('loadApiTodos() called. Loading:', this.isApiLoading);
+
+    // Guard clause to prevent multiple simultaneous API requests. If an API request is already in progress (isApiLoading is true), we return early to avoid making another request. This helps prevent duplicate requests and potential race conditions.
+    if (this.isApiLoading) {
+      // console.log('Duplicate API request prevented.'); // test: "Log a message to the console indicating that a duplicate API request was prevented."
+      return; // Prevent multiple simultaneous API requests by checking if a request is already in progress. If isApiLoading is true, it means an API request is currently being processed, so we return early to avoid making another request.
+    }
+
     this.isApiLoading = true; // show the loading spinner while the API request is in progress
     // this.apiError = null; // Clear any previous API error before making a new request
 
