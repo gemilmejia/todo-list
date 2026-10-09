@@ -165,4 +165,8 @@ export class TodoListComponent implements OnInit {
       this.todoService.clearCompleted(); // Call the clearCompleted method from the TodoService to remove all completed todo items from the service's todos array and update local storage. This ensures that the clearing of completed tasks is persistent and reflects in the overall application state. read: "Tell my TodoService to clear all completed Todos." (6)
     }
   }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+  }
 }

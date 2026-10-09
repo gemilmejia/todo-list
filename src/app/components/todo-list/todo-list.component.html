@@ -149,6 +149,12 @@
       placeholder="Search tasks..."
       [(ngModel)]="searchTerm"
     />
+
+    @if (searchTerm.length > 0) {
+      <button type="button" class="clear-search" (click)="clearSearch()">
+        ✖ Clear Search
+      </button>
+    }
   </div>
 
   <!-- Filter buttons  -->
