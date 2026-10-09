@@ -209,3 +209,16 @@ ul {
   border-radius: 6px;
   font-size: 1rem;
 }
+
+/* Style the message that appears when there are no matching todos after a search */
+.todo-no-results {
+  margin: 20px 0;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.todo-no-results p {
+  margin: 5px 0;
+}

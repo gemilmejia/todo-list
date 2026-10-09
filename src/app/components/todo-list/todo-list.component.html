@@ -182,7 +182,8 @@
     </button>
   </div>
 
-  @if (filteredTodos.length === 0) {
+  <!-- @if (filteredTodos.length === 0) { -->
+  @if (totalTodoCount === 0) {
     <div class="empty-state">
       @if (filter === "all") {
         📝 No tasks yet. Add your first task!
@@ -202,6 +203,15 @@
           (editSaved)="updateTodo($event)"
         >
         </app-todo-item>
+      }
+      <!-- Show this message only when there is a search term, no matching todos, and there are todos in the list. -->
+      @if (
+        searchTerm.trim() && filteredTodos.length === 0 && totalTodoCount > 0
+      ) {
+        <div class="todo-no-results" role="status">
+          <p>No matching tasks found.</p>
+          <p>Try a different search keyword.</p>
+        </div>
       }
     </ul>
   }
