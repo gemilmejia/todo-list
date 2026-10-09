@@ -15,7 +15,11 @@
       [error]="apiError"
       [title]="'Todo API Error'"
       [actionLabel]="'Reload Todo Data'"
-      [message]="'We could not load your Todo data. Please try again.'"
+      [message]="
+        hasLoadedApiTodos
+          ? 'We could not refresh your Todo data. Your previously loaded tasks are still available.'
+          : 'We could not load your Todo data. Please try again.'
+      "
       [isLoading]="isApiLoading"
       [loadingMessage]="'Refreshing Todo data...'"
       (retry)="loadApiTodos()"
