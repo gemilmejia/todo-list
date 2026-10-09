@@ -23,7 +23,9 @@
           : 'We could not load your Todo data. Please try again.'
       "
       [isLoading]="isApiLoading"
-      [loadingMessage]="'Refreshing Todo data...'"
+      [loadingMessage]="
+        hasLoadedApiTodos ? 'Refreshing API Todos...' : 'Loading API Todos...'
+      "
       (retry)="loadApiTodos()"
     ></app-api-error>
   }
