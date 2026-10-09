@@ -182,3 +182,10 @@ ul {
 .api-empty p {
   margin: 0;
 }
+
+/* Style the message that appears when the API is refreshing todos */
+.api-refresh-status {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  text-align: center;
+}

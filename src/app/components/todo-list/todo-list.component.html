@@ -35,6 +35,12 @@
         {{ isApiLoading ? "Refreshing API Todos..." : "🔄 Refresh API Todos" }}
       </button>
     </div>
+
+    @if (isApiLoading) {
+      <p class="api-refresh-status" role="status">
+        Updating API Todos. Your current tasks will remain visible.
+      </p>
+    }
   }
 
   <!-- Show this message only when the API has finished loading, there are no todos, and there is no error. -->
