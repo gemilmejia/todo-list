@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { TodoItemComponent } from '../todo-item/todo-item.component'; // Import the TodoItemComponent to use it within this component's template
 import { ApiErrorComponent } from '../api-error/api-error.component'; // Import the ApiErrorComponent to use it within this component's template
+import { FormsModule } from '@angular/forms'; // Import the FormsModule to use two-way data binding with ngModel in the template
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 import { Todo } from '../../models/todo.model'; // Import the Todo interface to use it within this component
 import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
@@ -8,7 +9,7 @@ import { finalize } from 'rxjs'; // this is for .pipe()
 
 @Component({
   selector: 'app-todo-list',
-  imports: [TodoItemComponent, ApiErrorComponent], // Import the TodoItemComponent and ApiErrorComponent to use them within this component's template
+  imports: [TodoItemComponent, ApiErrorComponent, FormsModule], // Import the necessary components and modules to use them within this component's template
   templateUrl: './todo-list.component.html',
   styleUrl: './todo-list.component.css',
 })
@@ -80,23 +81,30 @@ export class TodoListComponent implements OnInit {
 
   // State properties //
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
-  isApiLoading = false;
-  apiError: ApiError | null = null;
-  apiTodos: Todo[] = [];
-  hasLoadedApiTodos = false; // Flag to track if API todos have been loaded
+  searchTerm = ''; // Define a property to hold the current search term for filtering todos by title (1) read: "The current search term is empty".
+  isApiLoading = false; // Tracks whether an API request is in progress.
+  apiError: ApiError | null = null; // Stores a structured API error, or null if no error exists.
+  apiTodos: Todo[] = []; // Stores the API Todos as an array of Todo objects.
+  hasLoadedApiTodos = false; // Tracks whether at least one API request has succeeded.
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
-  get filteredTodos() {
-    const todos = this.todoService.getTodos();
-    // If the filter is set to 'completed', return only the todos that are completed
+  get filteredTodos(): Todo[] {
+    let todos = this.todoService.getTodos();
+
     if (this.filter === 'completed') {
-      return todos.filter((todo) => todo.completed);
+      todos = todos.filter((todo) => todo.completed);
     }
-    // If the filter is set to 'active', return only the todos that are not completed
+
     if (this.filter === 'active') {
-      return todos.filter((todo) => !todo.completed);
+      todos = todos.filter((todo) => !todo.completed);
     }
-    // all other cases (including 'all') return all todos from the service
+
+    const search = this.searchTerm.trim().toLowerCase();
+
+    if (search) {
+      todos = todos.filter((todo) => todo.title.toLowerCase().includes(search));
+    }
+
     return todos;
   }
 

@@ -139,6 +139,18 @@
     </button>
   }
 
+  <!-- Search input -->
+  <div class="todo-search">
+    <label for="todo-search-input">Search My Todos</label>
+
+    <input
+      id="todo-search-input"
+      type="search"
+      placeholder="Search tasks..."
+      [(ngModel)]="searchTerm"
+    />
+  </div>
+
   <!-- Filter buttons  -->
 
   <div class="filters">

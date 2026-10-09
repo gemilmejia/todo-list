@@ -189,3 +189,23 @@ ul {
   font-size: 0.9rem;
   text-align: center;
 }
+
+/* Style the message that appears when there is an API error */
+.todo-search {
+  margin: 15px 0;
+}
+
+.todo-search label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.todo-search input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
