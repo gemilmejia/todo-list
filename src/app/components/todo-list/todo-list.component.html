@@ -14,7 +14,9 @@
     <app-api-error
       [error]="apiError"
       [title]="'Todo API Error'"
-      [actionLabel]="'Reload Todo Data'"
+      [actionLabel]="
+        hasLoadedApiTodos ? 'Retry Refresh' : 'Try Loading Again Todos Again'
+      "
       [message]="
         hasLoadedApiTodos
           ? 'We could not refresh your Todo data. Your previously loaded tasks are still available.'
