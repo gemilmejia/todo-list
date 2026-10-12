@@ -82,6 +82,7 @@ export class TodoListComponent implements OnInit {
   // State properties //
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   searchTerm = ''; // Define a property to hold the current search term for filtering todos by title (1) read: "The current search term is empty".
+  sortOrder: 'default' | 'asc' | 'desc' = 'default'; // Define a property to hold the current sort order for sorting todos by title (1) read: "The current sort order is default".
   isApiLoading = false; // Tracks whether an API request is in progress.
   apiError: ApiError | null = null; // Stores a structured API error, or null if no error exists.
   apiTodos: Todo[] = []; // Stores the API Todos as an array of Todo objects.
@@ -103,6 +104,14 @@ export class TodoListComponent implements OnInit {
 
     if (search) {
       todos = todos.filter((todo) => todo.title.toLowerCase().includes(search));
+    }
+
+    if (this.sortOrder === 'asc') {
+      todos = [...todos].sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    if (this.sortOrder === 'desc') {
+      todos = [...todos].sort((a, b) => b.title.localeCompare(a.title));
     }
 
     return todos;

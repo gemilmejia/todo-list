@@ -262,3 +262,29 @@ ul {
 .todo-filter-empty p {
   margin: 5px 0;
 }
+
+/* Style the sort dropdown */
+.todo-sort {
+  margin: 15px 0;
+}
+
+.todo-sort label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.todo-sort select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fff;
+}
+
+.todo-sort select:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}

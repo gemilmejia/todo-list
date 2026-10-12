@@ -157,9 +157,21 @@
     }
   </div>
 
+  <!-- Show the number of filtered todos and the total number of todos -->
   <p class="todo-result-count" role="status">
     Showing {{ filteredTodos.length }} of {{ totalTodoCount }} tasks
   </p>
+
+  <!-- Sort select -->
+  <div class="todo-sort">
+    <label for="todo-sort-select">Sort My Todos</label>
+
+    <select id="todo-sort-select" [(ngModel)]="sortOrder">
+      <option value="default">Default order</option>
+      <option value="asc">Title: A–Z</option>
+      <option value="desc">Title: Z–A</option>
+    </select>
+  </div>
 
   <!-- Filter buttons  -->
 
