@@ -223,6 +223,21 @@
           <p>Try a different search keyword.</p>
         </div>
       }
+      <!-- Empty filter message -->
+      @if (
+        totalTodoCount > 0 &&
+        filteredTodos.length === 0 &&
+        !searchTerm.trim() &&
+        filter !== "all"
+      ) {
+        <div class="todo-filter-empty" role="status">
+          @if (filter === "active") {
+            <p>No active tasks found.</p>
+          } @else if (filter === "completed") {
+            <p>No completed tasks yet.</p>
+          }
+        </div>
+      }
     </ul>
   }
 </section>
