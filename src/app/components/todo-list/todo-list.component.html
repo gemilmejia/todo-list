@@ -166,7 +166,11 @@
   <div class="todo-sort">
     <label for="todo-sort-select">Sort My Todos</label>
 
-    <select id="todo-sort-select" [(ngModel)]="sortOrder">
+    <select
+      id="todo-sort-select"
+      [(ngModel)]="sortOrder"
+      (ngModelChange)="saveSortOrder()"
+    >
       <option value="default">Default order</option>
       <option value="asc">Title: A–Z</option>
       <option value="desc">Title: Z–A</option>

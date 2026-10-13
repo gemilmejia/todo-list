@@ -17,6 +17,8 @@ export class TodoListComponent implements OnInit {
   constructor(private todoService: TodoService) {} // Inject the TodoService into the component's constructor to use its methods and properties (2) read: "Give this component access to TodoService."
 
   ngOnInit() {
+    this.loadSortOrder();
+
     this.todoService.getStatus().subscribe({
       next: (message) => {
         console.log(message);
@@ -172,6 +174,22 @@ export class TodoListComponent implements OnInit {
     // If the user confirms the action, call the clearCompleted method from the TodoService to remove all completed todo items from the service's todos array and update local storage. This ensures that the clearing of completed tasks is persistent and reflects in the overall application state. //
     if (confirmed) {
       this.todoService.clearCompleted(); // Call the clearCompleted method from the TodoService to remove all completed todo items from the service's todos array and update local storage. This ensures that the clearing of completed tasks is persistent and reflects in the overall application state. read: "Tell my TodoService to clear all completed Todos." (6)
+    }
+  }
+
+  saveSortOrder(): void {
+    localStorage.setItem('todoSortOrder', this.sortOrder);
+  }
+
+  loadSortOrder(): void {
+    const savedSortOrder = localStorage.getItem('todoSortOrder');
+
+    if (
+      savedSortOrder === 'default' ||
+      savedSortOrder === 'asc' ||
+      savedSortOrder === 'desc'
+    ) {
+      this.sortOrder = savedSortOrder;
     }
   }
 
