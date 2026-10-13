@@ -84,7 +84,8 @@ export class TodoListComponent implements OnInit {
   // State properties //
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   searchTerm = ''; // Define a property to hold the current search term for filtering todos by title (1) read: "The current search term is empty".
-  sortOrder: 'default' | 'asc' | 'desc' | 'active-first' = 'default'; // Define a property to hold the current sort order for sorting todos by title (1) read: "The current sort order is default".
+  sortOrder: 'default' | 'asc' | 'desc' | 'active-first' | 'completed-first' =
+    'default'; // Define a property to hold the current sort order for sorting todos by title (1) read: "The current sort order is default".
   isApiLoading = false; // Tracks whether an API request is in progress.
   apiError: ApiError | null = null; // Stores a structured API error, or null if no error exists.
   apiTodos: Todo[] = []; // Stores the API Todos as an array of Todo objects.
@@ -119,6 +120,12 @@ export class TodoListComponent implements OnInit {
     if (this.sortOrder === 'active-first') {
       todos = [...todos].sort(
         (a, b) => Number(a.completed) - Number(b.completed),
+      );
+    }
+
+    if (this.sortOrder === 'completed-first') {
+      todos = [...todos].sort(
+        (a, b) => Number(b.completed) - Number(a.completed),
       );
     }
 
@@ -199,7 +206,8 @@ export class TodoListComponent implements OnInit {
       savedSortOrder === 'default' ||
       savedSortOrder === 'asc' ||
       savedSortOrder === 'desc' ||
-      savedSortOrder === 'active-first'
+      savedSortOrder === 'active-first' ||
+      savedSortOrder === 'completed-first'
     ) {
       this.sortOrder = savedSortOrder;
     }
