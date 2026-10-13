@@ -175,6 +175,11 @@
       <option value="asc">Title: A–Z</option>
       <option value="desc">Title: Z–A</option>
     </select>
+    @if (sortOrder !== "default") {
+      <button type="button" class="reset-sort" (click)="resetSortOrder()">
+        ↺ Reset Sorting
+      </button>
+    }
   </div>
 
   <!-- Filter buttons  -->

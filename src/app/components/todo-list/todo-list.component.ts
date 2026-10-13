@@ -181,6 +181,11 @@ export class TodoListComponent implements OnInit {
     localStorage.setItem('todoSortOrder', this.sortOrder);
   }
 
+  resetSortOrder(): void {
+    this.sortOrder = 'default';
+    this.saveSortOrder();
+  }
+
   loadSortOrder(): void {
     const savedSortOrder = localStorage.getItem('todoSortOrder');
 
