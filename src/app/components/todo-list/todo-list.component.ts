@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms'; // Import the FormsModule to use t
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 import { Todo } from '../../models/todo.model'; // Import the Todo interface to use it within this component
 import type { TodoSortOrder } from '../../models/todo-sort-order.type'; // Import the TodoSortOrder type to use it within this component
+import { isTodoSortOrder } from '../../models/todo-sort-order.type';
 import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
 import { finalize } from 'rxjs'; // this is for .pipe()
 
@@ -202,13 +203,7 @@ export class TodoListComponent implements OnInit {
   loadSortOrder(): void {
     const savedSortOrder = localStorage.getItem('todoSortOrder');
 
-    if (
-      savedSortOrder === 'default' ||
-      savedSortOrder === 'asc' ||
-      savedSortOrder === 'desc' ||
-      savedSortOrder === 'active-first' ||
-      savedSortOrder === 'completed-first'
-    ) {
+    if (isTodoSortOrder(savedSortOrder)) {
       this.sortOrder = savedSortOrder;
     }
   }
