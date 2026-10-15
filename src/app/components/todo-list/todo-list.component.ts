@@ -5,7 +5,10 @@ import { FormsModule } from '@angular/forms'; // Import the FormsModule to use t
 import { TodoService } from '../../services/todo.service'; // Import the TodoService to use it within this component
 import { Todo } from '../../models/todo.model'; // Import the Todo interface to use it within this component
 import type { TodoSortOrder } from '../../models/todo-sort-order.type'; // Import the TodoSortOrder type to use it within this component
-import { isTodoSortOrder } from '../../models/todo-sort-order.type';
+import {
+  isTodoSortOrder,
+  TODO_SORT_OPTIONS,
+} from '../../models/todo-sort-order.type';
 import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
 import { finalize } from 'rxjs'; // this is for .pipe()
 
@@ -87,6 +90,7 @@ export class TodoListComponent implements OnInit {
   filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   searchTerm = ''; // Define a property to hold the current search term for filtering todos by title (1) read: "The current search term is empty".
   sortOrder: TodoSortOrder = 'default'; // Define a property to hold the current sort order for sorting todos by title (1) read: "The current sort order is default".
+  readonly sortOptions = TODO_SORT_OPTIONS; // Define a readonly property to hold the available sort options for the dropdown menu in the template (1) read: "The available sort options are Default order, Title: A–Z, Title: Z–A, Active Tasks First, Completed Tasks First".
   isApiLoading = false; // Tracks whether an API request is in progress.
   apiError: ApiError | null = null; // Stores a structured API error, or null if no error exists.
   apiTodos: Todo[] = []; // Stores the API Todos as an array of Todo objects.
