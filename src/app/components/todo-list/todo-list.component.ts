@@ -11,6 +11,7 @@ import {
 } from '../../models/todo-sort-order.type';
 import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
 import { finalize } from 'rxjs'; // this is for .pipe()
+import { sortTodos } from '../../utils/todo-sort.util';
 
 @Component({
   selector: 'app-todo-list',
@@ -114,27 +115,7 @@ export class TodoListComponent implements OnInit {
       todos = todos.filter((todo) => todo.title.toLowerCase().includes(search));
     }
 
-    if (this.sortOrder === 'asc') {
-      todos = [...todos].sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    if (this.sortOrder === 'desc') {
-      todos = [...todos].sort((a, b) => b.title.localeCompare(a.title));
-    }
-
-    if (this.sortOrder === 'active-first') {
-      todos = [...todos].sort(
-        (a, b) => Number(a.completed) - Number(b.completed),
-      );
-    }
-
-    if (this.sortOrder === 'completed-first') {
-      todos = [...todos].sort(
-        (a, b) => Number(b.completed) - Number(a.completed),
-      );
-    }
-
-    return todos;
+    return sortTodos(todos, this.sortOrder);
   }
 
   // "When someone asks me for activeTodoCount..." then // "Give them the count of todos from TodoService that are not completed." //
