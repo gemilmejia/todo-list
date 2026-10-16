@@ -1,4 +1,4 @@
-import { isTodoSortOrder } from './todo-sort-order.type'; // 1. Import the function.
+import { TODO_SORT_OPTIONS, isTodoSortOrder } from './todo-sort-order.type'; // 1. Import the function.
 
 // 2. Create a test suite.
 describe('isTodoSortOrder', () => {
@@ -31,4 +31,59 @@ describe('isTodoSortOrder', () => {
   });
 
   /// 4. Run the complete Angular test suite
+  // npm test -- --watch=false
+});
+
+// Group related tests.
+describe('TODO_SORT_OPTIONS', () => {
+  // 1. Verify the number of sorting options
+  it('should contain exactly five sorting options', () => {
+    // Check the number of options.
+    expect(TODO_SORT_OPTIONS.length).toBe(5);
+  });
+
+  // 2. Verify expected sorting values
+  it('should contain the expected sorting values', () => {
+    // A. Extract the sorting values
+    const values = TODO_SORT_OPTIONS.map((option) => option.value);
+
+    // B. Compare the actual and expected arrays
+    expect(values).toEqual([
+      'default',
+      'asc',
+      'desc',
+      'active-first',
+      'completed-first',
+    ]);
+  });
+
+  // 3. Verify User-Friendly Sorting Labels
+  it('should contain the expected sorting labels', () => {
+    // A. Extract the labels
+    const labels = TODO_SORT_OPTIONS.map((option) => option.label);
+
+    // B. Verify the expected labels
+    expect(labels).toEqual([
+      'Default order',
+      'Title: A–Z',
+      'Title: Z–A',
+      'Active Tasks First',
+      'Completed Tasks First',
+    ]);
+  });
+
+  // 4. Verify No Duplicate Sorting Values
+  it('should not contain duplicate sorting values', () => {
+    // A. Extract all sorting values
+    const values = TODO_SORT_OPTIONS.map((option) => option.value);
+
+    // B. Create a Set
+    const uniqueValues = new Set(values);
+
+    // C. Compare the number of values
+    expect(uniqueValues.size).toBe(values.length);
+  });
+
+  // 5. Final Angular Test Suite Verification
+  // npm test -- --watch=false
 });
