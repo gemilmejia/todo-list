@@ -12,6 +12,7 @@ import {
 import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
 import { finalize } from 'rxjs'; // this is for .pipe()
 import { sortTodos } from '../../utils/todo-sort.util';
+import { filterTodos, type TodoFilter } from '../../utils/todo-filter.util';
 
 @Component({
   selector: 'app-todo-list',
@@ -88,7 +89,7 @@ export class TodoListComponent implements OnInit {
   }
 
   // State properties //
-  filter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
+  filter: TodoFilter = 'all'; // Define a property to hold thse current filter state (all, active, completed) (1) read: "The current filter is All".
   searchTerm = ''; // Define a property to hold the current search term for filtering todos by title (1) read: "The current search term is empty".
   sortOrder: TodoSortOrder = 'default'; // Define a property to hold the current sort order for sorting todos by title (1) read: "The current sort order is default".
   readonly sortOptions = TODO_SORT_OPTIONS; // Define a readonly property to hold the available sort options for the dropdown menu in the template (1) read: "The available sort options are Default order, Title: A–Z, Title: Z–A, Active Tasks First, Completed Tasks First".
@@ -99,22 +100,20 @@ export class TodoListComponent implements OnInit {
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos(): Todo[] {
+    // Step 1: Get all Todos from TodoService.
     let todos = this.todoService.getTodos();
 
-    if (this.filter === 'completed') {
-      todos = todos.filter((todo) => todo.completed);
-    }
+    // Step 2: Apply All, Active, or Completed filtering.
+    todos = filterTodos(todos, this.filter);
 
-    if (this.filter === 'active') {
-      todos = todos.filter((todo) => !todo.completed);
-    }
-
+    // Step 3: Apply case-insensitive title searching.
     const search = this.searchTerm.trim().toLowerCase();
 
     if (search) {
       todos = todos.filter((todo) => todo.title.toLowerCase().includes(search));
     }
 
+    // Step 4: Apply the selected sorting order.
     return sortTodos(todos, this.sortOrder);
   }
 
