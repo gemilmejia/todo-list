@@ -13,6 +13,7 @@ import { ApiError } from '../../models/api-error.model'; // Import the ApiError 
 import { finalize } from 'rxjs'; // this is for .pipe()
 import { sortTodos } from '../../utils/todo-sort.util';
 import { filterTodos, type TodoFilter } from '../../utils/todo-filter.util';
+import { searchTodos } from '../../utils/todo-search.util';
 
 @Component({
   selector: 'app-todo-list',
@@ -103,15 +104,11 @@ export class TodoListComponent implements OnInit {
     // Step 1: Get all Todos from TodoService.
     let todos = this.todoService.getTodos();
 
-    // Step 2: Apply All, Active, or Completed filtering.
+    // Step 2: Filter by All, Active, or Completed.
     todos = filterTodos(todos, this.filter);
 
-    // Step 3: Apply case-insensitive title searching.
-    const search = this.searchTerm.trim().toLowerCase();
-
-    if (search) {
-      todos = todos.filter((todo) => todo.title.toLowerCase().includes(search));
-    }
+    // Step 3: Search Todos by title.
+    todos = searchTodos(todos, this.searchTerm);
 
     // Step 4: Apply the selected sorting order.
     return sortTodos(todos, this.sortOrder);
