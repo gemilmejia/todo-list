@@ -196,4 +196,148 @@ describe('Todo utility pipeline', () => {
   // run: npx ng test --watch=false --include="src/app/utils/todo-pipeline.util.spec.ts"
   // 5. Final Angular Test Suite Verification
   // run: npm test -- --watch=false
+
+  // 1. Active filter with whitespace-only search
+  it('should preserve active todos when search contains only whitespace', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Review Unit Testing',
+        completed: true,
+      }),
+    ];
+
+    // A. Filter active Todos.
+    const activeTodos = filterTodos(todos, 'active');
+    // B. Search using whitespace only.
+    const matchingTodos = searchTodos(activeTodos, '   ');
+    // C. Verify the expected result.
+    expect(matchingTodos.map((todo) => todo.id)).toEqual([1, 3]);
+  });
+
+  // 2. Mixed-case title searching
+  it('should search active todos using mixed-case text', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Learn ANGULAR Basics',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 5,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+    ];
+
+    // A. Filter Active tasks
+    const activeTodos = filterTodos(todos, 'active');
+    // B. Search using mixed-case text
+    const matchingTodos = searchTodos(activeTodos, 'aNgUlAr');
+    // C. Verify the final result
+    expect(matchingTodos.map((todo) => todo.id)).toEqual([1, 4]);
+  });
+
+  // 3. Search terms with no matching active Todos
+  it('should return no results when only completed todos match the search', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Portfolio Review',
+        completed: true,
+      }),
+    ];
+
+    const activeTodos = filterTodos(todos, 'active');
+
+    const matchingTodos = searchTodos(activeTodos, 'portfolio');
+
+    expect(matchingTodos).toEqual([]);
+  });
+
+  // 4. Original array preservation
+  it('should preserve the original array when filtering and searching active todos', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Practice Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+    ];
+
+    const originalOrder = todos.map((todo) => todo.id);
+
+    const activeTodos = filterTodos(todos, 'active');
+
+    const matchingTodos = searchTodos(activeTodos, 'angular');
+
+    // Assertion 1 — Filtering creates a separate array
+    expect(activeTodos).not.toBe(todos);
+    // Assertion 2 — Searching creates another separate array
+    expect(matchingTodos).not.toBe(activeTodos);
+    // Assertion 3 — The original order remains unchanged
+    expect(todos.map((todo) => todo.id)).toEqual(originalOrder);
+    // Assertion 4 — Only matching Active tasks are returned
+    expect(matchingTodos.map((todo) => todo.id)).toEqual([1, 3]);
+  });
 });
