@@ -340,4 +340,196 @@ describe('Todo utility pipeline', () => {
     // Assertion 4 — Only matching Active tasks are returned
     expect(matchingTodos.map((todo) => todo.id)).toEqual([1, 3]);
   });
+
+  // 1. Completed + A–Z sorting
+  it('should sort completed todos alphabetically from A to Z', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Write Documentation',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 5,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+    ];
+    // A. Filter completed tasks
+    const completedTodos = filterTodos(todos, 'completed');
+    // B. Sort alphabetically
+    const sortedTodos = sortTodos(completedTodos, 'asc');
+    // C. Verify the correct order
+    expect(sortedTodos.map((todo) => todo.id)).toEqual([5, 3, 2]);
+    // D. Verify that every returned task is completed
+    expect(sortedTodos.every((todo) => todo.completed)).toBeTrue();
+  });
+
+  // 2. Completed + Z–A sorting
+  it('should sort completed todos alphabetically from Z to A', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Write Documentation',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 5,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+    ];
+
+    const completedTodos = filterTodos(todos, 'completed');
+
+    const sortedTodos = sortTodos(completedTodos, 'desc');
+    // Assertion 1 — Verify descending order.
+    expect(sortedTodos.map((todo) => todo.id)).toEqual([2, 3, 5]);
+    // Assertion 2 — Verify completion status.
+    expect(sortedTodos.every((todo) => todo.completed)).toBeTrue();
+  });
+
+  // 3. Completed + default sorting
+  it('should preserve completed todo order with default sorting', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Write Documentation',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 5,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+    ];
+
+    const completedTodos = filterTodos(todos, 'completed');
+
+    const sortedTodos = sortTodos(completedTodos, 'default');
+    // Assertion 1 — Original relative order is preserved
+    expect(sortedTodos.map((todo) => todo.id)).toEqual([2, 3, 5]);
+    // Assertion 2 — Sorting returns a separate array
+    expect(sortedTodos).not.toBe(completedTodos);
+    // Assertion 3 — Every returned task remains completed
+    expect(sortedTodos.every((todo) => todo.completed)).toBeTrue();
+  });
+
+  // 4. Empty results and array preservation
+  // Add the empty-results test
+  it('should return an empty array when no completed todos exist', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Build Portfolio',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+    ];
+
+    // returns an empty array.
+    const completedTodos = filterTodos(todos, 'completed');
+
+    const sortedTodos = sortTodos(completedTodos, 'asc');
+
+    expect(completedTodos).toEqual([]);
+
+    expect(sortedTodos).toEqual([]);
+  });
+
+  // Add the original-array preservation test
+  it('should preserve the original array when sorting completed todos', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Write Documentation',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+    ];
+
+    const originalOrder = todos.map((todo) => todo.id);
+
+    const completedTodos = filterTodos(todos, 'completed');
+
+    const sortedTodos = sortTodos(completedTodos, 'asc');
+
+    expect(completedTodos).not.toBe(todos);
+
+    expect(sortedTodos).not.toBe(completedTodos);
+
+    expect(todos.map((todo) => todo.id)).toEqual(originalOrder);
+
+    expect(sortedTodos.map((todo) => todo.id)).toEqual([3, 4, 2]);
+
+    expect(sortedTodos.every((todo) => todo.completed)).toBeTrue();
+  });
 });
