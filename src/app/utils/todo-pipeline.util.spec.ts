@@ -739,4 +739,201 @@ describe('processTodos', () => {
 
     expect(result.every((todo) => !todo.completed)).toBeTrue();
   });
+
+  // 2. All filtering + empty search + Default sorting
+  it('should preserve all todos with default processing options', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Review Unit Testing',
+        completed: true,
+      }),
+    ];
+
+    const result = processTodos(todos, {
+      filter: 'all',
+      searchTerm: '',
+      sortOrder: 'default',
+    });
+
+    // Assertion 1 — Verify all Todos remain in their original order.
+    expect(result.map((todo) => todo.id)).toEqual([1, 2, 3, 4]);
+    // Assertion 2 — Verify the result is a separate array.
+    expect(result).not.toBe(todos);
+  });
+
+  // 2. Completed filtering + Z–A sorting
+  it('should filter completed todos and sort them from Z to A', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Write Documentation',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 5,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+    ];
+
+    const result = processTodos(todos, {
+      filter: 'completed',
+      searchTerm: '',
+      sortOrder: 'desc',
+    });
+
+    // Assertion 1 — Checks that the correct tasks are included and sorted in descending alphabetical order.
+    expect(result.map((todo) => todo.id)).toEqual([2, 3, 5]);
+    // Assertion 2 — Checks that every returned task is completed.
+    expect(result.every((todo) => todo.completed)).toBeTrue();
+  });
+
+  // 3. Mixed-case searching with whitespace
+  it('should handle mixed-case search terms with surrounding whitespace', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Build Portfolio',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Learn ANGULAR Basics',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 5,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+    ];
+
+    const result = processTodos(todos, {
+      filter: 'active',
+      searchTerm: '   aNgUlAr   ',
+      sortOrder: 'asc',
+    });
+
+    // Assertion 1 — Verifies that filtering, normalized searching, and sorting produce the expected final order.
+    expect(result.map((todo) => todo.id)).toEqual([4, 1]);
+    // Assertion 2 — Verifies that every returned Todo remains active.
+    expect(result.every((todo) => !todo.completed)).toBeTrue();
+  });
+
+  // 4. Empty results and input-array preservation
+  // a. Test Empty Results
+  it('should return an empty array when no todos match the search', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+    ];
+
+    const result = processTodos(todos, {
+      filter: 'all',
+      searchTerm: 'nonexistent-task',
+      sortOrder: 'asc',
+    });
+
+    expect(result).toEqual([]);
+
+    expect(todos.length).toBe(3);
+  });
+
+  // b. Add the input-array preservation test
+  it('should preserve the original array when processing todos', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Practice Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+    ];
+
+    const originalOrder = todos.map((todo) => todo.id);
+
+    const result = processTodos(todos, {
+      filter: 'active',
+      searchTerm: 'angular',
+      sortOrder: 'asc',
+    });
+
+    expect(result).not.toBe(todos);
+
+    expect(todos.map((todo) => todo.id)).toEqual(originalOrder);
+
+    expect(todos.length).toBe(4);
+
+    expect(result.map((todo) => todo.id)).toEqual([3, 1]);
+
+    expect(result.every((todo) => !todo.completed)).toBeTrue();
+  });
 });
