@@ -1,10 +1,12 @@
 import { filterTodos } from './todo-filter.util';
 import { searchTodos } from './todo-search.util';
 import { sortTodos } from './todo-sort.util';
+import { processTodos } from './todo-pipeline.util';
 
 import { createMockTodo } from '../testing/todo-test.factory';
 import type { Todo } from '../models/todo.model';
 
+// for filterTodos() → searchTodos() → sortTodos()
 describe('Todo utility pipeline', () => {
   // 1. Jasmine
   // 1. Test Active + Search + A–Z sorting
@@ -691,5 +693,50 @@ describe('Todo utility pipeline', () => {
     expect(todos.map((todo) => todo.id)).toEqual(originalOrder);
     // Assertion 6 — The original number of tasks is unchanged
     expect(todos.length).toBe(4);
+  });
+});
+
+// for processTodos()
+// 2. Integrate processTodos()
+describe('processTodos', () => {
+  // Added utility test
+  it('should filter, search, and sort todos using the provided options', () => {
+    const todos: Todo[] = [
+      createMockTodo({
+        id: 1,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 2,
+        title: 'Build Portfolio',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 3,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 4,
+        title: 'Practice Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 5,
+        title: 'Learn TypeScript',
+        completed: false,
+      }),
+    ];
+
+    const result = processTodos(todos, {
+      filter: 'active',
+      searchTerm: 'angular',
+      sortOrder: 'asc',
+    });
+
+    expect(result.map((todo) => todo.id)).toEqual([4, 1]);
+
+    expect(result.every((todo) => !todo.completed)).toBeTrue();
   });
 });

@@ -11,9 +11,8 @@ import {
 } from '../../models/todo-sort-order.type';
 import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
 import { finalize } from 'rxjs'; // this is for .pipe()
-import { sortTodos } from '../../utils/todo-sort.util';
 import { filterTodos, type TodoFilter } from '../../utils/todo-filter.util';
-import { searchTodos } from '../../utils/todo-search.util';
+import { processTodos } from '../../utils/todo-pipeline.util';
 
 @Component({
   selector: 'app-todo-list',
@@ -101,17 +100,11 @@ export class TodoListComponent implements OnInit {
 
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos(): Todo[] {
-    // Step 1: Get all Todos from TodoService.
-    let todos = this.todoService.getTodos();
-
-    // Step 2: Filter by All, Active, or Completed.
-    todos = filterTodos(todos, this.filter);
-
-    // Step 3: Search Todos by title.
-    todos = searchTodos(todos, this.searchTerm);
-
-    // Step 4: Apply the selected sorting order.
-    return sortTodos(todos, this.sortOrder);
+    return processTodos(this.todoService.getTodos(), {
+      filter: this.filter,
+      searchTerm: this.searchTerm,
+      sortOrder: this.sortOrder,
+    });
   }
 
   // "When someone asks me for activeTodoCount..." then // "Give them the count of todos from TodoService that are not completed." //
