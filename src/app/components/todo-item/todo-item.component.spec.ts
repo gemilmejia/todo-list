@@ -135,4 +135,94 @@ describe('TodoItemComponent', () => {
     // Assert: The correct Todo ID should be emitted.
     expect(emitSpy).toHaveBeenCalledOnceWith(101);
   });
+
+  // 6. Test Todo completion output event
+  it('should emit the todo ID when completion is requested', () => {
+    // Arrange: Create an active Todo.
+    const mockTodo = createMockTodo({
+      id: 202,
+      title: 'Practice Angular Component Testing',
+      completed: false,
+    });
+
+    // Provide the mock Todo to the component.
+    fixture.componentRef.setInput('todo', mockTodo);
+    fixture.detectChanges();
+
+    // Spy on the completeClicked EventEmitter.
+    const emitSpy = spyOn(component.completeClicked, 'emit');
+
+    // Act: Call the existing completion method.
+    component.completeTodo();
+
+    // Assert: The correct Todo ID should be emitted.
+    expect(emitSpy).toHaveBeenCalledOnceWith(202);
+  });
+
+  // 7. Test the actual Complete button click
+  it('should emit the todo ID when the Complete button is clicked', () => {
+    // Arrange: Create an active Todo.
+    const mockTodo = createMockTodo({
+      id: 202,
+      title: 'Practice Angular Component Testing',
+      completed: false,
+    });
+
+    // Pass the Todo to the child component.
+    fixture.componentRef.setInput('todo', mockTodo);
+    fixture.detectChanges();
+
+    // Spy on the completion EventEmitter.
+    const emitSpy = spyOn(component.completeClicked, 'emit');
+
+    // Find the actual Complete button.
+    const completeButton: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector(
+        'button[aria-label="Mark task as completed"]',
+      );
+
+    // Verify the button exists.
+    expect(completeButton).not.toBeNull();
+
+    // Act: Simulate a user click.
+    completeButton!.click();
+
+    // Assert: Verify the expected Todo ID was emitted.
+    expect(emitSpy).toHaveBeenCalledOnceWith(202);
+  });
+
+  // 8. Test the actual Undo button click
+  it('should emit the todo ID when the Undo button is clicked', () => {
+    // Arrange: Create a completed Todo.
+    const mockTodo = createMockTodo({
+      id: 303,
+      title: 'Finish Angular Testing',
+      completed: true,
+    });
+
+    // Pass the completed Todo into the component.
+    fixture.componentRef.setInput('todo', mockTodo);
+    fixture.detectChanges();
+
+    // Spy on the completion EventEmitter.
+    const emitSpy = spyOn(component.completeClicked, 'emit');
+
+    // Find the Undo button using its accessibility label.
+    const undoButton: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector(
+        'button[aria-label="Mark task as active"]',
+      );
+
+    // Verify the Undo button is rendered.
+    expect(undoButton).not.toBeNull();
+
+    // Verify the displayed button text.
+    expect(undoButton!.textContent?.trim()).toBe('Undo');
+
+    // Act: Simulate a user clicking Undo.
+    undoButton!.click();
+
+    // Assert: The correct Todo ID should be emitted.
+    expect(emitSpy).toHaveBeenCalledOnceWith(303);
+  });
 });

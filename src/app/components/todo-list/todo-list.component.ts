@@ -11,7 +11,7 @@ import {
 } from '../../models/todo-sort-order.type';
 import { ApiError } from '../../models/api-error.model'; // Import the ApiError interface to use it within this component
 import { finalize } from 'rxjs'; // this is for .pipe()
-import { filterTodos, type TodoFilter } from '../../utils/todo-filter.util';
+import type { TodoFilter } from '../../utils/todo-filter.util';
 import { processTodos } from '../../utils/todo-pipeline.util';
 
 @Component({
