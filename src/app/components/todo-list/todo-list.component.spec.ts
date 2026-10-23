@@ -334,4 +334,180 @@ describe('TodoListComponent', () => {
 
     expect(todoTitle?.textContent?.trim()).toBe('Study Angular');
   });
+
+  // 8. Jasmine
+  // Lesson 151 - Part 1: Test parent Todo deletion handler
+  it('should delegate Todo deletion to TodoService', () => {
+    // Arrange: Retrieve the injected TodoService.
+    // A. Retrieve the service
+    const todoService = TestBed.inject(TodoService);
+
+    // Spy on the service's delete method.
+    // B. Create a Jasmine spy
+    const deleteSpy = spyOn(todoService, 'deleteTodo');
+
+    // Act: Request deletion of Todo ID 808.
+    // C. Call the parent handler
+    component.deleteTodo(808);
+
+    // D. Verify the service call
+    // Assert: Verify the correct ID is forwarded.
+    expect(deleteSpy).toHaveBeenCalledOnceWith(808);
+  });
+
+  // 9. Jasmine
+  // Lesson 151 - Part 2: Test child deleteClicked event binding
+  it('should forward the child deleteClicked event to TodoService', () => {
+    // Arrange: Create a mock Todo.
+    const mockTodo: Todo = createMockTodo({
+      id: 909,
+      title: 'Practice Angular Deletion Testing',
+      completed: false,
+    });
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // 1. Stub the service's Todo list
+    // Return predictable Todo data to the parent component.
+    spyOn(todoService, 'getTodos').and.returnValue([mockTodo]);
+
+    // Observe calls to the service deletion method.
+    const deleteSpy = spyOn(todoService, 'deleteTodo');
+
+    // Render the mock Todo through the parent template.
+    fixture.detectChanges();
+
+    // 2. Locate the child component
+    // Find the real child component.
+    const childDebugElement = fixture.debugElement.query(
+      By.directive(TodoItemComponent),
+    );
+
+    expect(childDebugElement).not.toBeNull();
+
+    // Access the rendered child component instance.
+    const childComponent =
+      childDebugElement.componentInstance as TodoItemComponent;
+    // 3. Emit the event
+    // Act: Emit the actual child output event.
+    childComponent.deleteClicked.emit(909);
+
+    // 4. Verify the service call
+    // Assert: The parent forwards the correct ID to TodoService.
+    expect(deleteSpy).toHaveBeenCalledOnceWith(909);
+  });
+
+  // 10. Jasmine
+  // Lesson 151 - Part 3: Test the actual Delete button
+  it('should delete the correct Todo when the child Delete button is clicked', () => {
+    // Arrange: Create predictable Todo data.
+    const mockTodo: Todo = createMockTodo({
+      id: 1010,
+      title: 'Practice Angular Deletion',
+      completed: false,
+    });
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    /// This ensures the parent renders a Todo with ID 1010.
+    // Provide our mock Todo to the parent component.
+    spyOn(todoService, 'getTodos').and.returnValue([mockTodo]);
+
+    // Spy on the service deletion method.
+    const deleteSpy = spyOn(todoService, 'deleteTodo');
+
+    // Render the Todo through TodoListComponent.
+    fixture.detectChanges();
+
+    /// Next, we locate the actual button: We're specifically looking for the Delete button inside a child app-todo-item element.
+    // Find the actual Delete button inside TodoItemComponent.
+    const deleteButton: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector(
+        'app-todo-item button[aria-label="Delete task"]',
+      );
+
+    // Verify the button exists.
+    expect(deleteButton).not.toBeNull();
+
+    /// Then, we simulate the click:
+    // Act: Simulate clicking the Delete button.
+    deleteButton!.click();
+
+    /// This verifies the service receives the correct ID exactly once.
+    // Assert: The service receives the correct Todo ID.
+    expect(deleteSpy).toHaveBeenCalledOnceWith(1010);
+  });
+
+  // 11. Jasmine
+  // Lesson 151 - Part 4: Verify the selected Todo ID
+  it('should delete only the selected Todo when multiple Todos are rendered', () => {
+    // Arrange: Create three different Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 1101,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 1102,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 1103,
+        title: 'Review Jasmine Tests',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected service.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return three predictable Todos.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Observe deletion requests.
+    const deleteSpy = spyOn(todoService, 'deleteTodo');
+
+    // Render the Todos through the parent template.
+    fixture.detectChanges();
+
+    /// Testing multiple child components
+    // Find every rendered child Todo component.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    /// We expect three:
+    // Verify that three Todos are displayed.
+    expect(todoItems.length).toBe(3);
+
+    // Confirm that the second Todo is our intended target.
+    const secondTodoTitle: HTMLElement | null =
+      todoItems[1].querySelector('.todo-title');
+
+    expect(secondTodoTitle?.textContent?.trim()).toBe('Practice TypeScript');
+
+    // Find the Delete button in the SECOND Todo only.
+    const deleteButton: HTMLButtonElement | null = todoItems[1].querySelector(
+      'button[aria-label="Delete task"]',
+    );
+
+    expect(deleteButton).not.toBeNull();
+
+    // Act: Click Delete on the second Todo.
+    deleteButton!.click();
+
+    // Assert: Exactly one deletion request was made.
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+
+    // Assert: The selected Todo ID was forwarded.
+    expect(deleteSpy).toHaveBeenCalledWith(1102);
+
+    // Assert: The first and third IDs were not targeted.
+    expect(deleteSpy).not.toHaveBeenCalledWith(1101);
+    expect(deleteSpy).not.toHaveBeenCalledWith(1103);
+  });
 });
