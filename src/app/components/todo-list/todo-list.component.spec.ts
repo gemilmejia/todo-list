@@ -510,4 +510,268 @@ describe('TodoListComponent', () => {
     expect(deleteSpy).not.toHaveBeenCalledWith(1101);
     expect(deleteSpy).not.toHaveBeenCalledWith(1103);
   });
+
+  // 12. Jasmine
+  // Lesson 152 - Part 1: All filter displays every Todo
+  it('should display all Todos when the All filter is selected', () => {
+    // Arrange: Create three mock Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 1201,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 1202,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 1203,
+        title: 'Review Jasmine Tests',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Act: Select the All filter.
+    component.filter = 'all';
+
+    // Update the rendered HTML.
+    fixture.detectChanges();
+
+    // Find all displayed Todo items.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Assert: All three Todos are visible.
+    expect(todoItems.length).toBe(3);
+
+    // Verify the displayed titles.
+    const displayedTitles = todoItems.map((item) =>
+      item.querySelector('.todo-title')?.textContent?.trim(),
+    );
+
+    expect(displayedTitles).toEqual([
+      'Study Angular',
+      'Practice TypeScript',
+      'Review Jasmine Tests',
+    ]);
+
+    // Assert: Filtering does not modify the source data.
+    expect(mockTodos.length).toBe(3);
+  });
+
+  // 13. Jasmine
+  // Lesson 152 - Part 2: Active filter displays unfinished Todos
+  it('should display only active Todos when the Active filter is selected', () => {
+    // Arrange: Create three Todos with different completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 1201,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 1202,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 1203,
+        title: 'Review Jasmine Tests',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the service.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable Todo data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Act: Select the Active filter.
+    component.filter = 'active';
+
+    // Update the rendered HTML.
+    fixture.detectChanges();
+
+    // Find the visible Todo components.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Assert: Only two active Todos are displayed.
+    expect(todoItems.length).toBe(2);
+
+    // Read the rendered Todo titles.
+    const displayedTitles = todoItems.map((item) =>
+      item.querySelector('.todo-title')?.textContent?.trim(),
+    );
+
+    // Assert: Only unfinished tasks are visible.
+    expect(displayedTitles).toEqual(['Study Angular', 'Review Jasmine Tests']);
+
+    // Assert: The completed task is hidden.
+    expect(displayedTitles).not.toContain('Practice TypeScript');
+
+    // Assert: The original Todo data is unchanged.
+    expect(mockTodos.length).toBe(3);
+    expect(mockTodos[1].completed).toBeTrue();
+  });
+
+  // 14. Jasmine
+  // Lesson 152 - Part 3: Completed filter displays finished Todos
+  it('should display only completed Todos when the Completed filter is selected', () => {
+    // Arrange: Create three Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 1201,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 1202,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 1203,
+        title: 'Review Jasmine Tests',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected service.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Act: Select the Completed filter.
+    component.filter = 'completed';
+
+    // Update the rendered HTML.
+    fixture.detectChanges();
+
+    // Find the visible Todo components.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Assert: Only one completed Todo is displayed.
+    expect(todoItems.length).toBe(1);
+
+    // Read the rendered Todo titles.
+    const displayedTitles = todoItems.map((item) =>
+      item.querySelector('.todo-title')?.textContent?.trim(),
+    );
+
+    // Assert: Only the completed Todo is visible.
+    expect(displayedTitles).toEqual(['Practice TypeScript']);
+
+    // Assert: Active Todos are hidden.
+    expect(displayedTitles).not.toContain('Study Angular');
+    expect(displayedTitles).not.toContain('Review Jasmine Tests');
+
+    // Assert: The source data remains unchanged.
+    expect(mockTodos.length).toBe(3);
+    expect(mockTodos[0].completed).toBeFalse();
+    expect(mockTodos[1].completed).toBeTrue();
+    expect(mockTodos[2].completed).toBeFalse();
+  });
+
+  // 15. Jasmine
+  // Lesson 152 - Part 4: Filter switching preserves Todo data
+  it('should switch filters without modifying the original Todos', () => {
+    // Arrange: Create three Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 1301,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 1302,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 1303,
+        title: 'Review Jasmine Tests',
+        completed: false,
+      }),
+    ];
+
+    // A. Create a snapshot
+    // Save a snapshot of the original data.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return the same Todos whenever the component requests them.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // B. Reuse a helper function
+    // Helper: Read titles from rendered Todo components.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // C. Verify switching works
+    // Step 1: Select All.
+    component.filter = 'all';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual([
+      'Study Angular',
+      'Practice TypeScript',
+      'Review Jasmine Tests',
+    ]);
+
+    // Step 2: Switch to Active.
+    component.filter = 'active';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual([
+      'Study Angular',
+      'Review Jasmine Tests',
+    ]);
+
+    // Step 3: Switch to Completed.
+    component.filter = 'completed';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual(['Practice TypeScript']);
+
+    // Step 4: Return to All.
+    component.filter = 'all';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual([
+      'Study Angular',
+      'Practice TypeScript',
+      'Review Jasmine Tests',
+    ]);
+
+    // D. Verify the original data remains unchanged
+    // Assert: No Todo was removed or modified.
+    expect(mockTodos).toEqual(originalTodos);
+
+    // Assert: The original array still contains three Todos.
+    expect(mockTodos.length).toBe(3);
+  });
 });
