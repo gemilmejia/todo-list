@@ -774,4 +774,211 @@ describe('TodoListComponent', () => {
     // Assert: The original array still contains three Todos.
     expect(mockTodos.length).toBe(3);
   });
+
+  // 16. Jasmine
+  // Lesson 153 - Part 1: Render an empty Todo list
+  it('should render no Todo items when the service returns an empty array', () => {
+    // Arrange: Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // A. Mock an empty service response
+    // Simulate a service with no Todos.
+    const getTodosSpy = spyOn(todoService, 'getTodos').and.returnValue([]);
+
+    // B. component.filter = 'all';
+    // Select the All filter.
+    component.filter = 'all';
+
+    // C. Trigger Angular change detection
+    // Act: Update the component template.
+    fixture.detectChanges();
+
+    // Find all rendered TodoItemComponent elements.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // D. Check the rendered HTML
+    // Assert: No Todo items should be rendered.
+    expect(todoItems.length).toBe(0);
+
+    // Assert: The service returned an empty collection.
+    expect(getTodosSpy).toHaveBeenCalled();
+    expect(getTodosSpy.calls.mostRecent().returnValue).toEqual([]);
+  });
+
+  // 17. Jasmine
+  // Lesson 153 - Part 2: Test the existing empty-state message
+  it('should display the empty-state message when no Todos exist', () => {
+    // Arrange: Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Simulate an empty Todo collection.
+    spyOn(todoService, 'getTodos').and.returnValue([]);
+
+    // Select the All filter.
+    component.filter = 'all';
+
+    // Act: Update the rendered HTML.
+    fixture.detectChanges();
+
+    // Find any rendered Todo items.
+    const todoItems: NodeListOf<HTMLElement> =
+      fixture.nativeElement.querySelectorAll('app-todo-item');
+
+    // Find your EXISTING empty-state element.
+    const emptyState: HTMLElement | null =
+      fixture.nativeElement.querySelector('.empty-state');
+
+    // Assert: No Todo items are rendered.
+    expect(todoItems.length).toBe(0);
+
+    // Assert: The empty-state element exists.
+    expect(emptyState).not.toBeNull();
+
+    // Assert: The existing message is displayed.
+    expect(emptyState?.textContent).toContain(
+      'No tasks yet. Add your first task!',
+    );
+
+    // Assert: The filter-specific empty message is not displayed.
+    const filterEmpty: HTMLElement | null =
+      fixture.nativeElement.querySelector('.todo-filter-empty');
+
+    expect(filterEmpty).toBeNull();
+  });
+
+  // 18. Jasmine
+  // Lesson 153 - Part 3: Empty Active filter results
+  it('should display the empty Active filter message when all Todos are completed', () => {
+    // Arrange: Create three completed Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 1531,
+        title: 'Study Angular',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 1532,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 1533,
+        title: 'Review Jasmine Tests',
+        completed: true,
+      }),
+    ];
+
+    // Retrieve the injected service.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Select the Active filter.
+    component.filter = 'active';
+
+    // Make sure the search field is empty.
+    component.searchTerm = '';
+
+    // Act: Update the rendered HTML.
+    fixture.detectChanges();
+
+    // Find all rendered Todo components.
+    const todoItems: NodeListOf<HTMLElement> =
+      fixture.nativeElement.querySelectorAll('app-todo-item');
+
+    // Find the filter-specific empty-state element.
+    const filterEmpty: HTMLElement | null =
+      fixture.nativeElement.querySelector('.todo-filter-empty');
+
+    // Find the general empty-state element.
+    const generalEmpty: HTMLElement | null =
+      fixture.nativeElement.querySelector('.empty-state');
+
+    // Assert: No active Todos are displayed.
+    expect(todoItems.length).toBe(0);
+
+    // Assert: The filter-specific empty message exists.
+    expect(filterEmpty).not.toBeNull();
+
+    // Assert: The correct Active filter message appears.
+    expect(filterEmpty?.textContent).toContain('No active tasks found.');
+
+    // Assert: The general empty-state message is not displayed.
+    expect(generalEmpty).toBeNull();
+
+    // Assert: The original Todos remain unchanged.
+    expect(mockTodos.length).toBe(3);
+    expect(mockTodos.every((todo) => todo.completed)).toBeTrue();
+  });
+
+  // 19. Jasmine
+  // Lesson 153 - Part 4: Empty Completed filter results
+  it('should display the empty Completed filter message when no Todos are completed', () => {
+    // Arrange: Create three active (unfinished) Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 1541,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 1542,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 1543,
+        title: 'Review Jasmine Tests',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Provide predictable Todo data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Select the Completed filter.
+    component.filter = 'completed';
+
+    // Ensure the search field is empty.
+    component.searchTerm = '';
+
+    // Act: Update Angular's rendered template.
+    fixture.detectChanges();
+
+    // Find any rendered Todo items.
+    const todoItems: NodeListOf<HTMLElement> =
+      fixture.nativeElement.querySelectorAll('app-todo-item');
+
+    // Find the filter-specific empty message.
+    const filterEmpty: HTMLElement | null =
+      fixture.nativeElement.querySelector('.todo-filter-empty');
+
+    // Find the general empty-state message.
+    const generalEmpty: HTMLElement | null =
+      fixture.nativeElement.querySelector('.empty-state');
+
+    // Assert: No completed Todos are displayed.
+    expect(todoItems.length).toBe(0);
+
+    // Assert: The filter-specific message is rendered.
+    expect(filterEmpty).not.toBeNull();
+
+    // Assert: The correct Completed filter message appears.
+    expect(filterEmpty?.textContent).toContain('No completed tasks yet.');
+
+    // Assert: The general empty-state message is hidden.
+    expect(generalEmpty).toBeNull();
+
+    // Assert: The original Todo collection remains intact.
+    expect(mockTodos.length).toBe(3);
+
+    // Assert: Every Todo remains unfinished.
+    expect(mockTodos.every((todo) => !todo.completed)).toBeTrue();
+  });
 });
