@@ -981,4 +981,293 @@ describe('TodoListComponent', () => {
     // Assert: Every Todo remains unfinished.
     expect(mockTodos.every((todo) => !todo.completed)).toBeTrue();
   });
+
+  // 20. Jasmine
+  // Lesson 154 - Part 1: Search Todos by title
+  it('should display only Todos that match the search term', () => {
+    /// A. Mock the data
+    // Arrange: Create three mock Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15401,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15402,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15403,
+        title: 'Angular Unit Testing',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// B. Isolate searching from other filters
+    // Select All so the status filter doesn't hide tasks.
+    component.filter = 'all';
+
+    // Act: Search for Todos containing "Angular".
+    component.searchTerm = 'Angular';
+
+    // Update Angular's rendered template.
+    fixture.detectChanges();
+
+    // Find the rendered Todo components.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    /// C. Verify the rendered HTML
+    // Assert: Exactly two Todos are displayed.
+    expect(todoItems.length).toBe(2);
+
+    // Read the rendered Todo titles.
+    const displayedTitles = todoItems.map((item) =>
+      item.querySelector('.todo-title')?.textContent?.trim(),
+    );
+
+    // Assert: Only matching Todos are displayed.
+    expect(displayedTitles).toEqual(['Study Angular', 'Angular Unit Testing']);
+
+    // Assert: The unrelated Todo is excluded.
+    expect(displayedTitles).not.toContain('Practice TypeScript');
+
+    /// D. Protect the original data
+    // Assert: Searching does not remove Todos from source data.
+    expect(mockTodos.length).toBe(3);
+  });
+
+  // 21. Jasmine
+  // Lesson 154 - Part 2: Case-insensitive Todo searching
+  it('should find matching Todos regardless of search term capitalization', () => {
+    /// A. We reuse the same mock Todos.
+    // Arrange: Create three mock Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15411,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15412,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15413,
+        title: 'Angular Unit Testing',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected service.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable mock data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Select All to isolate search behavior.
+    component.filter = 'all';
+
+    /// B. We create a helper function.
+    // Helper: Read currently rendered Todo titles.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    const expectedTitles = ['Study Angular', 'Angular Unit Testing'];
+
+    /// C. We change the search term three times.
+    // Act + Assert: Lowercase search.
+    component.searchTerm = 'angular';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual(expectedTitles);
+
+    // Act + Assert: Uppercase search.
+    component.searchTerm = 'ANGULAR';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual(expectedTitles);
+
+    // Act + Assert: Mixed-case search.
+    component.searchTerm = 'AnGuLaR';
+    fixture.detectChanges();
+
+    /// D. We expect identical results.
+    expect(getDisplayedTitles()).toEqual(expectedTitles);
+
+    // Assert: The original collection remains intact.
+    expect(mockTodos.length).toBe(3);
+  });
+
+  // 21. Jasmine
+  // Lesson 154 - Part 3: No matching Todo search results
+  it('should display a no-results message when the search matches no Todos', () => {
+    // Arrange: Create three mock Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15421,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15422,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15423,
+        title: 'Review Jasmine Tests',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Select All to isolate search functionality.
+    component.filter = 'all';
+
+    // Act: Search for a term that matches no Todos.
+    component.searchTerm = 'Python';
+
+    // Update Angular's template.
+    fixture.detectChanges();
+
+    // Find all rendered Todo items.
+    const todoItems: NodeListOf<HTMLElement> =
+      fixture.nativeElement.querySelectorAll('app-todo-item');
+
+    // Find the existing no-results message.
+    const noResults: HTMLElement | null =
+      fixture.nativeElement.querySelector('.todo-no-results');
+
+    // Find other empty-state messages.
+    const generalEmpty: HTMLElement | null =
+      fixture.nativeElement.querySelector('.empty-state');
+
+    const filterEmpty: HTMLElement | null =
+      fixture.nativeElement.querySelector('.todo-filter-empty');
+
+    // Assert: No Todo items are rendered.
+    expect(todoItems.length).toBe(0);
+
+    // Assert: The search-specific message is displayed.
+    expect(noResults).not.toBeNull();
+
+    // Assert: Both existing message lines are correct.
+    expect(noResults?.textContent).toContain('No matching tasks found.');
+
+    expect(noResults?.textContent).toContain('Try a different search keyword.');
+
+    // Assert: Other empty-state messages are not displayed.
+    expect(generalEmpty).toBeNull();
+    expect(filterEmpty).toBeNull();
+
+    // Assert: Searching does not remove source Todos.
+    expect(mockTodos.length).toBe(3);
+  });
+
+  // 23. Jasmine
+  // Lesson 154 - Part 4: Clearing search restores all Todos
+  it('should restore all Todos when the Clear Search button is clicked', () => {
+    // Arrange: Create three mock Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15431,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15432,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15433,
+        title: 'Review Jasmine Tests',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Use the All filter to isolate search functionality.
+    component.filter = 'all';
+
+    // Start with a search that matches only one Todo.
+    component.searchTerm = 'Angular';
+
+    // Update the rendered template.
+    fixture.detectChanges();
+
+    // Helper: Get the currently displayed Todo titles.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Assert: Only one Todo matches the initial search.
+    expect(getDisplayedTitles()).toEqual(['Study Angular']);
+
+    // Find the existing Clear Search button.
+    const clearSearchButton: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector('.clear-search');
+
+    // Assert: The button is visible while searching.
+    expect(clearSearchButton).not.toBeNull();
+
+    // Act: Simulate a real user clicking Clear Search.
+    clearSearchButton!.click();
+
+    // Refresh the Angular template.
+    fixture.detectChanges();
+
+    // Assert: Search term was cleared.
+    expect(component.searchTerm).toBe('');
+
+    // Assert: All three Todos are displayed again.
+    expect(getDisplayedTitles()).toEqual([
+      'Study Angular',
+      'Practice TypeScript',
+      'Review Jasmine Tests',
+    ]);
+
+    // Assert: Clear Search button is no longer displayed.
+    const buttonAfterClearing: HTMLElement | null =
+      fixture.nativeElement.querySelector('.clear-search');
+
+    expect(buttonAfterClearing).toBeNull();
+
+    // Assert: Original Todo data remains intact.
+    expect(mockTodos.length).toBe(3);
+  });
 });
