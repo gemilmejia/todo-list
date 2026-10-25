@@ -1270,4 +1270,328 @@ describe('TodoListComponent', () => {
     // Assert: Original Todo data remains intact.
     expect(mockTodos.length).toBe(3);
   });
+
+  // 24. Jasmine
+  // Lesson 155 - Part 1: Combine search with Active filter
+  it('should display only active Todos matching the search term', () => {
+    // Arrange: Create Todos with mixed titles and completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15501,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15502,
+        title: 'Angular Unit Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15503,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15504,
+        title: 'Angular Components',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected service.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return consistent test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Act: Apply both search and Active filter.
+    component.searchTerm = 'Angular';
+    component.filter = 'active';
+
+    // Update Angular's rendered template.
+    fixture.detectChanges();
+
+    // Read the displayed Todo titles from the DOM.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    const displayedTitles: string[] = todoItems.map(
+      (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+    );
+
+    // Assert: Only unfinished Angular tasks appear.
+    expect(displayedTitles).toEqual(['Study Angular', 'Angular Components']);
+
+    // Assert: Exactly two Todos are rendered.
+    expect(todoItems.length).toBe(2);
+
+    // Assert: The completed Angular task is excluded.
+    expect(displayedTitles).not.toContain('Angular Unit Testing');
+
+    // Assert: The unrelated active task is excluded.
+    expect(displayedTitles).not.toContain('Practice TypeScript');
+
+    // Assert: Source data is still intact.
+    expect(mockTodos.length).toBe(4);
+    expect(mockTodos.filter((todo) => todo.completed).length).toBe(1);
+  });
+
+  // 25. Jasmine
+  // Lesson 155 - Part 2: Combine search with Completed filter
+  it('should display only completed Todos matching the search term', () => {
+    // Arrange: Create Todos with mixed titles and completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15511,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15512,
+        title: 'Angular Unit Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15513,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15514,
+        title: 'Angular Components',
+        completed: true,
+      }),
+    ];
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// A. Apply both conditions
+    // Act: Apply both search and Completed filter.
+    component.searchTerm = 'Angular';
+    component.filter = 'completed';
+
+    /// B. Trigger change detection
+    // Update the Angular template.
+    fixture.detectChanges();
+
+    // Get rendered Todo components.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Read the displayed Todo titles.
+    const displayedTitles: string[] = todoItems.map(
+      (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+    );
+
+    /// C. Verify the rendered results
+    // Assert: Only completed Angular tasks appear.
+    expect(displayedTitles).toEqual([
+      'Angular Unit Testing',
+      'Angular Components',
+    ]);
+
+    // Assert: Exactly two Todos are rendered.
+    expect(todoItems.length).toBe(2);
+
+    // Assert: The unfinished Angular task is excluded.
+    expect(displayedTitles).not.toContain('Study Angular');
+
+    // Assert: The completed but unrelated task is excluded.
+    expect(displayedTitles).not.toContain('Practice TypeScript');
+
+    /// D. Verify source data preservation
+    // Assert: Original Todo data remains intact.
+    expect(mockTodos.length).toBe(4);
+
+    // Assert: Three source Todos are still completed.
+    expect(mockTodos.filter((todo) => todo.completed).length).toBe(3);
+  });
+
+  // 26. Jasmine
+  // Lesson 155 - Part 3: Combine search with All filter
+  it('should display all Todos matching the search regardless of completion status', () => {
+    // Arrange: Create Todos with different completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15521,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15522,
+        title: 'Angular Unit Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15523,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15524,
+        title: 'Angular Components',
+        completed: false,
+      }),
+    ];
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Mock the service response.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// A. Apply search and All filter
+    // Act: Search for Angular with the All filter selected.
+    component.searchTerm = 'Angular';
+    component.filter = 'all';
+
+    // Refresh the Angular template.
+    fixture.detectChanges();
+
+    // Retrieve the rendered Todo items.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Extract the displayed Todo titles.
+    const displayedTitles: string[] = todoItems.map(
+      (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+    );
+
+    /// B. Verify both completion states appear
+    // Assert: All matching Angular Todos appear.
+    expect(displayedTitles).toEqual([
+      'Study Angular',
+      'Angular Unit Testing',
+      'Angular Components',
+    ]);
+
+    // Assert: Exactly three matching Todos are rendered.
+    expect(todoItems.length).toBe(3);
+
+    // Assert: The unrelated Todo is excluded.
+    expect(displayedTitles).not.toContain('Practice TypeScript');
+
+    /// C. Verify completion states
+    // Assert: Search results include both active and completed Todos.
+    expect(mockTodos.find((todo) => todo.id === 15521)?.completed).toBeFalse();
+
+    expect(mockTodos.find((todo) => todo.id === 15522)?.completed).toBeTrue();
+
+    /// D. Verify the original collection
+    // Assert: The source data remains intact.
+    expect(mockTodos.length).toBe(4);
+  });
+
+  // 27. Jasmine
+  // Lesson 155 - Part 4: Preserve search while switching filters
+  it('should preserve the search term when switching Todo filters', () => {
+    // Arrange: Create mock Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15531,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15532,
+        title: 'Angular Unit Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15533,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15534,
+        title: 'Angular Components',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original data for later comparison.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Mock the service response.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// 1. State preservation
+    // Start with the Angular search term.
+    component.searchTerm = 'Angular';
+
+    /// 2. Reusing a DOM helper
+    // Helper: Read rendered Todo titles.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    /// 3. Angular change detection
+    // Step 1: All filter.
+    component.filter = 'all';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual([
+      'Study Angular',
+      'Angular Unit Testing',
+      'Angular Components',
+    ]);
+
+    expect(component.searchTerm).toBe('Angular');
+
+    // Step 2: Active filter.
+    component.filter = 'active';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual([
+      'Study Angular',
+      'Angular Components',
+    ]);
+
+    expect(component.searchTerm).toBe('Angular');
+
+    // Step 3: Completed filter.
+    component.filter = 'completed';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual(['Angular Unit Testing']);
+
+    expect(component.searchTerm).toBe('Angular');
+
+    // Step 4: Switch back to All.
+    component.filter = 'all';
+    fixture.detectChanges();
+
+    expect(getDisplayedTitles()).toEqual([
+      'Study Angular',
+      'Angular Unit Testing',
+      'Angular Components',
+    ]);
+
+    // Assert: The search term is still preserved.
+    expect(component.searchTerm).toBe('Angular');
+
+    /// 4. Protecting source data
+    // Assert: Switching filters did not modify source Todos.
+    expect(mockTodos).toEqual(originalTodos);
+    expect(mockTodos.length).toBe(4);
+
+    /// 5. Integration testing
+    // This test verifies that searching and status filtering work together across multiple state changes within one component instance. Unlike Parts 1–3, we're testing an entire sequence of filter changes.
+  });
 });
