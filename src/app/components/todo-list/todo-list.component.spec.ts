@@ -1594,4 +1594,296 @@ describe('TodoListComponent', () => {
     /// 5. Integration testing
     // This test verifies that searching and status filtering work together across multiple state changes within one component instance. Unlike Parts 1–3, we're testing an entire sequence of filter changes.
   });
+
+  // 28. Jasmine
+  // Lesson 156 - Part 1: Default sorting preserves Todo order
+  it('should preserve the original Todo order when default sorting is selected', () => {
+    // Arrange: Create Todos in a deliberately non-alphabetical order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15601,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15602,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15603,
+        title: 'Mango Task',
+        completed: false,
+      }),
+    ];
+
+    // Save the original order for comparison.
+    const originalIds = mockTodos.map((todo) => todo.id);
+
+    // Retrieve the TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return our controlled Todo collection.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Select default sorting and All filtering.
+    component.sortOrder = 'default';
+    component.filter = 'all';
+    component.searchTerm = '';
+
+    // Act: Render the component.
+    fixture.detectChanges();
+
+    // Retrieve all rendered Todo components.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Extract their displayed titles in DOM order.
+    const displayedTitles: string[] = todoItems.map(
+      (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+    );
+
+    /// This verifies the order of elements actually rendered in the browser, rather than merely checking the service array.
+    // Assert: The original order is preserved.
+    expect(displayedTitles).toEqual(['Zebra Task', 'Apple Task', 'Mango Task']);
+
+    // Assert: Exactly three Todo items are rendered.
+    expect(todoItems.length).toBe(3);
+
+    /// This ensures that rendering with default sorting hasn't unexpectedly rearranged the source array.
+    // Assert: Source Todo order remains unchanged.
+    expect(mockTodos.map((todo) => todo.id)).toEqual(originalIds);
+
+    // Assert: Default sorting remains selected.
+    expect(component.sortOrder).toBe('default');
+  });
+
+  // 29. Jasmine
+  // Lesson 156 - Part 2: Sort Todo titles alphabetically A-Z
+  it('should render Todos in alphabetical A-Z order when ascending sort is selected', () => {
+    // Arrange: Create Todos in a non-alphabetical order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15611,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15612,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15613,
+        title: 'Mango Task',
+        completed: false,
+      }),
+    ];
+
+    // Save the original source order.
+    const originalIds = mockTodos.map((todo) => todo.id);
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Mock the service response.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// A. Select the correct sorting option
+    // Act: Select ascending alphabetical sorting.
+    component.sortOrder = 'asc';
+
+    // Show all Todos without search restrictions.
+    component.filter = 'all';
+    component.searchTerm = '';
+
+    // Update Angular's rendered template.
+    fixture.detectChanges();
+
+    // Get rendered Todo components.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Extract titles in their rendered order.
+    const displayedTitles: string[] = todoItems.map(
+      (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+    );
+
+    /// B. Verify the rendered order
+    // Assert: Todo titles are sorted A-Z.
+    expect(displayedTitles).toEqual(['Apple Task', 'Mango Task', 'Zebra Task']);
+
+    // Assert: Exactly three Todos are rendered.
+    expect(todoItems.length).toBe(3);
+
+    /// C. Protect the original collection
+    // Assert: The source array order was not modified.
+    expect(mockTodos.map((todo) => todo.id)).toEqual(originalIds);
+
+    /// D. Verify component state
+    // Assert: The ascending option is selected.
+    expect(component.sortOrder).toBe('asc');
+  });
+
+  // 30. Jasmine
+  // Lesson 156 - Part 3: Sort Todo titles alphabetically Z-A
+  it('should render Todos in alphabetical Z-A order when descending sort is selected', () => {
+    // Arrange: Create Todos in a non-sorted order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15621,
+        title: 'Mango Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15622,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15623,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original source order.
+    const originalIds = mockTodos.map((todo) => todo.id);
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return predictable test data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// A. Selecting Z–A sorting
+    // Act: Select descending alphabetical sorting.
+    component.sortOrder = 'desc';
+
+    /// B. Isolating sorting behavior
+    // Isolate sorting from searching and filtering.
+    component.filter = 'all';
+    component.searchTerm = '';
+
+    // Refresh the rendered Angular template.
+    fixture.detectChanges();
+
+    // Get all rendered Todo components in DOM order.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Extract their displayed titles.
+    const displayedTitles: string[] = todoItems.map(
+      (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+    );
+
+    /// C. Checking rendered order
+    // Assert: Titles appear alphabetically Z-A.
+    expect(displayedTitles).toEqual(['Zebra Task', 'Mango Task', 'Apple Task']);
+
+    // Assert: Exactly three Todos are rendered.
+    expect(todoItems.length).toBe(3);
+
+    /// D. Checking data preservation
+    // Assert: Sorting did not modify the original array order.
+    expect(mockTodos.map((todo) => todo.id)).toEqual(originalIds);
+
+    // Assert: The descending sorting option remains selected.
+    expect(component.sortOrder).toBe('desc');
+  });
+
+  // 31. Jasmine
+  // Lesson 156 - Part 4: Combine sorting, searching, and filtering
+  it('should sort active Todos matching the search term in A-Z order', () => {
+    // Arrange: Create Todos with different titles
+    // and completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15631,
+        title: 'Zebra Angular Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15632,
+        title: 'Apple Angular Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15633,
+        title: 'Mango Angular Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15634,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15635,
+        title: 'Banana Angular Task',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the source data before processing.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Mock the service response.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// A. Combine all three processing options
+    // Act: Apply all three processing options.
+    component.filter = 'active';
+    component.searchTerm = 'Angular';
+    component.sortOrder = 'asc';
+
+    // Update Angular's rendered template.
+    fixture.detectChanges();
+
+    // Retrieve Todo components in their rendered order.
+    const todoItems: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-todo-item'),
+    );
+
+    // Extract the displayed titles.
+    const displayedTitles: string[] = todoItems.map(
+      (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+    );
+
+    /// B. Check the final rendered order
+    // Assert: Only active Angular tasks are shown,
+    // ordered alphabetically A-Z.
+    expect(displayedTitles).toEqual([
+      'Apple Angular Task',
+      'Banana Angular Task',
+      'Zebra Angular Task',
+    ]);
+
+    // Assert: Exactly three tasks are rendered.
+    expect(todoItems.length).toBe(3);
+
+    // Assert: The completed Angular task is excluded.
+    expect(displayedTitles).not.toContain('Mango Angular Task');
+
+    // Assert: The unrelated active task is excluded.
+    expect(displayedTitles).not.toContain('Practice TypeScript');
+
+    // Assert: The selected processing options are preserved.
+    expect(component.filter).toBe('active');
+    expect(component.searchTerm).toBe('Angular');
+    expect(component.sortOrder).toBe('asc');
+
+    /// C. Verify excluded tasks
+    //// The test checks that the completed Angular task and unrelated active task do not appear.
+    /// D. Protect source data
+    // Assert: Processing did not change the source Todos.
+    expect(mockTodos).toEqual(originalTodos);
+    expect(mockTodos.length).toBe(5);
+  });
 });

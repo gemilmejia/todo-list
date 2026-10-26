@@ -98,6 +98,7 @@ export class TodoListComponent implements OnInit {
   apiTodos: Todo[] = []; // Stores the API Todos as an array of Todo objects.
   hasLoadedApiTodos = false; // Tracks whether at least one API request has succeeded.
 
+  /// B. filteredTodos
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos(): Todo[] {
     return processTodos(this.todoService.getTodos(), {
