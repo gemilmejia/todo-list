@@ -6107,4 +6107,712 @@ describe('TodoListComponent', () => {
       localStorage.removeItem('todoSortOrder');
     }
   });
+
+  // 72. Jasmine
+  // Lesson 167 - Part 1:
+  // Verify that clicking Clear Search restores all Todos
+  // without resetting the user's sorting preference.
+  it('should restore all Todos when Clear Search is clicked', async () => {
+    // ARRANGE: Create predictable mock Todo data.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16701,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16702,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16703,
+        title: 'Apple Task',
+        completed: true,
+      }),
+    ];
+
+    // Save a snapshot so we can check for mutations.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Replace the service's Todo data with our mock data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for Angular's form controls to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Get the actual HTML sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    // Get the actual HTML search input.
+    const searchInput = fixture.nativeElement.querySelector(
+      'input[placeholder*="Search"]',
+    ) as HTMLInputElement;
+
+    // Confirm both controls exist.
+    expect(sortSelect).not.toBeNull();
+    expect(searchInput).not.toBeNull();
+
+    // Helper: Read rendered Todo titles in their displayed order.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    /// E. Why use try...finally?
+    /// The finally block executes even if an assertion fails.
+    /// This helps prevent a saved sorting preference from interfering with later tests.
+    try {
+      // STEP 1: Select Title: A-Z using the real dropdown.
+      sortSelect.value = 'asc';
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Check that ascending sorting is selected and saved.
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Check that all Todos initially appear in A-Z order.
+      expect(getDisplayedTitles()).toEqual([
+        'Apple Task',
+        'Study Angular',
+        'Zebra Task',
+      ]);
+
+      // STEP 2: Search for "angular" through the real input.
+      searchInput.value = 'angular';
+      searchInput.dispatchEvent(new Event('input'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Check that Angular received the search term.
+      expect(component.searchTerm).toBe('angular');
+
+      // Only the matching Todo should be visible.
+      expect(getDisplayedTitles()).toEqual(['Study Angular']);
+
+      // STEP 3: Locate the actual Clear Search button.
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      /// A. Why find the Clear Search button by its text?  /// Your application has more than one button containing the word Clear, including Clear Completed. Searching specifically for clear search avoids accidentally clicking the wrong button.
+      const clearSearchButton = buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('clear search'),
+      );
+
+      // Check that the button is visible after searching.
+      expect(clearSearchButton).toBeDefined();
+
+      /// B. Why click the real HTML button?. /// This triggers the Angular click event associated with the button.
+      // Click the actual Clear Search button.
+      clearSearchButton!.click();
+
+      // Wait for Angular to update the component and HTML.
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      /// C. Why check both the component and HTML input?
+      /// These assertions test two related but different things.
+      /// The first verifies the component's TypeScript state.
+      /// The second verifies the actual HTML input displayed to the user.
+      /// Both should be empty after clicking Clear Search.
+      // STEP 4: Verify that the search was cleared.
+      expect(component.searchTerm).toBe('');
+
+      // Verify that the HTML input was also cleared.
+      expect(searchInput.value).toBe('');
+
+      /// D. Why verify the list is restored? /// This confirms that clearing a search restores the full Todo list without removing the selected sorting preference.
+      // Verify that all Todos are visible again.
+      expect(getDisplayedTitles()).toEqual([
+        'Apple Task',
+        'Study Angular',
+        'Zebra Task',
+      ]);
+
+      // Verify that exactly three Todos are rendered.
+      expect(
+        fixture.nativeElement.querySelectorAll('app-todo-item').length,
+      ).toBe(3);
+
+      // Verify that the All filter remains selected.
+      expect(component.filter).toBe('all');
+
+      // Verify that ascending sorting remains selected.
+      expect(component.sortOrder).toBe('asc');
+      expect(sortSelect.value).toBe('asc');
+
+      // Verify that the saved preference remains unchanged.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Verify that the original data was not modified.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Clean up the saved sorting preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 73. Jasmine
+  // Lesson 167 - Part 2:
+  // Verify that Clear Search restores all Todos after
+  // a search produces zero matching results.
+  it('should recover from zero search results using Clear Search', async () => {
+    // ARRANGE: Create three predictable mock Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16711,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16712,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16713,
+        title: 'Banana Task',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original data for comparison.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Make TodoService return our mock Todos.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for Angular to initialize its form bindings.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Find the actual sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    // Find the actual search input.
+    const searchInput = fixture.nativeElement.querySelector(
+      'input[placeholder*="Search"]',
+    ) as HTMLInputElement;
+
+    expect(sortSelect).not.toBeNull();
+    expect(searchInput).not.toBeNull();
+
+    // Helper: Read the displayed Todo titles.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    try {
+      // STEP 1: Select Title: A-Z.
+      sortSelect.value = 'asc';
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify that sorting was selected and saved.
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Verify the initial displayed order.
+      expect(getDisplayedTitles()).toEqual([
+        'Apple Task',
+        'Banana Task',
+        'Zebra Task',
+      ]);
+
+      /// A. Why search for pineapple?. /// None of the three Todo titles contains pineapple. This deliberately creates a zero-results state.
+      // STEP 2: Search for a term that matches nothing.
+      searchInput.value = 'pineapple';
+      searchInput.dispatchEvent(new Event('input'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify that Angular received the search term.
+      expect(component.searchTerm).toBe('pineapple');
+
+      /// B. Why verify both the DOM and the component?.
+      /// The first assertion checks what the user actually sees.
+      /// The second checks the array generated by the component's processing pipeline.
+      /// Both should be empty.
+      // Verify that the rendered list is empty.
+      expect(getDisplayedTitles()).toEqual([]);
+
+      // Verify the component's processed list is empty.
+      expect(component.filteredTodos).toEqual([]);
+
+      // Verify sorting is not reset by the empty result.
+      expect(component.sortOrder).toBe('asc');
+      expect(sortSelect.value).toBe('asc');
+
+      // STEP 3: Find the actual Clear Search button.
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const clearSearchButton = buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('clear search'),
+      );
+
+      /// C. Why check that Clear Search is available?. /// A Clear Search button is especially useful when a search returns no results. Without it, users may have to manually erase their search text. We're verifying that the button remains accessible during the empty-results state.
+      // The Clear Search button should be available
+      // even when the search has zero matches.
+      expect(clearSearchButton).toBeDefined();
+
+      /// D. Why click the actual button?. /// This tests the connection between the HTML button and your component's clearSearch() behavior. Unlike directly calling component.clearSearch(), this verifies a real user interaction.
+      // STEP 4: Click the real Clear Search button.
+      clearSearchButton!.click();
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify that the component's search state is reset.
+      expect(component.searchTerm).toBe('');
+
+      // Verify that the visible HTML input is also cleared.
+      expect(searchInput.value).toBe('');
+
+      /// E. Why verify the list returns? . /// This is the most important assertion. /// It verifies that the Todos weren't deleted when the search returned no results. Clearing the search restores their visibility.
+      // Verify all Todos have returned in A-Z order.
+      expect(getDisplayedTitles()).toEqual([
+        'Apple Task',
+        'Banana Task',
+        'Zebra Task',
+      ]);
+
+      // Verify the expected number of rendered Todos.
+      expect(
+        fixture.nativeElement.querySelectorAll('app-todo-item').length,
+      ).toBe(3);
+
+      // Verify the All filter remains selected.
+      expect(component.filter).toBe('all');
+
+      /// F. Why preserve sorting? . /// Even after an unsuccessful search, the application should remember the selected sorting preference.
+      // Verify A-Z sorting is preserved.
+      expect(component.sortOrder).toBe('asc');
+      expect(sortSelect.value).toBe('asc');
+
+      // Verify the saved sorting preference is unchanged.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Verify the original Todo collection was not modified.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Clean up localStorage after the test.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 74. Jasmine
+  // Lesson 167 - Part 3:
+  // Verify that Clear Search preserves the currently
+  // selected Active or Completed filter.
+  it('should preserve Active and Completed filters when clearing search', async () => {
+    // ARRANGE: Create Todos with different completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16721,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16722,
+        title: 'Fix Laptop',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16723,
+        title: 'Submit Report',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16724,
+        title: 'Review Tests',
+        completed: true,
+      }),
+    ];
+
+    // Save a copy of the original data.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Mock TodoService with our predictable test data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Initialize Angular's form bindings.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Get the actual sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    // Get the actual search input.
+    const searchInput = fixture.nativeElement.querySelector(
+      'input[placeholder*="Search"]',
+    ) as HTMLInputElement;
+
+    expect(sortSelect).not.toBeNull();
+    expect(searchInput).not.toBeNull();
+
+    // Helper: Read the Todo titles currently displayed.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Click an actual filter button.
+    const clickFilter = async (label: string): Promise<void> => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const filterButton = buttons.find(
+        (button) => button.textContent?.trim() === label,
+      );
+
+      expect(filterButton).toBeDefined();
+
+      filterButton!.click();
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    // Helper: Simulate entering text into the search input.
+    const changeSearch = async (value: string): Promise<void> => {
+      searchInput.value = value;
+      searchInput.dispatchEvent(new Event('input'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    /// B. What does clickClearSearch() do? This is a reusable test helper. Instead of repeating button-querying logic twice, we define it once and call it in both scenarios. It also tests the real HTML button rather than directly calling component.clearSearch().
+    // Helper: Click the actual Clear Search button.
+    const clickClearSearch = async (): Promise<void> => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const clearSearchButton = buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('clear search'),
+      );
+
+      expect(clearSearchButton).toBeDefined();
+
+      clearSearchButton!.click();
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    try {
+      // STEP 1: Select Title: A-Z.
+      sortSelect.value = 'asc';
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // SCENARIO A: ACTIVE FILTER
+
+      /// A. Why test both Active and Completed?. /// The Active filter displays unfinished Todos (completed: false).
+      // STEP 2: Select Active.
+      await clickFilter('Active');
+
+      expect(component.filter).toBe('active');
+
+      // Verify the unfinished Todos are shown in A-Z order.
+      expect(getDisplayedTitles()).toEqual(['Fix Laptop', 'Study Angular']);
+
+      // STEP 3: Search for Angular.
+      await changeSearch('angular');
+
+      expect(component.searchTerm).toBe('angular');
+
+      // Only the matching unfinished Todo appears.
+      expect(getDisplayedTitles()).toEqual(['Study Angular']);
+
+      // STEP 4: Click Clear Search.
+      await clickClearSearch();
+
+      /// C. Why check both search state and input value?. /// The first assertion checks Angular's TypeScript component state. The second checks the actual text displayed inside the search input. Both must be empty after clearing the search.
+      // Verify both component state and HTML input are cleared.
+      expect(component.searchTerm).toBe('');
+      expect(searchInput.value).toBe('');
+
+      /// D. Why shouldn't Clear Search reset the filter?. /// Because searching and filtering are separate features. For example, if the user selects Active, they may want to search only unfinished tasks. When they click Clear Search, they should return to seeing all unfinished tasks, not all tasks regardless of completion status.
+
+      // Verify the Active filter remains selected.
+      expect(component.filter).toBe('active'); /// should remain true after clearing the search. The same principle applies to Completed.
+
+      // Both unfinished Todos return in A-Z order.
+      expect(getDisplayedTitles()).toEqual(['Fix Laptop', 'Study Angular']);
+
+      // SCENARIO B: COMPLETED FILTER
+
+      /// A. Why test both Active and Completed? /// The Completed filter displays finished Todos (completed: true). We want to ensure Clear Search preserves either selection, not just the default All filter.
+      // STEP 5: Switch to Completed.
+      await clickFilter('Completed');
+
+      expect(component.filter).toBe('completed');
+
+      // Verify the completed Todos are displayed in A-Z order.
+      expect(getDisplayedTitles()).toEqual(['Review Tests', 'Submit Report']);
+
+      // STEP 6: Search for Report.
+      await changeSearch('report');
+
+      expect(component.searchTerm).toBe('report');
+
+      // Only the matching completed Todo appears.
+      expect(getDisplayedTitles()).toEqual(['Submit Report']);
+
+      // STEP 7: Click Clear Search again.
+      await clickClearSearch();
+
+      // Verify the search was cleared again.
+      expect(component.searchTerm).toBe('');
+      expect(searchInput.value).toBe('');
+
+      // Verify the Completed filter remains selected.
+      expect(component.filter).toBe('completed');
+
+      // Both completed Todos return in A-Z order.
+      expect(getDisplayedTitles()).toEqual(['Review Tests', 'Submit Report']);
+
+      /// E. Why check sorting and localStorage? /// (Assertion = What it verifies)component.sortOrder = Component state, sortSelect.value = HTML dropdown selection, localStorage.getItem() = Saved sorting preference.
+      /// Clearing a search should not affect any of these.
+      // STEP 8: Verify the sorting preference was preserved.
+      expect(component.sortOrder).toBe('asc');
+      expect(sortSelect.value).toBe('asc');
+
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // STEP 9: Confirm the original Todos remain unchanged.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Clean up the sorting preference after the test.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 75. Jasmine
+  // Lesson 167 - Part 4:
+  // Verify that replacing search terms and clicking Clear Search
+  // preserves descending sorting and the original Todo data.
+  it('should replace search terms and clear search without resetting sorting', async () => {
+    // ARRANGE: Create four Todos with predictable titles.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16731,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16732,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16733,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16734,
+        title: 'Apple Task',
+        completed: true,
+      }),
+    ];
+
+    // Save a snapshot of the original Todo collection.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Mock the service to use predictable test data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for Angular's form controls to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Retrieve the actual sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    // Retrieve the actual search input.
+    const searchInput = fixture.nativeElement.querySelector(
+      'input[placeholder*="Search"]',
+    ) as HTMLInputElement;
+
+    // Verify both elements exist.
+    expect(sortSelect).not.toBeNull();
+    expect(searchInput).not.toBeNull();
+
+    // Helper: Read Todo titles from rendered HTML.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    /// B. Why use a helper function?. Using a helper avoids repeating these operations for every search term.
+    // Helper: Simulate typing in the real search input.
+    const changeSearch = async (value: string): Promise<void> => {
+      searchInput.value = value;
+      searchInput.dispatchEvent(new Event('input'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    try {
+      // STEP 1: Select Title: Z-A.
+      sortSelect.value = 'desc';
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Confirm descending sorting was saved.
+      expect(component.sortOrder).toBe('desc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // Confirm the initial Todos appear in Z-A order.
+      expect(getDisplayedTitles()).toEqual([
+        'Zebra Task',
+        'Study Angular',
+        'Practice TypeScript',
+        'Apple Task',
+      ]);
+
+      // STEP 2: Search for Angular.
+      await changeSearch('angular'); /// A. Why replace the search term several times?. A user typically doesn't perform only one search. They may repeatedly replace their input to locate different tasks. Our test confirms that the component recalculates the displayed list correctly for every new search term.
+
+      expect(component.searchTerm).toBe('angular');
+
+      expect(getDisplayedTitles()).toEqual(['Study Angular']);
+
+      // STEP 3: Replace the search with TypeScript.
+      await changeSearch('typescript'); /// A. Why replace the search term several times?. A user typically doesn't perform only one search. They may repeatedly replace their input to locate different tasks. Our test confirms that the component recalculates the displayed list correctly for every new search term.
+
+      expect(component.searchTerm).toBe('typescript');
+
+      expect(getDisplayedTitles()).toEqual(['Practice TypeScript']);
+
+      // Confirm Z-A sorting was not reset.
+      expect(component.sortOrder).toBe('desc');
+
+      /// C. Why deliberately search for something nonexistent?. /// This tests an important edge case: transitioning from valid search results to an empty list. We then verify that Clear Search correctly restores all Todos.
+      // STEP 4: Search for a nonexistent Todo.
+      await changeSearch('pineapple'); /// A. Why replace the search term several times?. A user typically doesn't perform only one search. They may repeatedly replace their input to locate different tasks. Our test confirms that the component recalculates the displayed list correctly for every new search term.
+
+      expect(component.searchTerm).toBe('pineapple');
+
+      // An unsuccessful search should display no Todos.
+      expect(getDisplayedTitles()).toEqual([]);
+      expect(component.filteredTodos).toEqual([]);
+
+      // Sorting is still selected despite the empty result.
+      expect(component.sortOrder).toBe('desc');
+      expect(sortSelect.value).toBe('desc');
+
+      // STEP 5: Find the actual Clear Search button.
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const clearSearchButton = buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('clear search'),
+      );
+
+      // Verify that the button is available.
+      expect(clearSearchButton).toBeDefined();
+
+      /// D. Why click the actual Clear Search button?. /// This verifies the connection between the HTML template and your component's clearSearch() method. The exclamation mark ! tells TypeScript that we expect the button to exist at this point.
+      /// We're also checking its existence beforehand: expect(clearSearchButton).toBeDefined();
+      // Click the actual Clear Search button.
+      clearSearchButton!.click();
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // STEP 6: Verify the search was cleared.
+      expect(component.searchTerm).toBe('');
+      expect(searchInput.value).toBe('');
+
+      // Verify all Todos return in descending order.
+      expect(getDisplayedTitles()).toEqual([
+        'Zebra Task',
+        'Study Angular',
+        'Practice TypeScript',
+        'Apple Task',
+      ]);
+
+      // Verify exactly four Todos are rendered.
+      expect(
+        fixture.nativeElement.querySelectorAll('app-todo-item').length,
+      ).toBe(4);
+
+      // Verify the All filter remains selected.
+      expect(component.filter).toBe('all');
+
+      // Verify the descending sorting preference is preserved.
+      expect(component.sortOrder).toBe('desc');
+      expect(sortSelect.value).toBe('desc');
+
+      /// E. Why check localStorage?. /// Your sorting preference is saved between sessions. Changing search terms and clearing the search should not overwrite that preference.
+      // Verify the saved preference remains unchanged.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      /// F. Why verify source data integrity?. /// Searching should only change the displayed view. It should never delete, modify, or reorder the original array of Todos.
+      // Verify the original Todo collection was not modified.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Clean up the saved sorting preference after testing.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
