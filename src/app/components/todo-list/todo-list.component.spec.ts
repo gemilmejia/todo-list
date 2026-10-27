@@ -3464,4 +3464,312 @@ describe('TodoListComponent', () => {
       localStorage.removeItem('todoSortOrder');
     }
   });
+
+  // 52. Jasmine
+  // Lesson 162 - Part 1:
+  // Verify that selecting a sorting option through the real
+  // HTML dropdown automatically saves it to localStorage.
+  it('should save the selected sort order when the user changes the dropdown', async () => {
+    // Arrange: Wait for the existing component's
+    // template-driven form to finish initializing.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Confirm that the component starts with Default sorting.
+    expect(component.sortOrder).toBe('default');
+
+    // Confirm that there is no saved sorting preference.
+    expect(localStorage.getItem('todoSortOrder')).toBeNull();
+
+    /// A. Locate the real dropdown
+    // Retrieve the actual HTML sorting dropdown.
+    const sortSelect: HTMLSelectElement | null =
+      fixture.nativeElement.querySelector('#todo-sort-select');
+
+    // Assert: The dropdown exists.
+    expect(sortSelect).not.toBeNull();
+
+    // Assert: The dropdown initially displays Default.
+    expect(sortSelect?.value).toBe('default');
+
+    /// B. Simulate a user's selection
+    // Act: Simulate the user selecting Title: Z-A.
+    sortSelect!.value = 'desc';
+
+    // Dispatch a real browser change event.
+    sortSelect!.dispatchEvent(new Event('change'));
+
+    /// C. Let Angular process the event
+    // Wait for Angular to process ngModel and ngModelChange.
+    await fixture.whenStable();
+
+    // Update the template after Angular processes the event.
+    fixture.detectChanges();
+
+    /// D. Verify automatic saving
+    // Assert: Two-way binding updated the component property.
+    expect(component.sortOrder).toBe('desc');
+
+    // Assert: Angular called saveSortOrder() automatically.
+    expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+    // Assert: The dropdown reflects the new selection.
+    expect(sortSelect?.value).toBe('desc');
+
+    // Assert: The Reset Sorting button is now visible.
+    const resetButton: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector('.reset-sort');
+
+    /// D. Verify automatic saving
+    expect(resetButton).not.toBeNull();
+
+    // Clean up the saved preference.
+    localStorage.removeItem('todoSortOrder');
+  });
+
+  // 53. Jasmine
+  // Lesson 162 - Part 2:
+  // Verify that multiple sorting changes through the HTML
+  // dropdown update both component state and localStorage.
+  it('should save each sorting change made through the dropdown', async () => {
+    // Arrange: Wait for Angular's form bindings to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Retrieve the real HTML sorting dropdown.
+    const sortSelect: HTMLSelectElement | null =
+      fixture.nativeElement.querySelector('#todo-sort-select');
+
+    // Assert: The dropdown exists.
+    expect(sortSelect).not.toBeNull();
+
+    // Verify the initial component and storage state.
+    expect(component.sortOrder).toBe('default');
+    expect(localStorage.getItem('todoSortOrder')).toBeNull();
+
+    /// A. Define a sequence of test values
+    // Define the sequence of user selections.
+    const sortChanges = ['asc', 'desc', 'active-first'] as const;
+
+    try {
+      /// B. Loop through each selection
+      // Act: Simulate each dropdown change, one at a time.
+      for (const sortOrder of sortChanges) {
+        ///C. Simulate real dropdown changes
+        // Change the native dropdown's selected value.
+        sortSelect!.value = sortOrder;
+
+        // Dispatch the browser event that Angular listens for.
+        sortSelect!.dispatchEvent(new Event('change'));
+
+        // Wait for Angular to process the change.
+        await fixture.whenStable();
+
+        // Refresh the component's rendered template.
+        fixture.detectChanges();
+
+        /// D. Test each change immediately
+        // Assert: The component reflects the latest selection.
+        expect(component.sortOrder).toBe(sortOrder);
+
+        // Assert: localStorage contains the latest preference.
+        expect(localStorage.getItem('todoSortOrder')).toBe(sortOrder);
+
+        // Assert: The dropdown displays the selected option.
+        expect(sortSelect!.value).toBe(sortOrder);
+
+        // Assert: Reset Sorting is available for non-default values.
+        const resetButton: HTMLButtonElement | null =
+          fixture.nativeElement.querySelector('.reset-sort');
+
+        expect(resetButton).not.toBeNull();
+      }
+
+      // Assert: The final preference remains the latest selection.
+      expect(component.sortOrder).toBe('active-first');
+
+      /// E. Verify the final preference
+      expect(localStorage.getItem('todoSortOrder')).toBe('active-first');
+    } finally {
+      // Clean up saved state even if an assertion fails.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 54. Jasmine
+  // Lesson 162 - Part 3:
+  // Verify that a preference selected through the actual
+  // dropdown is restored when another component initializes.
+  it('should restore a dropdown-selected preference in a new component', async () => {
+    // Arrange: Wait for Component A's form binding to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Confirm the original component starts with Default sorting.
+    expect(component.sortOrder).toBe('default');
+
+    // Confirm no sorting preference has been saved.
+    expect(localStorage.getItem('todoSortOrder')).toBeNull();
+
+    // Retrieve Component A's real HTML sorting dropdown.
+    const firstSelect: HTMLSelectElement | null =
+      fixture.nativeElement.querySelector('#todo-sort-select');
+
+    // Assert: The dropdown exists and starts at Default.
+    expect(firstSelect).not.toBeNull();
+    expect(firstSelect?.value).toBe('default');
+
+    /// A. Simulate a real user's selection
+    // Act: Simulate the user selecting Completed Tasks First.
+    firstSelect!.value = 'completed-first';
+
+    // Trigger Angular's ngModel and ngModelChange bindings.
+    firstSelect!.dispatchEvent(new Event('change'));
+
+    // Wait for Angular to process the dropdown event.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Assert: Component A now uses Completed-First sorting.
+    expect(component.sortOrder).toBe('completed-first');
+
+    // Assert: The dropdown interaction saved the preference.
+    expect(localStorage.getItem('todoSortOrder')).toBe('completed-first');
+
+    /// B. Create a second component
+    // Create Component B AFTER the preference was saved.
+    const secondFixture = TestBed.createComponent(TodoListComponent);
+
+    // Retrieve the second component instance.
+    const secondComponent = secondFixture.componentInstance;
+
+    try {
+      /// C. Trigger the real initialization process
+      // Before initialization, Component B has its class default.
+      expect(secondComponent.sortOrder).toBe('default');
+
+      // Act: Initialize Component B.
+      // Angular triggers ngOnInit() on the first detectChanges().
+      secondFixture.detectChanges();
+
+      // Wait for form-binding updates.
+      await secondFixture.whenStable();
+
+      // Refresh Component B's rendered template.
+      secondFixture.detectChanges();
+
+      /// D. Verify the restored dropdown
+      // Assert: Component B automatically restored the preference.
+      expect(secondComponent.sortOrder).toBe('completed-first');
+
+      // Retrieve Component B's sorting dropdown.
+      const secondSelect: HTMLSelectElement | null =
+        secondFixture.nativeElement.querySelector('#todo-sort-select');
+
+      // Assert: The new dropdown exists.
+      expect(secondSelect).not.toBeNull();
+
+      /// D. Verify the restored dropdown
+      // Assert: The new dropdown displays Completed Tasks First.
+      expect(secondSelect?.value).toBe('completed-first');
+
+      // Assert: The saved preference remains unchanged.
+      expect(localStorage.getItem('todoSortOrder')).toBe('completed-first');
+
+      // Assert: Component A still retains its own selected value.
+      expect(component.sortOrder).toBe('completed-first');
+    } finally {
+      // Clean up Component B's extra fixture.
+      secondFixture.destroy();
+
+      // Remove the preference so other tests are unaffected.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 55. Jasmine
+  // Lesson 162 - Part 4:
+  // Verify that selecting a sorting option through the
+  // real dropdown and clicking Reset Sorting restores
+  // the default state and updates localStorage.
+  it('should reset sorting after a real dropdown selection', async () => {
+    // Arrange: Wait for Angular's form controls to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Confirm that the component starts with Default sorting.
+    expect(component.sortOrder).toBe('default');
+
+    // Confirm that no saved sorting preference exists.
+    expect(localStorage.getItem('todoSortOrder')).toBeNull();
+
+    // Retrieve the real HTML sorting dropdown.
+    const sortSelect: HTMLSelectElement | null =
+      fixture.nativeElement.querySelector('#todo-sort-select');
+
+    // Assert: The dropdown exists.
+    expect(sortSelect).not.toBeNull();
+
+    // Assert: The dropdown initially displays Default.
+    expect(sortSelect?.value).toBe('default');
+
+    try {
+      /// A. Simulate the dropdown change
+      // STEP 1: Simulate the user selecting Title: Z-A.
+      sortSelect!.value = 'desc';
+
+      // Dispatch the native browser change event.
+      sortSelect!.dispatchEvent(new Event('change'));
+
+      // Wait for Angular to process ngModelChange.
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: The component changed to descending sorting.
+      expect(component.sortOrder).toBe('desc');
+
+      // Assert: The preference was automatically saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // Assert: The dropdown displays Title: Z-A.
+      expect(sortSelect!.value).toBe('desc');
+
+      /// B. Retrieve the Reset Sorting button
+      // STEP 2: Locate the Reset Sorting button.
+      const resetButton: HTMLButtonElement | null =
+        fixture.nativeElement.querySelector('.reset-sort');
+
+      // Assert: The Reset Sorting button is visible.
+      expect(resetButton).not.toBeNull();
+
+      /// C. Simulate a real button click
+      // STEP 3: Simulate the user clicking Reset Sorting.
+      resetButton!.click();
+
+      // Allow Angular to process the click event.
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      /// D. Verify component, HTML, and storage state
+      // Assert: The component returned to Default sorting.
+      expect(component.sortOrder).toBe('default');
+
+      // Assert: The dropdown returned to Default order.
+      expect(sortSelect!.value).toBe('default');
+
+      // Assert: resetSortOrder() saved the default preference.
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      /// E. Verify the Reset Sorting button disappears
+      // STEP 4: Verify the Reset Sorting button disappeared.
+      const resetButtonAfterClick: HTMLButtonElement | null =
+        fixture.nativeElement.querySelector('.reset-sort');
+
+      expect(resetButtonAfterClick).toBeNull();
+    } finally {
+      // Remove the saved preference to prevent test interference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
