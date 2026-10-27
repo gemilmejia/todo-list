@@ -2785,4 +2785,294 @@ describe('TodoListComponent', () => {
     // a new value to localStorage.
     expect(localStorage.getItem('todoSortOrder')).toBeNull();
   });
+
+  // 44. Jasmine
+  // Lesson 160 - Part 1:
+  // Verify that ngOnInit() automatically restores a saved
+  // sorting preference when a new component is initialized.
+  it('should restore the saved sort order during component initialization', async () => {
+    /// A. Save the preference before creating the component
+    // Arrange: Simulate a preference saved from an earlier visit.
+    localStorage.setItem('todoSortOrder', 'desc');
+
+    // Create a NEW component fixture after saving the preference.
+    // This is important because the shared beforeEach() fixture
+    // has already executed ngOnInit().
+    const newFixture = TestBed.createComponent(TodoListComponent);
+
+    // Get the component instance from the new fixture.
+    const newComponent = newFixture.componentInstance;
+
+    /// B. Verify the initial class property
+    // Assert: Before initialization, the component uses its
+    // class-level default sorting value.
+    expect(newComponent.sortOrder).toBe('default');
+
+    /// C. Trigger Angular initialization
+    // Act: Trigger the new component's ngOnInit().
+    newFixture.detectChanges();
+
+    /// D. Wait for form synchronization
+    // Wait for Angular's pending form updates.
+    await newFixture.whenStable();
+
+    // Refresh the rendered template.
+    newFixture.detectChanges();
+
+    /// E. Verify restored UI state
+    // Assert: ngOnInit() automatically restored the saved value.
+    expect(newComponent.sortOrder).toBe('desc');
+
+    // Retrieve the sorting dropdown from the NEW fixture.
+    const sortSelect: HTMLSelectElement | null =
+      newFixture.nativeElement.querySelector('#todo-sort-select');
+
+    // Assert: The dropdown exists.
+    expect(sortSelect).not.toBeNull();
+
+    // Assert: The dropdown reflects the restored preference.
+    expect(sortSelect?.value).toBe('desc');
+
+    // Assert: Loading the preference did not overwrite storage.
+    expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+    // Clean up the new component fixture.
+    newFixture.destroy();
+
+    // Remove the saved preference.
+    localStorage.removeItem('todoSortOrder');
+  });
+
+  // 45. Jasmine
+  // Lesson 160 - Part 2:
+  // Verify that a sorting preference restored during ngOnInit()
+  // affects the actual rendered order of Todo items.
+  it('should render Todos using the saved sort order during initialization', async () => {
+    // Arrange: Create mock Todos in a non-descending order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16011,
+        title: 'Apple Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16012,
+        title: 'Zebra Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16013,
+        title: 'Mango Task',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original Todo data and array order.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    /// A. Mock the TodoService before initializing the new component
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Mock the service before initializing the new fixture.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// B. Save the preference before creating the new fixture
+    // Simulate a previously saved Title: Z-A preference.
+    localStorage.setItem('todoSortOrder', 'desc');
+
+    // Create a NEW fixture after saving the preference.
+    // The shared beforeEach() fixture has already initialized.
+    const newFixture = TestBed.createComponent(TodoListComponent);
+
+    // Retrieve the new component instance.
+    const newComponent = newFixture.componentInstance;
+
+    /// E. Why use try...finally?. /// The finally block runs even if an assertion throws an error, helping ensure the extra component fixture and saved preference are cleaned up. This is a useful testing habit when working with resources or shared browser state.
+    try {
+      // Assert: The class initially uses Default sorting.
+      expect(newComponent.sortOrder).toBe('default');
+
+      /// C. Let Angular initialize the component
+      // Act: Trigger ngOnInit() and automatic preference restoration.
+      newFixture.detectChanges();
+
+      // Wait for Angular's pending template-driven form updates.
+      await newFixture.whenStable();
+
+      // Refresh the rendered template.
+      newFixture.detectChanges();
+
+      // Assert: The saved descending preference was restored.
+      expect(newComponent.sortOrder).toBe('desc');
+
+      // Retrieve the actual sorting dropdown.
+      const sortSelect: HTMLSelectElement | null =
+        newFixture.nativeElement.querySelector('#todo-sort-select');
+
+      // Assert: The dropdown displays Title: Z-A.
+      expect(sortSelect?.value).toBe('desc');
+
+      // Retrieve the rendered Todo components.
+      const todoItems: HTMLElement[] = Array.from(
+        newFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      // Extract Todo titles in their displayed DOM order.
+      const displayedTitles: string[] = todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+
+      /// D. Verify the rendered order
+      // Assert: Todos appear alphabetically Z-A.
+      expect(displayedTitles).toEqual([
+        'Zebra Task',
+        'Mango Task',
+        'Apple Task',
+      ]);
+
+      // Assert: All three Todos remain visible.
+      expect(todoItems.length).toBe(3);
+
+      // Assert: The source collection was not modified.
+      expect(mockTodos).toEqual(originalTodos);
+
+      // Assert: The saved preference remains unchanged.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+    } finally {
+      // Clean up even if an assertion fails.
+      newFixture.destroy();
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 46. Jasmine
+  // Lesson 160 - Part 3:
+  // Verify that ngOnInit() ignores invalid saved sorting
+  // preferences when a new component is initialized.
+  it('should ignore invalid saved sorting during initialization', async () => {
+    /// A. Save an invalid value before initialization
+    // Arrange: Simulate an unsupported saved sorting preference.
+    localStorage.setItem('todoSortOrder', 'unknown-sort');
+
+    /// B. Create a fresh Angular component
+    // Create a new fixture AFTER storing the invalid value.
+    // The shared beforeEach() fixture has already initialized.
+    const newFixture = TestBed.createComponent(TodoListComponent);
+
+    // Retrieve the new component instance.
+    const newComponent = newFixture.componentInstance;
+
+    try {
+      /// D. Check defensive validation
+      // Assert: Before ngOnInit(), sorting starts at default.
+      expect(newComponent.sortOrder).toBe('default');
+
+      /// C. Trigger initialization
+      // Act: Trigger ngOnInit(), which calls loadSortOrder().
+      newFixture.detectChanges();
+
+      // Wait for Angular's pending form updates.
+      await newFixture.whenStable();
+
+      /// C. Trigger initialization
+      // Synchronize the dropdown and component template.
+      newFixture.detectChanges();
+
+      // Assert: Invalid sorting was not applied.
+      expect(newComponent.sortOrder).toBe('default');
+
+      // Retrieve the sorting dropdown from the new fixture.
+      const sortSelect: HTMLSelectElement | null =
+        newFixture.nativeElement.querySelector('#todo-sort-select');
+
+      // Assert: The dropdown exists.
+      expect(sortSelect).not.toBeNull();
+
+      // Assert: The dropdown still displays Default.
+      expect(sortSelect?.value).toBe('default');
+
+      /// E. Verify localStorage behavior
+      // Assert: The invalid value remains stored because
+      // loadSortOrder() ignores it rather than deleting it.
+      expect(localStorage.getItem('todoSortOrder')).toBe('unknown-sort');
+    } finally {
+      // Always destroy the extra fixture and clear test storage.
+      newFixture.destroy();
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 47. Jasmine
+  // Lesson 160 - Part 4:
+  // Verify that a new TodoListComponent initializes with
+  // default sorting when no saved preference exists.
+  it('should initialize with default sorting when no preference is saved', async () => {
+    /// A. Simulate a first-time user
+    // Arrange: Ensure that localStorage contains no
+    // previously saved sorting preference.
+    localStorage.removeItem('todoSortOrder');
+
+    /// B. Create a new component
+    // Create a NEW component fixture.
+    // This allows us to test ngOnInit() independently
+    // of the fixture created by our shared beforeEach().
+    const newFixture = TestBed.createComponent(TodoListComponent);
+
+    // Retrieve the component instance from this new fixture.
+    const newComponent = newFixture.componentInstance;
+
+    try {
+      // Assert: Before ngOnInit(), the component starts
+      // with its class-level default sorting value.
+      expect(newComponent.sortOrder).toBe('default');
+
+      // Assert: No saved sorting preference exists.
+      expect(localStorage.getItem('todoSortOrder')).toBeNull();
+
+      /// C. Trigger the real lifecycle hook
+      // Act: Trigger Angular component initialization.
+      // The first detectChanges() calls ngOnInit().
+      newFixture.detectChanges();
+
+      // Wait for pending Angular form-binding updates.
+      await newFixture.whenStable();
+
+      // Refresh the rendered template.
+      newFixture.detectChanges();
+
+      /// D. Verify the default state
+      // Assert: The component retains default sorting.
+      expect(newComponent.sortOrder).toBe('default');
+
+      // Retrieve the actual sorting dropdown.
+      const sortSelect: HTMLSelectElement | null =
+        newFixture.nativeElement.querySelector('#todo-sort-select');
+
+      // Assert: The dropdown exists.
+      expect(sortSelect).not.toBeNull();
+
+      /// D. Verify the default state
+      // Assert: Default sorting is selected.
+      expect(sortSelect?.value).toBe('default');
+
+      // Assert: The Reset Sorting button is not visible
+      // because the component already uses default sorting.
+      const resetButton: HTMLButtonElement | null =
+        newFixture.nativeElement.querySelector('.reset-sort');
+
+      expect(resetButton).toBeNull();
+
+      /// E. Verify that initialization doesn't write a preference
+      // Assert: Initialization did not create a new
+      // localStorage preference automatically.
+      expect(localStorage.getItem('todoSortOrder')).toBeNull();
+    } finally {
+      // Always destroy the additional Angular fixture.
+      newFixture.destroy();
+
+      // Keep localStorage clean for other tests.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
