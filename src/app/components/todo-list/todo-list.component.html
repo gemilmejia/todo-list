@@ -177,6 +177,8 @@
         </option>
       }
     </select>
+
+    <!-- reset SortOrder -->
     @if (sortOrder !== "default") {
       <button type="button" class="reset-sort" (click)="resetSortOrder()">
         ↺ Reset Sorting
@@ -216,7 +218,7 @@
   </div>
 
   <!-- @if (filteredTodos.length === 0) { -->
-   <!-- empty-message -->
+  <!-- empty-message -->
   @if (totalTodoCount === 0) {
     <div class="empty-state">
       @if (filter === "all") {
