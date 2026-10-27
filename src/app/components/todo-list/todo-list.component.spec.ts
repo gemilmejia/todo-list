@@ -16,6 +16,11 @@ describe('TodoListComponent', () => {
   let fixture: ComponentFixture<TodoListComponent>;
 
   beforeEach(async () => {
+    // Lesson 158 - Test isolation:
+    // Remove the saved sorting preference so each test
+    // starts without a sorting choice from another test.
+    localStorage.removeItem('todoSortOrder');
+
     await TestBed.configureTestingModule({
       imports: [TodoListComponent],
       providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -25,6 +30,7 @@ describe('TodoListComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
+
   // 1. Component creation.
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -2238,5 +2244,254 @@ describe('TodoListComponent', () => {
     // Assert: The original collection remains unchanged.
     expect(mockTodos).toEqual(originalTodos);
     expect(mockTodos.length).toBe(5);
+  });
+
+  // 36. Jasmine
+  // Lesson 158 - Part 1:
+  // Verify all sorting dropdown options and labels.
+  it('should render all five Todo sorting options correctly', () => {
+    // Arrange: Set the initial sorting selection.
+    component.sortOrder = 'default';
+
+    // Act: Update the Angular template.
+    fixture.detectChanges();
+
+    /// A. Retrieve the actual HTML dropdown
+    // Find the sorting dropdown.
+    const sortSelect: HTMLSelectElement | null =
+      fixture.nativeElement.querySelector('#todo-sort-select');
+
+    // Assert: The dropdown exists.
+    expect(sortSelect).not.toBeNull();
+
+    // Make sure the element exists before accessing its options.
+    if (!sortSelect) {
+      return;
+    }
+
+    /// B. Inspect rendered options
+    // Extract all option values in their rendered order.
+    const optionValues: string[] = Array.from(sortSelect.options).map(
+      (option) => option.value,
+    );
+
+    /// C. Verify what users see
+    // Extract all visible option labels.
+    const optionLabels: string[] = Array.from(sortSelect.options).map(
+      (option) => option.textContent?.trim() ?? '',
+    );
+
+    // Assert: Exactly five options are rendered.
+    expect(sortSelect.options.length).toBe(5);
+
+    // Assert: Each option has the correct internal value.
+    expect(optionValues).toEqual([
+      'default',
+      'asc',
+      'desc',
+      'active-first',
+      'completed-first',
+    ]);
+
+    // Assert: Each option has the correct displayed label.
+    expect(optionLabels).toEqual([
+      'Default order',
+      'Title: A–Z',
+      'Title: Z–A',
+      'Active Tasks First',
+      'Completed Tasks First',
+    ]);
+
+    /// D. Verify the selected value
+    // Assert: Default sorting is selected initially.
+    expect(sortSelect.value).toBe('default');
+
+    // Assert: Component sorting state is consistent.
+    expect(component.sortOrder).toBe('default');
+  });
+
+  // 37. Jasmine
+  // Lesson 158 - Part 2:
+  // Verify that changing the sort dropdown updates the component
+  // and changes the rendered Todo order.
+  it('should update sorting when the user changes the dropdown', async () => {
+    // Arrange: Create mock Todos in non-alphabetical order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 15811,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 15812,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 15813,
+        title: 'Mango Task',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original source order and Todo values.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Return the mock Todos instead of actual service data.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    // Start with default sorting and no filtering/searching.
+    component.sortOrder = 'default';
+    component.filter = 'all';
+    component.searchTerm = '';
+
+    fixture.detectChanges();
+
+    // Find the actual HTML sorting dropdown.
+    const sortSelect: HTMLSelectElement =
+      fixture.nativeElement.querySelector('#todo-sort-select');
+
+    // Helper: Read Todo titles in their rendered order.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Assert: Default order is displayed initially.
+    expect(sortSelect.value).toBe('default');
+
+    expect(getDisplayedTitles()).toEqual([
+      'Zebra Task',
+      'Apple Task',
+      'Mango Task',
+    ]);
+
+    /// A. Simulate a real user interaction
+    // Act: Simulate the user selecting Title: A-Z.
+    sortSelect.value = 'asc';
+
+    // Notify Angular that the select value changed.
+    sortSelect.dispatchEvent(new Event('change'));
+
+    /// B. Wait for Angular's form updates
+    // Wait for Angular's ngModel update to finish.
+    await fixture.whenStable();
+
+    // Refresh the rendered Todo list.
+    fixture.detectChanges();
+
+    /// C. Verify two-way binding
+    // Assert: Two-way binding updates the component state.
+    expect(component.sortOrder).toBe('asc');
+
+    // Assert: The dropdown reflects the selected value.
+    expect(sortSelect.value).toBe('asc');
+
+    /// D. Verify the sorting pipeline
+    // Assert: Todos are now displayed alphabetically.
+    expect(getDisplayedTitles()).toEqual([
+      'Apple Task',
+      'Mango Task',
+      'Zebra Task',
+    ]);
+
+    // Assert: The source Todo collection remains unchanged.
+    expect(mockTodos).toEqual(originalTodos);
+  });
+
+  // 38. Jasmine
+  // Lesson 158 - Part 3:
+  // Verify that saveSortOrder() persists the selected
+  // sorting preference to localStorage.
+  it('should save the selected sort order to localStorage', () => {
+    /// B. Save the selected option
+    // Arrange: Select Completed Tasks First.
+    component.sortOrder = 'completed-first';
+
+    /// A. Verify the initial storage state
+    // Confirm this test starts without a saved preference.
+    expect(localStorage.getItem('todoSortOrder')).toBeNull();
+
+    /// B. Save the selected option
+    // Act: Save the selected sorting preference.
+    component.saveSortOrder();
+
+    /// C. Verify persistence
+    // Assert: localStorage contains the expected value.
+    expect(localStorage.getItem('todoSortOrder')).toBe('completed-first');
+
+    // Assert: The component still has the selected option.
+    expect(component.sortOrder).toBe('completed-first');
+
+    /// D. Clean up afterward
+    // Clean up this test's saved preference.
+    localStorage.removeItem('todoSortOrder');
+  });
+
+  // 39. Jasmine
+  // Lesson 158 - Part 4:
+  // Verify that loadSortOrder() restores a valid sorting
+  // preference from localStorage and updates the dropdown.
+  it('should restore the saved sort order from localStorage', async () => {
+    // Arrange: Simulate a saved sorting preference.
+    localStorage.setItem('todoSortOrder', 'desc');
+
+    // Reset the component sorting state.
+    component.sortOrder = 'default';
+
+    // Ensure the component and dropdown start in sync.
+    fixture.detectChanges();
+
+    // Wait for pending Angular form updates.
+    await fixture.whenStable();
+
+    // Assert: The component starts with default sorting.
+    expect(component.sortOrder).toBe('default');
+
+    // Assert: The saved preference exists.
+    expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+    // Act: Restore the saved preference.
+    component.loadSortOrder();
+
+    // Assert: The component restored the saved value.
+    expect(component.sortOrder).toBe('desc');
+
+    // Allow Angular to update the dropdown binding.
+    fixture.detectChanges();
+
+    // Wait for pending ngModel updates.
+    await fixture.whenStable();
+
+    // Run change detection again to synchronize the DOM.
+    fixture.detectChanges();
+
+    // Find the actual sorting dropdown.
+    const sortSelect: HTMLSelectElement | null =
+      fixture.nativeElement.querySelector('#todo-sort-select');
+
+    // Assert: The dropdown exists.
+    expect(sortSelect).not.toBeNull();
+
+    if (!sortSelect) {
+      return;
+    }
+
+    // Assert: The dropdown displays the restored value.
+    expect(sortSelect.value).toBe('desc');
+
+    // Assert: The stored preference remains unchanged.
+    expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+    // Clean up the saved preference.
+    localStorage.removeItem('todoSortOrder');
   });
 });
