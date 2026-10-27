@@ -3772,4 +3772,531 @@ describe('TodoListComponent', () => {
       localStorage.removeItem('todoSortOrder');
     }
   });
+
+  // 56. Jasmine
+  // Lesson 163 - Part 1:
+  // Verify that selecting A-Z sorting and clicking the Active
+  // filter displays only unfinished Todos in alphabetical order.
+  it('should combine dropdown sorting with the active filter', async () => {
+    // ARRANGE: Create test Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16301,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16302,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16303,
+        title: 'Mango Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16304,
+        title: 'Banana Task',
+        completed: false,
+      }),
+    ];
+
+    // Save a copy to confirm sorting doesn't mutate source data.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    /// A. Mock predictable data
+    // Replace TodoService.getTodos() with predictable test data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for the existing component's form bindings.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Retrieve the actual sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    // Confirm the starting component state.
+    expect(component.sortOrder).toBe('default');
+    expect(component.filter).toBe('all');
+
+    try {
+      /// B. Trigger sorting through the real dropdown
+      // STEP 1: User chooses Title: A-Z.
+      sortSelect.value = 'asc';
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: Angular updated and saved the sorting preference.
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // STEP 2: Locate the Active filter button.
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      // Find the filter button based on its visible label.
+      const activeButton = buttons.find(
+        (button) => button.textContent?.trim() === 'Active',
+      );
+
+      expect(activeButton).toBeDefined();
+
+      /// C. Click the real filter button
+      // STEP 3: Click the actual Active filter button.
+      activeButton!.click();
+
+      // Let Angular process the click and update the template.
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: The component switched to Active filtering.
+      expect(component.filter).toBe('active');
+
+      // Assert: The selected sorting preference was retained.
+      expect(component.sortOrder).toBe('asc');
+
+      // STEP 4: Collect the rendered Todo titles in DOM order.
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      const displayedTitles = todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+
+      /// D. Verify combined behavior
+      // Assert: Only unfinished tasks remain, sorted A-Z.
+      expect(displayedTitles).toEqual([
+        'Banana Task',
+        'Mango Task',
+        'Zebra Task',
+      ]);
+
+      // Assert: Exactly three active Todos are displayed.
+      expect(todoItems.length).toBe(3);
+
+      /// E. Verify original data remains unchanged
+      // Assert: Sorting and filtering did not mutate source data.
+      expect(mockTodos).toEqual(originalTodos);
+
+      // Assert: Filtering didn't overwrite the sorting preference.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+    } finally {
+      // Remove saved state after the test.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 57. Jasmine
+  // Lesson 163 - Part 2:
+  // Verify that selecting Z-A sorting and clicking the
+  // Completed filter displays only finished Todos
+  // in descending alphabetical order.
+  it('should combine dropdown sorting with the completed filter', async () => {
+    // ARRANGE: Create mock Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      /// A. Create a mix of completed and unfinished Todos
+      createMockTodo({
+        id: 16311,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16312,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16313,
+        title: 'Mango Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16314,
+        title: 'Banana Task',
+        completed: true,
+      }),
+    ];
+
+    // Save a snapshot of the original Todo collection.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Replace TodoService.getTodos() with predictable mock data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for Angular's form bindings to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Retrieve the real sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    // Verify the initial state.
+    expect(component.sortOrder).toBe('default');
+    expect(component.filter).toBe('all');
+
+    try {
+      /// B. Simulate the sorting dropdown
+      // STEP 1: Simulate selecting Title: Z-A.
+      sortSelect.value = 'desc';
+
+      // Dispatch the browser change event.
+      sortSelect.dispatchEvent(new Event('change'));
+
+      // Wait for Angular to update ngModel.
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: Sorting preference was updated.
+      expect(component.sortOrder).toBe('desc');
+
+      // Assert: Sorting preference was saved automatically.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // STEP 2: Locate the Completed filter button.
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const completedButton = buttons.find(
+        (button) => button.textContent?.trim() === 'Completed',
+      );
+
+      // Assert: The Completed button exists.
+      expect(completedButton).toBeDefined();
+
+      // STEP 3: Click the Completed filter button.
+      completedButton!.click();
+
+      // Let Angular process the click and update the template.
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: Completed filtering is now active.
+      expect(component.filter).toBe('completed');
+
+      // Assert: Descending sorting remains selected.
+      expect(component.sortOrder).toBe('desc');
+
+      // STEP 4: Read the displayed Todo titles.
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      const displayedTitles: string[] = todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+
+      /// D. Check filtering and sorting together
+      // Assert: Only completed Todos appear in Z-A order.
+      expect(displayedTitles).toEqual([
+        'Mango Task',
+        'Banana Task',
+        'Apple Task',
+      ]);
+
+      // Assert: Exactly three completed Todos are visible.
+      expect(todoItems.length).toBe(3);
+
+      /// E. Verify data integrity
+      // Assert: Filtering and sorting did not mutate source data.
+      expect(mockTodos).toEqual(originalTodos);
+
+      // Assert: Filtering did not overwrite saved sorting.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+    } finally {
+      // Always remove saved sorting preferences after testing.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 58. Jasmine
+  // Lesson 163 - Part 3:
+  // Verify that changing the sorting dropdown and typing into
+  // the real search input displays matching Todos in A-Z order.
+  it('should combine dropdown sorting with a real search input', async () => {
+    // ARRANGE: Create predictable mock Todo data.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16321,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16322,
+        title: 'Apple Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16323,
+        title: 'Mango Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16324,
+        title: 'Buy Groceries',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original collection for comparison.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Mock the service's Todo collection.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for Angular's form controls to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Find the sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    /// A. Find the actual search input
+    // Find the search input by its ngModel binding.
+    const searchInput = fixture.nativeElement.querySelector(
+      'input[placeholder*="Search"]',
+    ) as HTMLInputElement | null;
+
+    // Verify the search input exists before using it.
+    expect(searchInput).not.toBeNull();
+
+    // Verify the component's initial state.
+    expect(component.sortOrder).toBe('default');
+    expect(component.searchTerm).toBe('');
+    expect(component.filter).toBe('all');
+
+    try {
+      // STEP 1: User chooses Title: A-Z.
+      sortSelect.value = 'asc';
+
+      // Trigger Angular's sorting dropdown binding.
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify sorting was selected and persisted.
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      /// B. Simulate typing into the input
+      // STEP 2: User types "task" into the search input.
+      searchInput!.value = 'task';
+
+      // Trigger Angular's input binding.
+      searchInput!.dispatchEvent(new Event('input'));
+
+      /// C. Wait for Angular to process the input
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify Angular updated the search property.
+      expect(component.searchTerm).toBe('task');
+
+      // Verify sorting remains selected.
+      expect(component.sortOrder).toBe('asc');
+
+      // STEP 3: Read the Todo titles currently rendered.
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      const displayedTitles: string[] = todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+
+      /// D. Verify the combined search and sorting result
+      // ASSERT: Search results appear alphabetically A-Z.
+      expect(displayedTitles).toEqual([
+        'Apple Task',
+        'Mango Task',
+        'Zebra Task',
+      ]);
+
+      // Only matching Todos should be visible.
+      expect(todoItems.length).toBe(3);
+
+      // Searching and sorting must not change the source data.
+      expect(mockTodos).toEqual(originalTodos);
+
+      /// E. Verify existing preferences remain unchanged.
+      // Searching must not overwrite the saved sorting preference.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+    } finally {
+      // Clean up test storage even if an assertion fails.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 59. Jasmine
+  // Lesson 163 - Part 4:
+  // Verify that real sorting, filtering, and searching
+  // controls work together to display the correct Todos.
+  it('should combine sorting filtering and searching through UI controls', async () => {
+    // ARRANGE: Create test Todos with different titles
+    // and completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16331,
+        title: 'Apple Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16332,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16333,
+        title: 'Mango Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16334,
+        title: 'Banana Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16335,
+        title: 'Buy Groceries',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original Todo collection.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    /// A. Mock the TodoService
+    // Mock the injected service to return predictable Todo data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for Angular's form bindings to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Retrieve the actual HTML sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    // Retrieve the actual search input.
+    const searchInput = fixture.nativeElement.querySelector(
+      'input[placeholder*="Search"]',
+    ) as HTMLInputElement | null;
+
+    // Verify that both controls exist.
+    expect(sortSelect).not.toBeNull();
+    expect(searchInput).not.toBeNull();
+
+    // Verify the initial component state.
+    expect(component.sortOrder).toBe('default');
+    expect(component.filter).toBe('all');
+    expect(component.searchTerm).toBe('');
+
+    try {
+      /// B. Change sorting through the dropdown
+      // STEP 1: Simulate selecting Title: Z-A.
+      sortSelect.value = 'desc';
+
+      // Dispatch the native change event.
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: Descending sorting is selected and saved.
+      expect(component.sortOrder).toBe('desc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // STEP 2: Locate the real Active filter button.
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const activeButton = buttons.find(
+        (button) => button.textContent?.trim() === 'Active',
+      );
+
+      // Assert: The Active button exists.
+      expect(activeButton).toBeDefined();
+
+      /// C. Click the real filter button
+      // Click the Active filter button.
+      activeButton!.click();
+
+      // Update Angular's component and template.
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: Active filtering is selected.
+      expect(component.filter).toBe('active');
+
+      // Assert: Sorting remains descending.
+      expect(component.sortOrder).toBe('desc');
+
+      /// D. Type into the real search input
+      // STEP 3: Simulate typing "task" into the search box.
+      searchInput!.value = 'task';
+
+      // Dispatch a native input event.
+      searchInput!.dispatchEvent(new Event('input'));
+
+      // Wait for ngModel to update searchTerm.
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: Angular updated the search term.
+      expect(component.searchTerm).toBe('task');
+
+      // Assert: Other selected options remain unchanged.
+      expect(component.sortOrder).toBe('desc');
+      expect(component.filter).toBe('active');
+
+      // STEP 4: Retrieve the currently rendered Todo items.
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      // Extract their titles in displayed DOM order.
+      const displayedTitles: string[] = todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+
+      /// E. Verify all three features together
+      // ASSERT: Only active matching Todos appear in Z-A order.
+      expect(displayedTitles).toEqual([
+        'Zebra Task',
+        'Banana Task',
+        'Apple Task',
+      ]);
+
+      // Exactly three matching active Todos should be visible.
+      expect(todoItems.length).toBe(3);
+
+      // Filtering, searching, and sorting must not mutate
+      // the original Todo collection.
+      expect(mockTodos).toEqual(originalTodos);
+
+      // Confirm that search/filter interactions did not
+      // overwrite the saved sorting preference.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+    } finally {
+      // Always clear the saved sorting preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
