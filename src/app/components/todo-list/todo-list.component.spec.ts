@@ -3075,4 +3075,393 @@ describe('TodoListComponent', () => {
       localStorage.removeItem('todoSortOrder');
     }
   });
+
+  // 48. Jasmine
+  // Lesson 161 - Part 1:
+  // Verify that a newly initialized component restores
+  // Active Tasks First sorting and renders Todos correctly.
+  it('should restore active-first sorting in a new component', async () => {
+    // Arrange: Create Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16101,
+        title: 'Study Angular',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16102,
+        title: 'Practice TypeScript',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16103,
+        title: 'Review Jasmine',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16104,
+        title: 'Build Portfolio',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original Todo data and array order.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Retrieve the shared injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Mock the service before initializing the new component.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// A. Save the preference before creating the component
+    // Simulate a previously saved sorting preference.
+    localStorage.setItem('todoSortOrder', 'active-first');
+
+    // Create a NEW component fixture after saving the preference.
+    const newFixture = TestBed.createComponent(TodoListComponent);
+
+    // Access the new component instance.
+    const newComponent = newFixture.componentInstance;
+
+    try {
+      // Before ngOnInit(), the property should have its default.
+      expect(newComponent.sortOrder).toBe('default');
+
+      /// B. Trigger initialization
+      // Act: Trigger ngOnInit(), which calls loadSortOrder().
+      newFixture.detectChanges();
+
+      // Wait for pending Angular form updates.
+      await newFixture.whenStable();
+
+      /// B. Trigger initialization
+      // Refresh the rendered template.
+      newFixture.detectChanges();
+
+      // Assert: The saved Active-First option was restored.
+      expect(newComponent.sortOrder).toBe('active-first');
+
+      // Find the actual sorting dropdown.
+      const sortSelect: HTMLSelectElement | null =
+        newFixture.nativeElement.querySelector('#todo-sort-select');
+
+      // Assert: The dropdown reflects Active Tasks First.
+      expect(sortSelect?.value).toBe('active-first');
+
+      // Retrieve the rendered Todo components.
+      const todoItems: HTMLElement[] = Array.from(
+        newFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      // Extract Todo titles in their displayed order.
+      const displayedTitles: string[] = todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+
+      /// C. Verify the displayed Todo order
+      // Assert: Unfinished Todos appear before completed Todos.
+      expect(displayedTitles).toEqual([
+        'Practice TypeScript',
+        'Build Portfolio',
+        'Study Angular',
+        'Review Jasmine',
+      ]);
+
+      // Assert: All four Todos are still displayed.
+      expect(todoItems.length).toBe(4);
+
+      /// D. Verify source-data integrity
+      // Assert: Sorting did not modify the original collection.
+      expect(mockTodos).toEqual(originalTodos);
+
+      // Assert: The saved preference remains unchanged.
+      expect(localStorage.getItem('todoSortOrder')).toBe('active-first');
+    } finally {
+      // Always clean up the extra fixture and saved preference.
+      newFixture.destroy();
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 49. Jasmine
+  // Lesson 161 - Part 2:
+  // Verify that a newly initialized component restores
+  // Completed Tasks First sorting and renders Todos correctly.
+  it('should restore completed-first sorting in a new component', async () => {
+    // Arrange: Create Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16111,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16112,
+        title: 'Practice TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16113,
+        title: 'Build Portfolio',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16114,
+        title: 'Review Jasmine',
+        completed: true,
+      }),
+    ];
+
+    // Preserve the original array order and Todo values.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Retrieve the injected TodoService.
+    const todoService = TestBed.inject(TodoService);
+
+    // Mock the service before initializing the new component.
+    spyOn(todoService, 'getTodos').and.returnValue(mockTodos);
+
+    /// A. Store the preference before initialization
+    // Simulate a previously saved Completed-First preference.
+    localStorage.setItem('todoSortOrder', 'completed-first');
+
+    // Create a NEW component after saving the preference.
+    const newFixture = TestBed.createComponent(TodoListComponent);
+
+    // Retrieve its component instance.
+    const newComponent = newFixture.componentInstance;
+
+    try {
+      // Assert: Before ngOnInit(), the class default is selected.
+      expect(newComponent.sortOrder).toBe('default');
+
+      /// B. Allow Angular to restore the preference
+      // Act: Initialize the new component.
+      // The first detectChanges() triggers ngOnInit().
+      newFixture.detectChanges();
+
+      // Wait for pending Angular form updates.
+      await newFixture.whenStable();
+
+      // Synchronize the rendered template.
+      newFixture.detectChanges();
+
+      // Assert: The saved Completed-First option was restored.
+      expect(newComponent.sortOrder).toBe('completed-first');
+
+      // Find the actual sorting dropdown.
+      const sortSelect: HTMLSelectElement | null =
+        newFixture.nativeElement.querySelector('#todo-sort-select');
+
+      // Assert: The dropdown reflects the restored preference.
+      expect(sortSelect?.value).toBe('completed-first');
+
+      // Retrieve rendered Todo components in DOM order.
+      const todoItems: HTMLElement[] = Array.from(
+        newFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      // Extract their displayed titles.
+      const displayedTitles: string[] = todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+
+      /// C. Verify the actual displayed order
+      // Assert: Completed tasks appear before unfinished tasks.
+      expect(displayedTitles).toEqual([
+        'Practice TypeScript',
+        'Review Jasmine',
+        'Study Angular',
+        'Build Portfolio',
+      ]);
+
+      // Assert: All four Todos remain visible.
+      expect(todoItems.length).toBe(4);
+
+      /// D. Protect the original Todo data
+      // Assert: The source Todo collection remains unchanged.
+      expect(mockTodos).toEqual(originalTodos);
+
+      // Assert: Loading does not overwrite the saved preference.
+      expect(localStorage.getItem('todoSortOrder')).toBe('completed-first');
+    } finally {
+      // Always destroy the extra fixture.
+      newFixture.destroy();
+
+      // Prevent the saved preference from affecting other tests.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 50. Jasmine
+  // Lesson 161 - Part 3:
+  // Verify that a preference saved by one component
+  // is restored automatically in another component.
+  it('should restore a sort preference saved by another component', async () => {
+    // Arrange: Our shared beforeEach() already created
+    // and initialized the first component instance.
+
+    // Confirm that no preference was saved initially.
+    expect(localStorage.getItem('todoSortOrder')).toBeNull();
+
+    /// A. Save through the component method
+    // Step 1: Select Title: A-Z in the first component.
+    component.sortOrder = 'asc';
+
+    // Save the preference using the real component method.
+    component.saveSortOrder();
+
+    // Assert: The preference was saved successfully.
+    expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+    /// B. Create another component
+    // Step 2: Create a second, independent component instance.
+    const secondFixture = TestBed.createComponent(TodoListComponent);
+
+    const secondComponent = secondFixture.componentInstance;
+
+    try {
+      /// C. Initialize the second component
+      // Assert: The second component starts with its class default.
+      expect(secondComponent.sortOrder).toBe('default');
+
+      // Act: Initialize the second component.
+      // The first detectChanges() triggers ngOnInit().
+      secondFixture.detectChanges();
+
+      // Wait for Angular's pending form updates.
+      await secondFixture.whenStable();
+
+      // Synchronize the rendered template.
+      secondFixture.detectChanges();
+
+      /// D. Verify independent component state
+      // Assert: The second component restored the saved value.
+      expect(secondComponent.sortOrder).toBe('asc');
+
+      // Retrieve the second component's sorting dropdown.
+      const secondSortSelect: HTMLSelectElement | null =
+        secondFixture.nativeElement.querySelector('#todo-sort-select');
+
+      // Assert: The dropdown reflects Title: A-Z.
+      expect(secondSortSelect).not.toBeNull();
+      expect(secondSortSelect?.value).toBe('asc');
+
+      // Assert: The saved value remains unchanged.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      /// D. Verify independent component state
+      // Assert: The original component still has its selection.
+      expect(component.sortOrder).toBe('asc');
+    } finally {
+      // Clean up the second fixture even if a test assertion fails.
+      secondFixture.destroy();
+
+      // Remove saved state so it cannot affect other tests.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 51. Jasmine
+  // Lesson 161 - Part 4:
+  // Verify that component instances maintain independent
+  // sorting states while sharing saved localStorage preferences.
+  it('should keep existing component sorting states independent', async () => {
+    // Arrange: The shared beforeEach() already initialized
+    // our first component (Component A).
+
+    // Make sure this test starts with no saved preference.
+    expect(localStorage.getItem('todoSortOrder')).toBeNull();
+
+    /// A. Component instances have independent properties
+    // Component A selects and saves ascending sorting.
+    component.sortOrder = 'asc';
+    component.saveSortOrder();
+
+    // Assert: localStorage now contains the ascending option.
+    expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+    // Create Component B after the first preference was saved.
+    const secondFixture = TestBed.createComponent(TodoListComponent);
+    const secondComponent = secondFixture.componentInstance;
+
+    try {
+      // Initialize Component B through ngOnInit().
+      secondFixture.detectChanges();
+
+      // Wait for Angular's form binding to stabilize.
+      await secondFixture.whenStable();
+      secondFixture.detectChanges();
+
+      // Assert: Component B restored the ascending preference.
+      expect(secondComponent.sortOrder).toBe('asc');
+
+      // Component A changes to descending sorting.
+      component.sortOrder = 'desc';
+
+      /// B. localStorage is shared
+      // Save the updated preference using Component A.
+      component.saveSortOrder();
+
+      // Assert: The shared saved preference was updated.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // Assert: Component A now uses descending sorting.
+      expect(component.sortOrder).toBe('desc');
+
+      // Assert: Component B still uses its own previous state.
+      expect(secondComponent.sortOrder).toBe('asc');
+
+      // Verify Component B's dropdown remains on A-Z.
+      secondFixture.detectChanges();
+      await secondFixture.whenStable();
+      secondFixture.detectChanges();
+
+      const secondSelect: HTMLSelectElement | null =
+        secondFixture.nativeElement.querySelector('#todo-sort-select');
+
+      expect(secondSelect?.value).toBe('asc');
+
+      /// C. New components restore the latest saved preference
+      // Create Component C after the updated preference was saved.
+      const thirdFixture = TestBed.createComponent(TodoListComponent);
+      const thirdComponent = thirdFixture.componentInstance;
+
+      /// D. Why use nested try...finally?. /// We're creating two additional Angular fixtures inside one test. /// Nested try...finally blocks help ensure that each fixture is destroyed and localStorage is cleaned up, even when an assertion fails. /// This is especially important when testing shared state across multiple component instances.
+      try {
+        /// C. New components restore the latest saved preference
+        // Trigger Component C's initialization.
+        thirdFixture.detectChanges();
+
+        // Wait for pending Angular form updates.
+        await thirdFixture.whenStable();
+        thirdFixture.detectChanges();
+
+        // Assert: Component C restores the latest preference.
+        expect(thirdComponent.sortOrder).toBe('desc');
+
+        // Verify Component C's dropdown displays Z-A.
+        const thirdSelect: HTMLSelectElement | null =
+          thirdFixture.nativeElement.querySelector('#todo-sort-select');
+
+        expect(thirdSelect?.value).toBe('desc');
+
+        // Component B must still retain its own sorting state.
+        expect(secondComponent.sortOrder).toBe('asc');
+
+        // The latest saved preference should remain unchanged.
+        expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+      } finally {
+        // Always destroy Component C's fixture.
+        thirdFixture.destroy();
+      }
+    } finally {
+      // Always destroy Component B's fixture.
+      secondFixture.destroy();
+
+      // Remove shared saved state after testing.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
