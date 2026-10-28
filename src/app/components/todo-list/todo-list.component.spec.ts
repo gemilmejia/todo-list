@@ -6815,4 +6815,567 @@ describe('TodoListComponent', () => {
       localStorage.removeItem('todoSortOrder');
     }
   });
+
+  // 76. Jasmine
+  // Lesson 168 - Part 1:
+  // Verify that A-Z sorting is restored when TodoListComponent
+  // is destroyed and recreated.
+  it('should restore saved ascending sorting after component reinitialization', async () => {
+    // ARRANGE: Create predictable Todo data.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16801,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16802,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16803,
+        title: 'Banana Task',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original Todo collection.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Make TodoService return our mock data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Helper: Read rendered titles from a specific fixture.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Declare a variable for the replacement component.
+    let newFixture: ComponentFixture<TodoListComponent> | undefined;
+
+    try {
+      // STEP 1: Check the original component's default state.
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+
+      expect(getDisplayedTitles(fixture)).toEqual([
+        'Zebra Task',
+        'Apple Task',
+        'Banana Task',
+      ]);
+
+      // STEP 2: Find the original sorting dropdown.
+      const originalSortSelect = fixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(originalSortSelect).not.toBeNull();
+
+      // Select Title: A-Z through the actual HTML dropdown.
+      originalSortSelect.value = 'asc';
+      originalSortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify the preference was selected and saved.
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      expect(getDisplayedTitles(fixture)).toEqual([
+        'Apple Task',
+        'Banana Task',
+        'Zebra Task',
+      ]);
+
+      // STEP 3: Destroy the original component fixture.
+      fixture.destroy(); /// A. What does fixture.destroy() do? - This destroys the original test fixture and its Angular component instance. It's useful for testing cleanup and lifecycle behavior. It does not automatically erase browser localStorage, so the sorting preference should remain saved.
+
+      // Confirm the saved preference still exists.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // STEP 4: Create a completely new component instance.
+      newFixture = TestBed.createComponent(TodoListComponent); /// B. What does TestBed.createComponent() do? - This creates a separate TodoListComponent instance. Its component properties start with their initial values, before lifecycle initialization.
+
+      // Trigger ngOnInit() in the replacement component.
+      newFixture.detectChanges(); /// When we call: newFixture.detectChanges();  - Angular runs its initialization lifecycle, including ngOnInit(). Your ngOnInit() calls loadSortOrder(), which should restore the saved sorting preference.
+
+      // Wait for Angular's asynchronous tasks.
+      await newFixture.whenStable();
+      newFixture.detectChanges();
+
+      // Retrieve the newly created component instance.
+      const newComponent = newFixture.componentInstance; /// C. Why use newFixture.componentInstance? - The component variable from your existing beforeEach() still refers to the original instance. We need the new component instance to verify that restoration works.
+
+      // STEP 5: Verify that saved sorting was restored.
+      expect(newComponent.sortOrder).toBe('asc'); /// This assertion verifies that the newly created component loaded the persisted setting.
+
+      // Find the dropdown belonging to the new fixture.
+      const newSortSelect = newFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(newSortSelect).not.toBeNull();
+
+      // Verify the new dropdown displays Title: A-Z.
+      expect(newSortSelect.value).toBe('asc'); /// D. Why check the new dropdown? - It's possible for a TypeScript property to have the correct value while the UI doesn't reflect it due to a template-binding problem. By checking the new dropdown, we're verifying that the restored preference is correctly displayed to the user.
+
+      ///  This is especially important. Restoring the dropdown alone isn't enough. The Todo list should actually be sorted using the saved preference.
+      // Verify that the new component renders the correct order.
+      expect(getDisplayedTitles(newFixture)).toEqual([
+        'Apple Task',
+        'Banana Task',
+        'Zebra Task',
+      ]);
+
+      // Verify the preference remained saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Verify the source Todo collection was unchanged.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Clean up the replacement fixture, if created.
+      newFixture?.destroy(); /// F. What does optional chaining mean here? - The ?. operator means: If newFixture exists, call its destroy() method. This prevents an error if the test fails before the replacement component is created.
+
+      // Remove the saved sorting preference after the test.
+      localStorage.removeItem('todoSortOrder'); /// G. Why clean up localStorage? - The saved preference belongs to this test scenario. Removing it afterward prevents its state from affecting unrelated Jasmine tests.
+    }
+  });
+
+  // 77. Jasmine
+  // Lesson 168 - Part 2:
+  // Verify that Z-A sorting is preserved when TodoListComponent
+  // is destroyed and recreated.
+  it('should restore saved descending sorting after component reinitialization', async () => {
+    // ARRANGE: Create predictable Todo data.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16811,
+        title: 'Apple Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16812,
+        title: 'Zebra Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16813,
+        title: 'Banana Task',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original data for mutation checks.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Replace the real Todo data with our predictable mocks.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Helper: Read rendered Todo titles from a particular fixture.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Hold the new fixture so we can clean it up afterward.
+    let newFixture: ComponentFixture<TodoListComponent> | undefined;
+
+    try {
+      // STEP 1: Verify the original component uses default sorting.
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+
+      // With default sorting, preserve the original array order.
+      expect(getDisplayedTitles(fixture)).toEqual([
+        'Apple Task',
+        'Zebra Task',
+        'Banana Task',
+      ]);
+
+      // STEP 2: Find the original HTML sorting dropdown.
+      const originalSortSelect = fixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(originalSortSelect).not.toBeNull();
+
+      // Select Title: Z-A through the real dropdown.
+      originalSortSelect.value = 'desc';
+      originalSortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Confirm that Z-A sorting was selected.
+      expect(component.sortOrder).toBe('desc');
+
+      // Confirm that Z-A sorting was saved to localStorage.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // Verify that the original component displays Z-A order.
+      expect(getDisplayedTitles(fixture)).toEqual([
+        'Zebra Task',
+        'Banana Task',
+        'Apple Task',
+      ]);
+
+      // STEP 3: Destroy the original component.
+      fixture.destroy();
+
+      // Verify that destroying the component did not erase localStorage.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // STEP 4: Create a new TodoListComponent.
+      newFixture = TestBed.createComponent(TodoListComponent);
+
+      // Trigger initialization, including ngOnInit().
+      newFixture.detectChanges();
+
+      // Wait for Angular to finish outstanding tasks.
+      await newFixture.whenStable();
+      newFixture.detectChanges();
+
+      // Retrieve the NEW component instance.
+      const newComponent = newFixture.componentInstance;
+
+      // STEP 5: Verify that descending sorting was restored.
+      expect(newComponent.sortOrder).toBe('desc');
+
+      // Retrieve the NEW component's dropdown.
+      const newSortSelect = newFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(newSortSelect).not.toBeNull();
+
+      // The new dropdown should display Title: Z-A.
+      expect(newSortSelect.value).toBe('desc');
+
+      // The new Todo list must actually use Z-A sorting.
+      expect(getDisplayedTitles(newFixture)).toEqual([
+        'Zebra Task',
+        'Banana Task',
+        'Apple Task',
+      ]);
+
+      // Check that the saved preference remains unchanged.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // Confirm neither sorting operation modified the source array.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Destroy the replacement component if it exists.
+      newFixture?.destroy();
+
+      // Remove the saved sorting preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 78. Jasmine
+  // Lesson 168 - Part 3:
+  // Verify Active First and Completed First sorting preferences
+  // survive component destruction and reinitialization.
+  it('should restore completion-based sorting after component reinitialization', async () => {
+    // ARRANGE: Create mock Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16821,
+        title: 'Submit Report',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16822,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16823,
+        title: 'Review Tests',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16824,
+        title: 'Fix Laptop',
+        completed: false,
+      }),
+    ];
+
+    // Keep a snapshot to detect accidental source-data changes.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Replace TodoService's data with our predictable mock collection.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Helper: Read Todo titles from any component fixture.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    /// B. Why use an array of test cases? - This is data-driven testing. Instead of writing two nearly identical Jasmine tests, we use one test that runs both scenarios. Each iteration uses a different sorting preference and checks the corresponding expected result.
+    // Define both sorting scenarios and their expected results.
+    const sortCases = [
+      {
+        value: 'active-first',
+        expectedTitles: [
+          'Study Angular',
+          'Fix Laptop',
+          'Submit Report',
+          'Review Tests',
+        ],
+      },
+      {
+        value: 'completed-first',
+        expectedTitles: [
+          'Submit Report',
+          'Review Tests',
+          'Study Angular',
+          'Fix Laptop',
+        ],
+      },
+    ];
+
+    // Track any replacement fixture for safe cleanup.
+    let newFixture: ComponentFixture<TodoListComponent> | undefined;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+
+      // STEP 2: Test each completion-based sorting preference.
+      for (const sortCase of sortCases) {
+        // Get the current fixture's sorting dropdown.
+        const currentSortSelect = fixture.nativeElement.querySelector(
+          '#todo-sort-select',
+        ) as HTMLSelectElement;
+
+        expect(currentSortSelect).not.toBeNull();
+
+        // Select Active First or Completed First.
+        currentSortSelect.value = sortCase.value;
+
+        // Trigger Angular's form binding and saveSortOrder().
+        currentSortSelect.dispatchEvent(new Event('change'));
+
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        // Confirm the selected value is saved.
+        expect(component.sortOrder).toBe(sortCase.value);
+        expect(localStorage.getItem('todoSortOrder')).toBe(sortCase.value);
+
+        // Confirm the original component renders the correct order.
+        expect(getDisplayedTitles(fixture)).toEqual(sortCase.expectedTitles); /// E. Why verify the original and recreated Todo order? - This confirms the chosen sorting option works before component destruction.
+
+        // STEP 3: Destroy the original component.
+        fixture.destroy();
+
+        // The sorting preference should survive destruction.
+        expect(localStorage.getItem('todoSortOrder')).toBe(sortCase.value);
+
+        // STEP 4: Recreate TodoListComponent.
+        newFixture = TestBed.createComponent(TodoListComponent);
+
+        // Initialize the new component.
+        newFixture.detectChanges();
+
+        await newFixture.whenStable();
+        newFixture.detectChanges();
+
+        // Retrieve the newly created component instance.
+        const newComponent = newFixture.componentInstance;
+
+        // Verify that the saved sorting preference was restored.
+        expect(newComponent.sortOrder).toBe(sortCase.value);
+
+        // Retrieve the new component's sorting dropdown.
+        const newSortSelect = newFixture.nativeElement.querySelector(
+          '#todo-sort-select',
+        ) as HTMLSelectElement;
+
+        expect(newSortSelect).not.toBeNull();
+
+        // Verify that the dropdown reflects the saved preference.
+        expect(newSortSelect.value).toBe(sortCase.value);
+
+        // Verify that the rendered Todo order is restored.
+        expect(getDisplayedTitles(newFixture)).toEqual(sortCase.expectedTitles); /// E. Why verify the original and recreated Todo order? - This confirms the sorting behavior survives component recreation. We're verifying both correct initial behavior and correct persistence.
+
+        // Verify that localStorage still contains the preference.
+        expect(localStorage.getItem('todoSortOrder')).toBe(sortCase.value); /// F. What happens to localStorage? - This checks that the stored preference contains the expected value. Angular components may be destroyed, but localStorage persists until the saved item is explicitly changed or removed.
+
+        /// C. Why assign fixture = newFixture? - After the first scenario, the original fixture has been destroyed. We want to test the second scenario using a working component instance. These lines make the newly created fixture the current fixture for the next iteration. The original fixture and component variables were created in your existing beforeEach(). One subtle point: this approach deliberately reassigns those shared variables inside this test. Jasmine will create fresh variables through beforeEach() for the next test, so it won't reuse this component instance.
+        // STEP 5: Prepare for the next sorting scenario.
+        // Use the newly created component as the next original.
+        fixture = newFixture;
+        component = fixture.componentInstance;
+
+        // The replacement fixture is now tracked by "fixture".
+        newFixture = undefined; /// D. Why reset newFixture to undefined? - After assigning the replacement component to fixture, the variable newFixture no longer needs to own that reference. This prevents accidentally destroying the same fixture twice in the finally block.
+      }
+
+      // Confirm the source Todo data was not modified.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Clean up the last replacement fixture, if necessary.
+      newFixture?.destroy();
+
+      // Remove the saved sorting preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 79. Jasmine
+  // Lesson 168 - Part 4:
+  // Verify that an invalid saved sort preference is ignored
+  // when TodoListComponent is recreated.
+  it('should ignore invalid saved sorting after component reinitialization', async () => {
+    // ARRANGE: Create predictable mock Todo data.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16831,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16832,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16833,
+        title: 'Banana Task',
+        completed: false,
+      }),
+    ];
+
+    // Save the original Todo data for mutation checking.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Make TodoService return our test data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Helper: Read displayed Todo titles from a given fixture.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Keep a reference to the replacement fixture for cleanup.
+    let newFixture: ComponentFixture<TodoListComponent> | undefined;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify that the original component starts with default sorting.
+      expect(component.sortOrder).toBe('default');
+
+      expect(getDisplayedTitles(fixture)).toEqual([
+        'Zebra Task',
+        'Apple Task',
+        'Banana Task',
+      ]);
+
+      // STEP 2: Destroy the original component.
+      fixture.destroy(); /// B. Why destroy the original component first? - Your shared Jasmine beforeEach() has already initialized the original component. If we simply modify localStorage without recreating the component, we won't automatically trigger loadSortOrder() again. Destroying the fixture and creating a new one lets us test the real initialization behavior.
+
+      // STEP 3: Store an intentionally invalid sorting value.
+      localStorage.setItem('todoSortOrder', 'random-sort'); /// A. Why deliberately save an invalid value? - We're simulating corrupted, outdated, or manually modified browser data. Even though your application normally saves valid preferences, localStorage is not guaranteed to contain valid data forever. Testing invalid stored values is an example of defensive testing.
+
+      expect(localStorage.getItem('todoSortOrder')).toBe('random-sort');
+
+      // STEP 4: Create a new TodoListComponent.
+      newFixture = TestBed.createComponent(TodoListComponent);
+
+      // Trigger initialization, including ngOnInit().
+      newFixture.detectChanges();
+
+      await newFixture.whenStable();
+      newFixture.detectChanges();
+
+      // Get the new component instance.
+      const newComponent = newFixture.componentInstance;
+
+      // STEP 5: Verify that the invalid value was ignored.
+      expect(newComponent.sortOrder).toBe('default'); /// C. Why should sortOrder remain 'default'? - Your component starts with: sortOrder: TodoSortOrder = 'default'; Its loadSortOrder() method only replaces that value when the stored value passes validation. Since 'random-sort' is invalid, the property should remain 'default'.
+      // Retrieve the new component's sorting dropdown.
+      const newSortSelect = newFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(newSortSelect).not.toBeNull();
+
+      // Verify that the dropdown displays the default option.
+      expect(newSortSelect.value).toBe('default'); /// D. Why verify the dropdown? - We want to verify that the HTML interface accurately reflects the component's sorting state. An invalid saved preference should not leave the dropdown displaying an unsupported selection.
+
+      /// E. Why check the original Todo order? - This is our most important UI assertion. If the component correctly falls back to default sorting, the original order should remain unchanged.
+      // Verify that the original Todo order is preserved.
+      expect(getDisplayedTitles(newFixture)).toEqual([
+        'Zebra Task',
+        'Apple Task',
+        'Banana Task',
+      ]);
+
+      // The current implementation ignores invalid values
+      // without automatically removing them from localStorage.
+      expect(localStorage.getItem('todoSortOrder')).toBe('random-sort'); /// F. Why does localStorage still contain 'random-sort'? - Your current loadSortOrder() method validates the stored value but does not delete invalid values. That distinction matters: Ignoring invalid data means not using it; Removing invalid data means deleting it from storage. - Our test verifies the behavior your current implementation actually provides. Later, we could improve the method to remove invalid values automatically, but that would be a separate feature change.
+
+      // Verify that the component retained its default filter.
+      expect(newComponent.filter).toBe('all');
+
+      // Verify that no search term was introduced.
+      expect(newComponent.searchTerm).toBe('');
+
+      // Verify that the original Todo data was not modified.
+      expect(mockTodos).toEqual(originalTodos);
+      /// G. Why use try...finally? - This ensures that the replacement component and invalid stored preference are cleaned up even if an assertion fails.
+    } finally {
+      // Destroy the replacement fixture if it was created.
+      newFixture?.destroy();
+
+      // Remove the deliberately invalid preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
