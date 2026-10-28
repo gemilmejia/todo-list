@@ -11427,4 +11427,1063 @@ describe('TodoListComponent', () => {
       localStorage.removeItem('todoSortOrder');
     }
   });
+
+  // 100. Jasmine
+  // Lesson 174 - Part 1:
+  // Verify that users can select A-Z sorting after resetting
+  // Z-A to Default and recreating TodoListComponent.
+  it('should save a new ascending preference after reset and component recreation', async () => {
+    // ARRANGE: Create four Todos in non-alphabetical order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 17401,
+        title: 'Mango Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17402,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17403,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17404,
+        title: 'Banana Task',
+        completed: true,
+      }),
+    ];
+
+    // Preserve the source data for mutation checking.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Supply predictable Todos to all component instances.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Expected original source order.
+    const defaultTitles = [
+      'Mango Task',
+      'Apple Task',
+      'Zebra Task',
+      'Banana Task',
+    ];
+
+    // Expected reverse alphabetical order.
+    const descendingTitles = [
+      'Zebra Task',
+      'Mango Task',
+      'Banana Task',
+      'Apple Task',
+    ];
+
+    // Expected alphabetical order.
+    const ascendingTitles = [
+      'Apple Task',
+      'Banana Task',
+      'Mango Task',
+      'Zebra Task',
+    ];
+
+    // Helper: Read the rendered Todo titles.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Select sorting using the actual HTML dropdown.
+    const selectSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const sortSelect = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(sortSelect).not.toBeNull();
+
+      sortSelect.value = value;
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Find the actual Reset Sorting button.
+    const findResetButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('reset sorting'),
+      );
+    };
+
+    // Helper: Check component state, dropdown, localStorage,
+    // and the rendered Todo order.
+    const expectSorting = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      expectedValue: string,
+      expectedTitles: string[],
+      context: string,
+    ): void => {
+      const currentComponent = currentFixture.componentInstance;
+
+      const sortSelect = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(sortSelect).not.toBeNull();
+
+      expect(currentComponent.sortOrder)
+        .withContext(`${context}: component state`)
+        .toBe(expectedValue);
+
+      expect(sortSelect.value)
+        .withContext(`${context}: dropdown`)
+        .toBe(expectedValue);
+
+      expect(localStorage.getItem('todoSortOrder'))
+        .withContext(`${context}: localStorage`)
+        .toBe(expectedValue);
+
+      expect(getDisplayedTitles(currentFixture))
+        .withContext(`${context}: rendered Todo order`)
+        .toEqual(expectedTitles);
+    };
+
+    // Keep track of the currently active component fixture.
+    let currentFixture: ComponentFixture<TodoListComponent> = fixture;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Verify initial Default sorting.
+      expect(component.sortOrder).toBe('default');
+      expect(getDisplayedTitles(currentFixture)).toEqual(defaultTitles);
+
+      // STEP 2: Select Z-A sorting.
+      await selectSorting(currentFixture, 'desc');
+
+      // Verify descending sorting was applied and saved.
+      expectSorting(
+        currentFixture,
+        'desc',
+        descendingTitles,
+        'Original component - Z-A',
+      );
+
+      // STEP 3: Reset sorting using the real button.
+      const resetButton = findResetButton(currentFixture);
+
+      expect(resetButton).toBeDefined();
+
+      resetButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Verify Default replaced the saved Z-A preference.
+      expectSorting(
+        currentFixture,
+        'default',
+        defaultTitles,
+        'Original component - after reset',
+      );
+
+      // Reset Sorting should disappear under Default.
+      expect(findResetButton(currentFixture)).toBeUndefined();
+
+      // STEP 4: Destroy the original component.
+      currentFixture.destroy();
+
+      // Confirm Default remains saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // Create replacement component #1.
+      currentFixture = TestBed.createComponent(TodoListComponent);
+
+      // Trigger ngOnInit(), including loadSortOrder().
+      currentFixture.detectChanges();
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Verify the replacement restores Default.
+      expectSorting(
+        currentFixture,
+        'default',
+        defaultTitles,
+        'Recreation 1 - restored Default',
+      );
+
+      // Reset Sorting should still be hidden.
+      expect(findResetButton(currentFixture)).toBeUndefined();
+
+      // STEP 5: Select A-Z on the replacement component.
+      await selectSorting(currentFixture, 'asc');
+
+      // Verify the new selection overwrites Default.
+      expectSorting(
+        currentFixture,
+        'asc',
+        ascendingTitles,
+        'Recreation 1 - selected A-Z',
+      );
+
+      // Reset Sorting should be available again.
+      expect(findResetButton(currentFixture)).toBeDefined();
+
+      // STEP 6: Destroy the first replacement component.
+      currentFixture.destroy();
+
+      // Verify A-Z remains saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Create replacement component #2.
+      currentFixture = TestBed.createComponent(TodoListComponent);
+
+      currentFixture.detectChanges();
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Verify the latest A-Z preference is restored.
+      expectSorting(
+        currentFixture,
+        'asc',
+        ascendingTitles,
+        'Recreation 2 - restored A-Z',
+      );
+
+      // The Reset Sorting button must remain available.
+      expect(findResetButton(currentFixture)).toBeDefined();
+
+      // Verify unrelated state starts at its defaults.
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // STEP 7: Confirm sorting never modified the source data.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Clean up the currently active component.
+      currentFixture.destroy();
+
+      // Remove the saved sorting preference after testing.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 101. Jasmine
+  // Lesson 174 - Part 2:
+  // Verify that users can select Z-A after resetting A-Z,
+  // and that Z-A survives three component recreations.
+  it('should preserve a new descending preference after reset and repeated recreations', async () => {
+    // ARRANGE: Create four Todos in a non-alphabetical order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 17411,
+        title: 'Banana Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17412,
+        title: 'Zebra Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17413,
+        title: 'Apple Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17414,
+        title: 'Mango Task',
+        completed: true,
+      }),
+    ];
+
+    // Preserve the source data to detect unwanted mutations.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Supply predictable Todos to every component instance.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Expected Todo orders.
+    const defaultTitles = [
+      'Banana Task',
+      'Zebra Task',
+      'Apple Task',
+      'Mango Task',
+    ];
+
+    const ascendingTitles = [
+      'Apple Task',
+      'Banana Task',
+      'Mango Task',
+      'Zebra Task',
+    ];
+
+    const descendingTitles = [
+      'Zebra Task',
+      'Mango Task',
+      'Banana Task',
+      'Apple Task',
+    ];
+
+    // Helper: Read rendered titles from the active fixture.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Change sorting through the real HTML dropdown.
+    const selectSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Find the real Reset Sorting button.
+    const findResetButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('reset sorting'),
+      );
+    };
+
+    // Helper: Verify component state, dropdown, localStorage,
+    // and the actual rendered order.
+    const expectSorting = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      expectedValue: string,
+      expectedTitles: string[],
+      context: string,
+    ): void => {
+      const currentComponent = currentFixture.componentInstance;
+
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      expect(currentComponent.sortOrder)
+        .withContext(`${context}: component state`)
+        .toBe(expectedValue);
+
+      expect(select.value)
+        .withContext(`${context}: dropdown`)
+        .toBe(expectedValue);
+
+      expect(localStorage.getItem('todoSortOrder'))
+        .withContext(`${context}: localStorage`)
+        .toBe(expectedValue);
+
+      expect(getDisplayedTitles(currentFixture))
+        .withContext(`${context}: Todo order`)
+        .toEqual(expectedTitles);
+    };
+
+    // Helper: Destroy an old fixture and create a new one.
+    const recreateComponent = async (
+      oldFixture: ComponentFixture<TodoListComponent>,
+    ): Promise<ComponentFixture<TodoListComponent>> => {
+      oldFixture.destroy();
+
+      const replacement = TestBed.createComponent(TodoListComponent);
+
+      // Trigger ngOnInit(), which restores saved sorting.
+      replacement.detectChanges();
+
+      await replacement.whenStable();
+      replacement.detectChanges();
+
+      return replacement;
+    };
+
+    // Track the currently active component.
+    let currentFixture: ComponentFixture<TodoListComponent> = fixture;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+      expect(getDisplayedTitles(currentFixture)).toEqual(defaultTitles);
+
+      // STEP 2: Select A-Z in the original component.
+      await selectSorting(currentFixture, 'asc');
+
+      expectSorting(
+        currentFixture,
+        'asc',
+        ascendingTitles,
+        'Original component - selected A-Z',
+      );
+
+      // Reset Sorting must be visible for a non-default preference.
+      expect(findResetButton(currentFixture)).toBeDefined();
+
+      // STEP 3: Click the actual Reset Sorting button.
+      const resetButton = findResetButton(currentFixture);
+
+      expect(resetButton).toBeDefined();
+
+      resetButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Verify the old A-Z preference was replaced with Default.
+      expectSorting(
+        currentFixture,
+        'default',
+        defaultTitles,
+        'Original component - after reset',
+      );
+
+      // Reset Sorting should be hidden under Default.
+      expect(findResetButton(currentFixture)).toBeUndefined();
+
+      // STEP 4: Recreate component #1.
+      currentFixture = await recreateComponent(currentFixture);
+
+      // Verify Default was restored.
+      expectSorting(
+        currentFixture,
+        'default',
+        defaultTitles,
+        'Recreation 1 - restored Default',
+      );
+
+      // STEP 5: Select Z-A in the recreated component.
+      await selectSorting(currentFixture, 'desc');
+
+      // Verify the new choice replaced the saved Default preference.
+      expectSorting(
+        currentFixture,
+        'desc',
+        descendingTitles,
+        'Recreation 1 - selected Z-A',
+      );
+
+      // Reset Sorting should appear again.
+      expect(findResetButton(currentFixture)).toBeDefined();
+
+      // STEP 6: Recreate component #2.
+      currentFixture = await recreateComponent(currentFixture);
+
+      // Verify that Z-A was restored.
+      expectSorting(
+        currentFixture,
+        'desc',
+        descendingTitles,
+        'Recreation 2 - restored Z-A',
+      );
+
+      // STEP 7: Recreate component #3.
+      currentFixture = await recreateComponent(currentFixture);
+
+      // Verify that Z-A continues to be restored.
+      expectSorting(
+        currentFixture,
+        'desc',
+        descendingTitles,
+        'Recreation 3 - restored Z-A',
+      );
+
+      // Verify Reset Sorting is still available.
+      expect(findResetButton(currentFixture)).toBeDefined();
+
+      // Check unrelated state defaults in the latest component.
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // STEP 8: Confirm the original source data was not mutated.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Destroy the active component.
+      currentFixture.destroy();
+
+      // Remove the saved sorting preference after this test.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 102. Jasmine
+  // Lesson 174 - Part 3:
+  // Verify that a new Active First preference can be saved
+  // after resetting Completed First and recreating the component.
+  it('should save active-first after resetting completed-first and restore it', async () => {
+    // ARRANGE: Create five Todos in mixed completion order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 17421,
+        title: 'Submit Report',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17422,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17423,
+        title: 'Review Tests',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17424,
+        title: 'Build Portfolio',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17425,
+        title: 'Fix Bugs',
+        completed: false,
+      }),
+    ];
+
+    // Keep a copy to detect unintended source data mutations.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Return predictable data from TodoService.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Original order.
+    const defaultTitles = [
+      'Submit Report',
+      'Study Angular',
+      'Review Tests',
+      'Build Portfolio',
+      'Fix Bugs',
+    ];
+
+    // Completed Todos first, retaining order within each group.
+    const completedFirstTitles = [
+      'Submit Report',
+      'Review Tests',
+      'Study Angular',
+      'Build Portfolio',
+      'Fix Bugs',
+    ];
+
+    // Unfinished Todos first, retaining order within each group.
+    const activeFirstTitles = [
+      'Study Angular',
+      'Build Portfolio',
+      'Fix Bugs',
+      'Submit Report',
+      'Review Tests',
+    ];
+
+    // Helper: Read the titles currently rendered in the HTML.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Select sorting through the actual HTML dropdown.
+    const selectSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Find the real Reset Sorting button.
+    const findResetButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('reset sorting'),
+      );
+    };
+
+    // Helper: Check component state, HTML dropdown,
+    // saved preference, and actual rendered Todo order.
+    const expectSorting = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      expectedValue: string,
+      expectedTitles: string[],
+      context: string,
+    ): void => {
+      const currentComponent = currentFixture.componentInstance;
+
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      expect(currentComponent.sortOrder)
+        .withContext(`${context}: component state`)
+        .toBe(expectedValue);
+
+      expect(select.value)
+        .withContext(`${context}: dropdown`)
+        .toBe(expectedValue);
+
+      expect(localStorage.getItem('todoSortOrder'))
+        .withContext(`${context}: localStorage`)
+        .toBe(expectedValue);
+
+      expect(getDisplayedTitles(currentFixture))
+        .withContext(`${context}: displayed Todo order`)
+        .toEqual(expectedTitles);
+    };
+
+    // Track the currently active component.
+    let currentFixture: ComponentFixture<TodoListComponent> = fixture;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+      expect(getDisplayedTitles(currentFixture)).toEqual(defaultTitles);
+
+      // STEP 2: Select Completed First.
+      await selectSorting(currentFixture, 'completed-first');
+
+      expectSorting(
+        currentFixture,
+        'completed-first',
+        completedFirstTitles,
+        'Original component - Completed First',
+      );
+
+      // Verify Reset Sorting is available.
+      const resetButton = findResetButton(currentFixture);
+      expect(resetButton).toBeDefined();
+
+      // STEP 3: Click Reset Sorting.
+      resetButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Confirm Default replaced Completed First.
+      expectSorting(
+        currentFixture,
+        'default',
+        defaultTitles,
+        'Original component - after reset',
+      );
+
+      // Reset Sorting should disappear under Default.
+      expect(findResetButton(currentFixture)).toBeUndefined();
+
+      // STEP 4: Destroy the original component.
+      currentFixture.destroy();
+
+      // The saved reset must survive destruction.
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // Create replacement component #1.
+      currentFixture = TestBed.createComponent(TodoListComponent);
+
+      // Trigger ngOnInit() to restore saved sorting.
+      currentFixture.detectChanges();
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Verify that Default was restored.
+      expectSorting(
+        currentFixture,
+        'default',
+        defaultTitles,
+        'Recreation 1 - restored Default',
+      );
+
+      // STEP 5: Select Active First on the replacement.
+      await selectSorting(currentFixture, 'active-first');
+
+      expectSorting(
+        currentFixture,
+        'active-first',
+        activeFirstTitles,
+        'Recreation 1 - selected Active First',
+      );
+
+      // Reset Sorting should become available again.
+      expect(findResetButton(currentFixture)).toBeDefined();
+
+      // STEP 6: Destroy the first replacement component.
+      currentFixture.destroy();
+
+      // Confirm the new preference remains saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('active-first');
+
+      // Create replacement component #2.
+      currentFixture = TestBed.createComponent(TodoListComponent);
+
+      currentFixture.detectChanges();
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // STEP 7: Verify Active First was restored.
+      expectSorting(
+        currentFixture,
+        'active-first',
+        activeFirstTitles,
+        'Recreation 2 - restored Active First',
+      );
+
+      // Verify Reset Sorting remains available.
+      expect(findResetButton(currentFixture)).toBeDefined();
+
+      // Verify unrelated state starts with its defaults.
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // STEP 8: Verify the original data was not modified.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Destroy the currently active component.
+      currentFixture.destroy();
+
+      // Remove the saved sorting preference after testing.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 103. Jasmine
+  // Lesson 174 - Part 4:
+  // Verify multiple sorting reset and reselection cycles
+  // across repeated TodoListComponent recreations.
+  it('should preserve the latest preference across repeated reset and reselection cycles', async () => {
+    // ARRANGE: Create four Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 17431,
+        title: 'Zebra Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17432,
+        title: 'Apple Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17433,
+        title: 'Mango Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17434,
+        title: 'Banana Task',
+        completed: false,
+      }),
+    ];
+
+    // Save original data to check for mutations.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Return predictable data from TodoService.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Expected displayed orders for each sorting mode.
+    const expectedOrders: Record<string, string[]> = {
+      default: ['Zebra Task', 'Apple Task', 'Mango Task', 'Banana Task'],
+      asc: ['Apple Task', 'Banana Task', 'Mango Task', 'Zebra Task'],
+      'completed-first': [
+        'Zebra Task',
+        'Mango Task',
+        'Apple Task',
+        'Banana Task',
+      ],
+      desc: ['Zebra Task', 'Mango Task', 'Banana Task', 'Apple Task'],
+      'active-first': ['Apple Task', 'Banana Task', 'Zebra Task', 'Mango Task'],
+    };
+
+    // Helper: Read Todo titles from the rendered HTML.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const items: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return items.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Find the real sorting dropdown.
+    const getSortSelect = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): HTMLSelectElement => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      return select;
+    };
+
+    // Helper: Find the real Reset Sorting button.
+    const findResetButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('reset sorting'),
+      );
+    };
+
+    // Helper: Verify component state, dropdown, localStorage,
+    // and actual displayed Todo titles.
+    const expectSorting = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      expectedValue: string,
+      context: string,
+    ): void => {
+      const currentComponent = currentFixture.componentInstance;
+
+      expect(currentComponent.sortOrder)
+        .withContext(`${context}: component state`)
+        .toBe(expectedValue);
+
+      expect(getSortSelect(currentFixture).value)
+        .withContext(`${context}: dropdown`)
+        .toBe(expectedValue);
+
+      expect(localStorage.getItem('todoSortOrder'))
+        .withContext(`${context}: localStorage`)
+        .toBe(expectedValue);
+
+      expect(getDisplayedTitles(currentFixture))
+        .withContext(`${context}: displayed titles`)
+        .toEqual(expectedOrders[expectedValue]);
+
+      // Reset Sorting should only be visible for non-default modes.
+      if (expectedValue === 'default') {
+        expect(findResetButton(currentFixture))
+          .withContext(`${context}: reset button hidden`)
+          .toBeUndefined();
+      } else {
+        expect(findResetButton(currentFixture))
+          .withContext(`${context}: reset button visible`)
+          .toBeDefined();
+      }
+    };
+
+    // Helper: Select sorting through the real HTML dropdown.
+    const selectSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const select = getSortSelect(currentFixture);
+
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Click the real Reset Sorting button.
+    const resetSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): Promise<void> => {
+      const button = findResetButton(currentFixture);
+
+      expect(button).toBeDefined();
+
+      button!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Track the currently active component fixture.
+    let currentFixture: ComponentFixture<TodoListComponent> = fixture;
+
+    // A function to initialize a replacement component.
+    const createReplacement = async (): Promise<
+      ComponentFixture<TodoListComponent>
+    > => {
+      const replacement = TestBed.createComponent(TodoListComponent);
+
+      replacement.detectChanges();
+
+      await replacement.whenStable();
+      replacement.detectChanges();
+
+      return replacement;
+    };
+
+    try {
+      // STEP 1: Initialize the original component.
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+      expect(getDisplayedTitles(currentFixture)).toEqual(
+        expectedOrders['default'],
+      );
+
+      // STEP 2: Select A-Z sorting.
+      await selectSorting(currentFixture, 'asc');
+
+      expectSorting(currentFixture, 'asc', 'Original component - selected A-Z');
+
+      // STEP 3: Reset A-Z back to Default.
+      await resetSorting(currentFixture);
+
+      expectSorting(
+        currentFixture,
+        'default',
+        'Original component - reset A-Z',
+      );
+
+      // STEP 4: Select Completed First.
+      await selectSorting(currentFixture, 'completed-first');
+
+      expectSorting(
+        currentFixture,
+        'completed-first',
+        'Original component - selected Completed First',
+      );
+
+      // STEP 5: Recreate component #1.
+      currentFixture.destroy();
+      currentFixture = await createReplacement();
+
+      expectSorting(
+        currentFixture,
+        'completed-first',
+        'Recreation 1 - restored Completed First',
+      );
+
+      // STEP 6: Reset Completed First to Default.
+      await resetSorting(currentFixture);
+
+      expectSorting(
+        currentFixture,
+        'default',
+        'Recreation 1 - reset Completed First',
+      );
+
+      // STEP 7: Select Z-A sorting.
+      await selectSorting(currentFixture, 'desc');
+
+      expectSorting(currentFixture, 'desc', 'Recreation 1 - selected Z-A');
+
+      // STEP 8: Recreate component #2.
+      currentFixture.destroy();
+      currentFixture = await createReplacement();
+
+      expectSorting(currentFixture, 'desc', 'Recreation 2 - restored Z-A');
+
+      // STEP 9: Reset Z-A to Default.
+      await resetSorting(currentFixture);
+
+      expectSorting(currentFixture, 'default', 'Recreation 2 - reset Z-A');
+
+      // STEP 10: Select Active First.
+      await selectSorting(currentFixture, 'active-first');
+
+      expectSorting(
+        currentFixture,
+        'active-first',
+        'Recreation 2 - selected Active First',
+      );
+
+      // STEP 11: Recreate component #3.
+      currentFixture.destroy();
+      currentFixture = await createReplacement();
+
+      expectSorting(
+        currentFixture,
+        'active-first',
+        'Recreation 3 - restored Active First',
+      );
+
+      // STEP 12: Verify unrelated properties use defaults.
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // Verify source Todos were never modified.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Destroy the most recently active component.
+      currentFixture.destroy();
+
+      // Remove the saved preference so it cannot affect other tests.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
