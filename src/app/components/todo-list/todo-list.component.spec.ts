@@ -7378,4 +7378,704 @@ describe('TodoListComponent', () => {
       localStorage.removeItem('todoSortOrder');
     }
   });
+
+  // 80. Jasmine
+  // Lesson 169 - Part 1:
+  // Verify that clicking the actual Reset Sorting button
+  // restores the original Todo order and saves "default".
+  it('should reset ascending sorting using the Reset Sorting button', async () => {
+    // ARRANGE: Create three predictable mock Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16901,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16902,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16903,
+        title: 'Banana Task',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original Todo data and array order.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Mock the service to return our test Todos.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Initialize Angular's form bindings.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Retrieve the real sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    expect(sortSelect).not.toBeNull();
+
+    // Helper: Read the displayed Todo titles in DOM order.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Find the actual Reset Sorting button.
+    const getResetButton = (): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('reset sorting'),
+      );
+    };
+
+    try {
+      // STEP 1: Verify initial default sorting.
+      expect(component.sortOrder).toBe('default');
+      expect(getDisplayedTitles()).toEqual([
+        'Zebra Task',
+        'Apple Task',
+        'Banana Task',
+      ]);
+
+      // Reset Sorting should not appear in default mode.
+      expect(getResetButton()).toBeUndefined();
+
+      // STEP 2: Select Title: A-Z using the HTML dropdown.
+      sortSelect.value = 'asc';
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify ascending sorting is selected and saved.
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Verify the displayed list is alphabetically sorted.
+      expect(getDisplayedTitles()).toEqual([
+        'Apple Task',
+        'Banana Task',
+        'Zebra Task',
+      ]);
+
+      // STEP 3: Find the Reset Sorting button.
+      const resetButton = getResetButton();
+
+      expect(resetButton).toBeDefined();
+
+      // Click the real Reset Sorting button.
+      resetButton!.click();
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // STEP 4: Verify the component returned to default.
+      expect(component.sortOrder).toBe('default');
+
+      // Verify the dropdown also shows the default value.
+      expect(sortSelect.value).toBe('default');
+
+      // Verify localStorage saved the reset preference.
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // Verify the original Todo order has been restored.
+      expect(getDisplayedTitles()).toEqual([
+        'Zebra Task',
+        'Apple Task',
+        'Banana Task',
+      ]);
+
+      // Verify the Reset Sorting button disappeared.
+      expect(getResetButton()).toBeUndefined();
+
+      // Verify that the All filter remains selected.
+      expect(component.filter).toBe('all');
+
+      // Verify that the search input state is unchanged.
+      expect(component.searchTerm).toBe('');
+
+      // Verify that resetting sorting did not mutate the source.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Remove the saved preference after this test.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 81. Jasmine
+  // Lesson 169 - Part 2:
+  // Verify that Reset Sorting works for descending,
+  // Active First, and Completed First preferences.
+  it('should reset descending and completion-based sorting to default', async () => {
+    // ARRANGE: Create mock Todos in a predictable original order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16911,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16912,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16913,
+        title: 'Banana Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16914,
+        title: 'Mango Task',
+        completed: true,
+      }),
+    ];
+
+    // Preserve the original Todo array.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Mock the TodoService method that provides Todos.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for Angular form controls to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Get the actual sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    expect(sortSelect).not.toBeNull();
+
+    // Helper: Read the Todo titles currently displayed.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Locate the actual Reset Sorting button.
+    const getResetButton = (): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('reset sorting'),
+      );
+    };
+
+    // Helper: Select a sorting option through the real dropdown.
+    const changeSorting = async (value: string): Promise<void> => {
+      /// B. Why does changeSorting() use an event? - The first line changes the HTML dropdown selection. The second line notifies Angular that the selection changed. This triggers the component's form binding and its saveSortOrder() logic. Without dispatching the event, changing the HTML element's value would not necessarily update component.sortOrder.
+      sortSelect.value = value;
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    // Define the original order expected after every reset.
+    const originalTitles = [
+      'Zebra Task',
+      'Apple Task',
+      'Banana Task',
+      'Mango Task',
+    ];
+
+    /// A. Why use sortCases? - This is called data-driven testing. Instead of writing three nearly identical Jasmine tests, we store different inputs and expected outputs in one array.
+    // Define three different sorting scenarios.
+    const sortCases = [
+      {
+        value: 'desc',
+        expectedTitles: [
+          'Zebra Task',
+          'Mango Task',
+          'Banana Task',
+          'Apple Task',
+        ],
+      },
+      {
+        value: 'active-first',
+        expectedTitles: [
+          'Zebra Task',
+          'Banana Task',
+          'Apple Task',
+          'Mango Task',
+        ],
+      },
+      {
+        value: 'completed-first',
+        expectedTitles: [
+          'Apple Task',
+          'Mango Task',
+          'Zebra Task',
+          'Banana Task',
+        ],
+      },
+    ];
+
+    try {
+      // STEP 1: Verify the initial state.
+      expect(component.sortOrder).toBe('default');
+      expect(getDisplayedTitles()).toEqual(originalTitles);
+      expect(getResetButton()).toBeUndefined();
+
+      // STEP 2: Test each sorting preference.
+      for (const sortCase of sortCases) {
+        // Select the current sorting preference.
+        await changeSorting(sortCase.value);
+
+        // Verify the component received the selected value.
+        expect(component.sortOrder).toBe(sortCase.value);
+
+        // Verify the dropdown reflects the selection.
+        expect(sortSelect.value).toBe(sortCase.value);
+
+        // Verify the selected sorting preference was saved.
+        expect(localStorage.getItem('todoSortOrder')).toBe(sortCase.value);
+
+        // Verify the Todo order changed correctly.
+        expect(getDisplayedTitles()).toEqual(sortCase.expectedTitles);
+
+        /// D. Why click the button for every sorting option? - We aren't merely verifying that a sorting option can be selected.
+        // STEP 3: Locate the Reset Sorting button.
+        const resetButton = getResetButton();
+
+        expect(resetButton).toBeDefined();
+
+        // Click the actual Reset Sorting button.
+        resetButton!.click();
+
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        // STEP 4: Verify sorting returned to default.
+        expect(component.sortOrder).toBe('default');
+        expect(sortSelect.value).toBe('default');
+
+        // Verify localStorage was updated to default.
+        expect(localStorage.getItem('todoSortOrder')).toBe('default'); /// E. Why verify localStorage after every reset? - Your resetSortOrder() method calls saveSortOrder(). Therefore, the reset preference should be saved, not only applied temporarily.
+
+        // Verify the original Todo order was restored.
+        expect(getDisplayedTitles()).toEqual(originalTitles);
+
+        // Verify the Reset Sorting button disappeared.
+        expect(getResetButton()).toBeUndefined(); /// F. Why check the Reset Sorting button disappears? - Your template displays the reset button only when sorting is not 'default'. This assertion verifies that the UI correctly updates after resetting.
+
+        // Verify unrelated component state was preserved.
+        expect(component.filter).toBe('all');
+        expect(component.searchTerm).toBe('');
+      }
+
+      // STEP 5: Confirm none of the scenarios modified source data.
+      expect(mockTodos).toEqual(originalTodos); /// G. Why compare the source Todos? - Sorting should not permanently rearrange the collection returned by TodoService.
+    } finally {
+      // Remove the saved sorting preference after testing.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 82. Jasmine
+  // Lesson 169 - Part 3:
+  // Verify that resetting sorting to default is saved
+  // and remains effective after component recreation.
+  it('should restore saved default sorting after resetting and recreating the component', async () => {
+    // ARRANGE: Create Todos in a non-alphabetical order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16921,
+        title: 'Zebra Task',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16922,
+        title: 'Apple Task',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16923,
+        title: 'Banana Task',
+        completed: false,
+      }),
+    ];
+
+    // Save the original Todo array for comparison.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Return our mock Todos whenever TodoService.getTodos() runs.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    /// F. Why use a fixture parameter in our helpers? - We need to examine two different component instances: the original fixture and the replacement fixture. Passing the fixture into the helper ensures that we're reading the correct component's HTML.
+    // Helper: Read Todo titles from a particular fixture.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Find the Reset Sorting button in a fixture.
+    const getResetButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes('reset sorting'),
+      );
+    };
+
+    // Hold the new fixture for cleanup.
+    let newFixture: ComponentFixture<TodoListComponent> | undefined;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify initial default sorting.
+      expect(component.sortOrder).toBe('default');
+
+      expect(getDisplayedTitles(fixture)).toEqual([
+        'Zebra Task',
+        'Apple Task',
+        'Banana Task',
+      ]);
+
+      // STEP 2: Get the original sorting dropdown.
+      const originalSortSelect = fixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(originalSortSelect).not.toBeNull();
+
+      /// A. Why select A–Z before resetting? - We want to prove that the preference changes from a non-default option back to default. If we started with default sorting and immediately recreated the component, we wouldn't be testing the actual reset process.
+      // Select A-Z through the real HTML dropdown.
+      originalSortSelect.value = 'asc';
+      originalSortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify A-Z sorting is now selected and saved.
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Verify the rendered list is alphabetically sorted.
+      expect(getDisplayedTitles(fixture)).toEqual([
+        'Apple Task',
+        'Banana Task',
+        'Zebra Task',
+      ]);
+
+      // STEP 3: Find the actual Reset Sorting button.
+      const resetButton = getResetButton(fixture);
+
+      expect(resetButton).toBeDefined();
+
+      // Click the Reset Sorting button.
+      resetButton!.click();
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify sorting returned to default.
+      expect(component.sortOrder).toBe('default');
+      expect(originalSortSelect.value).toBe('default');
+
+      /// B. Why check localStorage before recreating the component? - This confirms that the Reset Sorting button saved the new preference successfully.
+      // Verify the reset preference was saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // Verify the original Todo order returned.
+      expect(getDisplayedTitles(fixture)).toEqual([
+        'Zebra Task',
+        'Apple Task',
+        'Banana Task',
+      ]);
+
+      // Verify the Reset Sorting button disappeared.
+      expect(getResetButton(fixture)).toBeUndefined();
+
+      // STEP 4: Destroy the original component.
+      fixture.destroy(); /// C. What does component recreation prove? -  These lines create a fresh component instance. During initialization, Angular runs ngOnInit(), which calls loadSortOrder(). The newly created component should read 'default' from localStorage. One important distinction: because 'default' is also the component's initial value, checking newComponent.sortOrder alone would not prove that storage was read. That's why we also verify the saved value, dropdown state, and actual Todo order.
+
+      // The saved default preference should remain available.
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // STEP 5: Create a completely new component instance.
+      newFixture = TestBed.createComponent(TodoListComponent); /// C. What does component recreation prove? -  These lines create a fresh component instance. During initialization, Angular runs ngOnInit(), which calls loadSortOrder(). The newly created component should read 'default' from localStorage. One important distinction: because 'default' is also the component's initial value, checking newComponent.sortOrder alone would not prove that storage was read. That's why we also verify the saved value, dropdown state, and actual Todo order.
+
+      // Trigger ngOnInit(), including loadSortOrder().
+      newFixture.detectChanges(); /// C. What does component recreation prove? -  These lines create a fresh component instance. During initialization, Angular runs ngOnInit(), which calls loadSortOrder(). The newly created component should read 'default' from localStorage. One important distinction: because 'default' is also the component's initial value, checking newComponent.sortOrder alone would not prove that storage was read. That's why we also verify the saved value, dropdown state, and actual Todo order.
+
+      await newFixture.whenStable();
+      newFixture.detectChanges();
+
+      // Retrieve the new component instance.
+      const newComponent = newFixture.componentInstance;
+
+      // STEP 6: Verify default sorting was retained.
+      expect(newComponent.sortOrder).toBe('default');
+
+      // Retrieve the new component's sorting dropdown.
+      const newSortSelect = newFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(newSortSelect).not.toBeNull();
+
+      // Verify the new dropdown displays Default.
+      expect(newSortSelect.value).toBe('default');
+
+      /// D. Why verify the rendered Todo order? - This is the main UI assertion. The restored default sorting preference must preserve the original order returned by TodoService.
+      // Verify the original Todo order is displayed.
+      expect(getDisplayedTitles(newFixture)).toEqual([
+        'Zebra Task',
+        'Apple Task',
+        'Banana Task',
+      ]);
+
+      /// E. Why verify the button is hidden? - Your template displays Reset Sorting only when the selected sorting preference is not 'default'. After recreation, the button should remain hidden.
+      // Verify the Reset Sorting button remains hidden.
+      expect(getResetButton(newFixture)).toBeUndefined();
+
+      // Verify the saved default preference was preserved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // Verify unrelated component state starts normally.
+      expect(newComponent.filter).toBe('all');
+      expect(newComponent.searchTerm).toBe('');
+
+      // Confirm that neither component modified the source Todos.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      /// G. Why clean up the replacement fixture? - The optional chaining operator ?. ensures that destroy() runs only when newFixture exists.
+      // Destroy the replacement fixture if it exists.
+      newFixture?.destroy();
+
+      // Clean up the saved sorting preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 83. Jasmine
+  // Lesson 169 - Part 4:
+  // Verify that resetting sorting preserves the user's
+  // search term and selected Active filter.
+  it('should reset sorting without clearing search or filter state', async () => {
+    // ARRANGE: Create Todos in a predictable original order.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 16931,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16932,
+        title: 'Submit Report',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16933,
+        title: 'Practice Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 16934,
+        title: 'Angular Testing',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 16935,
+        title: 'Fix Laptop',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original Todo collection for comparison.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Mock the service so the test uses predictable data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Wait for Angular's form bindings to initialize.
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // Retrieve the real sorting dropdown.
+    const sortSelect = fixture.nativeElement.querySelector(
+      '#todo-sort-select',
+    ) as HTMLSelectElement;
+
+    // Retrieve the real search input.
+    const searchInput = fixture.nativeElement.querySelector(
+      'input[placeholder*="Search"]',
+    ) as HTMLInputElement;
+
+    // Verify both elements exist.
+    expect(sortSelect).not.toBeNull();
+    expect(searchInput).not.toBeNull();
+
+    // Helper: Read rendered Todo titles in their displayed order.
+    const getDisplayedTitles = (): string[] => {
+      const todoItems: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return todoItems.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Find a button using its visible label.
+    const findButton = (label: string): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes(label.toLowerCase()),
+      );
+    };
+
+    try {
+      // STEP 1: Select Active using the real filter button.
+      const activeButton = findButton('Active');
+
+      expect(activeButton).toBeDefined();
+
+      activeButton!.click(); /// A. Why apply the filter and search before sorting? - We deliberately create a state where only two of the five Todos match. This allows us to verify that resetting sorting affects only the order of the displayed tasks, not which tasks are displayed.
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify Active filtering was selected.
+      expect(component.filter).toBe('active');
+
+      /// A. Why apply the filter and search before sorting? - - We deliberately create a state where only two of the five Todos match. This allows us to verify that resetting sorting affects only the order of the displayed tasks, not which tasks are displayed.
+      // STEP 2: Search for Angular using the actual input.
+      searchInput.value = 'angular';
+      searchInput.dispatchEvent(new Event('input'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify that Angular received the search term.
+      expect(component.searchTerm).toBe('angular');
+
+      /// B. Why check the order before selecting A–Z? - Your default sorting should preserve the original order returned by TodoService. Since Study Angular appears before Practice Angular in our mock array, that is the expected default order.
+      // With default sorting, matching tasks follow source order.
+      expect(getDisplayedTitles()).toEqual([
+        'Study Angular',
+        'Practice Angular',
+      ]);
+
+      /// C. Why select A–Z before resetting? - We need to create a meaningful sorting change. With A–Z sorting, Practice Angular appears before Study Angular. This gives us a visible difference to check after clicking Reset Sorting.
+      // STEP 3: Select Title: A-Z using the real dropdown.
+      sortSelect.value = 'asc';
+      sortSelect.dispatchEvent(new Event('change'));
+
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify that ascending sorting was selected.
+      expect(component.sortOrder).toBe('asc');
+
+      // Verify the preference was saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Verify that matching tasks now appear alphabetically.
+      expect(getDisplayedTitles()).toEqual([
+        'Practice Angular',
+        'Study Angular',
+      ]);
+
+      // STEP 4: Find the actual Reset Sorting button.
+      const resetButton = findButton('Reset Sorting');
+
+      expect(resetButton).toBeDefined();
+
+      // Click the real Reset Sorting button.
+      resetButton!.click();
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // STEP 5: Verify sorting returned to default.
+      expect(component.sortOrder).toBe('default');
+
+      // Verify the dropdown reflects default sorting.
+      expect(sortSelect.value).toBe('default');
+
+      // Verify localStorage saved the reset preference.
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      /// D. Why verify search and filter state separately? - These assertions verify that resetting sorting does not change unrelated component properties. Your application should manage searching, filtering, and sorting independently.
+      // Verify Active filtering was NOT reset.
+      expect(component.filter).toBe('active');
+
+      // Verify the search term was NOT cleared.
+      expect(component.searchTerm).toBe('angular');
+
+      /// E. Why check the actual HTML input? - A component property can contain the correct value while the HTML input displays something else if its binding is broken. Checking the HTML element confirms the user's search remains visible after resetting sorting.
+      // Verify the actual HTML input still contains the search.
+      expect(searchInput.value).toBe('angular');
+
+      /// F. Why check the rendered Todo order? - This verifies that the reset operation restored the original relative order of the matching Todos. It also confirms that the application did not remove the Active filter or the search term.
+      // Verify only matching Active Todos remain visible,
+      // now in their original source-array order.
+      expect(getDisplayedTitles()).toEqual([
+        'Study Angular',
+        'Practice Angular',
+      ]);
+
+      // Verify that exactly two Todos are displayed.
+      expect(
+        fixture.nativeElement.querySelectorAll('app-todo-item').length,
+      ).toBe(2);
+
+      // Verify the Reset Sorting button disappeared.
+      expect(findButton('Reset Sorting')).toBeUndefined();
+
+      /// G. Why protect the original collection? -
+      // Verify the original Todo collection was not modified.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Clean up the saved sorting preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
