@@ -308,3 +308,9 @@ ul {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
+
+/* Prevent long API Todo titles from overflowing */
+.api-todos li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

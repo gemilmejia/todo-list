@@ -1,4 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+/* Global styles for the Angular Todo List application */
+
+/* Make element widths include padding and borders. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove the browser's default page margin. */
+body {
+  margin: 0;
+}
+
+/* Keep the main application container responsive. */
 .container {
-  width: 500px;
+  width: 100%;
+  max-width: 600px;
 }

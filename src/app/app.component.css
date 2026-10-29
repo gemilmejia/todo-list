@@ -31,3 +31,16 @@ h1 {
 .filters .active {
   font-weight: bold;
 }
+
+/* Mobile responsive layout */
+@media (max-width: 600px) {
+  .container {
+    margin: 20px auto;
+    padding: 16px;
+  }
+
+  h1 {
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+}

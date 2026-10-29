@@ -62,7 +62,7 @@ input:focus-visible {
     font-size: 14px;
   }
 
-    .edit-form {
+  .edit-form {
     flex-direction: column;
   }
 
@@ -84,14 +84,12 @@ li.completed {
   flex: 1;
 }
 
-
 /* Style for the completed date changed name from recently-completed into completion-relative-time */
 .completion-relative-time {
   font-size: 11px;
   color: #777;
   font-style: italic;
 }
-
 
 /* Style for the edit error message */
 .edit-error {
@@ -101,7 +99,6 @@ li.completed {
   font-size: 12px;
   margin-top: -5px;
 }
-
 
 /* Style for the edit form */
 .edit-form {
@@ -128,7 +125,6 @@ li.completed {
   gap: 6px;
 }
 
-
 /* Style for the character count in the edit form */
 .edit-character-count {
   width: 100%;
@@ -136,7 +132,6 @@ li.completed {
   font-size: 11px;
   color: #777;
 }
-
 
 /* Add warning and limit styles for character count */
 .edit-character-count.warning {

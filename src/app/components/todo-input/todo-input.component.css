@@ -43,3 +43,19 @@
   color: #f44336; /* Red color for limit state */
   font-weight: bold;
 }
+
+/* Make Add Task controls fit mobile screens */
+@media (max-width: 600px) {
+  .todo-input {
+    flex-direction: column;
+  }
+
+  .todo-input input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .todo-input button {
+    width: 100%;
+  }
+}
