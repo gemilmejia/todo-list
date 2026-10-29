@@ -23,29 +23,37 @@ import { processTodos } from '../../utils/todo-pipeline.util';
 export class TodoListComponent implements OnInit {
   constructor(private todoService: TodoService) {} // Inject the TodoService into the component's constructor to use its methods and properties (2) read: "Give this component access to TodoService."
 
-  ngOnInit() {
+  ngOnInit(): void {
+    // Restore the user's previously saved sorting preference.
     this.loadSortOrder();
 
-    this.todoService.getStatus().subscribe({
-      next: (message) => {
-        console.log(message);
-      },
-      complete: () => {
-        console.log('Todo status stream completed');
-      },
-    });
-
-    this.todoService.getStatusWithError().subscribe({
-      next: (message) => {
-        console.log(message);
-      },
-      error: (error) => {
-        console.error('Todo status stream failed:', error);
-      },
-    });
-
+    // Load API Todos when the component initializes.
     this.loadApiTodos();
   }
+
+  // ngOnInit() {
+  //   this.loadSortOrder();
+
+  //   this.todoService.getStatus().subscribe({
+  //     next: (message) => {
+  //       console.log(message);
+  //     },
+  //     complete: () => {
+  //       console.log('Todo status stream completed');
+  //     },
+  //   });
+
+  //   this.todoService.getStatusWithError().subscribe({
+  //     next: (message) => {
+  //       console.log(message);
+  //     },
+  //     error: (error) => {
+  //       console.error('Todo status stream failed:', error);
+  //     },
+  //   });
+
+  //   this.loadApiTodos();
+  // }
 
   loadApiTodos(): void {
     console.log('loadApiTodos() called. Loading:', this.isApiLoading);
