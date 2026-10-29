@@ -12486,4 +12486,1253 @@ describe('TodoListComponent', () => {
       localStorage.removeItem('todoSortOrder');
     }
   });
+
+  // 104. Jasmine
+  // Lesson 175 - Part 1:
+  // Verify that a newly selected A-Z preference remains saved
+  // through search, filter, reset, and component recreation.
+  it('should preserve sorting across search and filter changes after reset', async () => {
+    // ARRANGE: Create five Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 17501,
+        title: 'Zebra Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17502,
+        title: 'Apple TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17503,
+        title: 'Banana Angular',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17504,
+        title: 'Mango Portfolio',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17505,
+        title: 'Apple Angular',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original data to detect unintended mutations.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Make TodoService return predictable test data.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Helper: Read Todo titles displayed by a component fixture.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const items: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return items.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Select a sorting preference through the real dropdown.
+    const selectSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Find a button by its visible text.
+    const findButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      text: string,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes(text.toLowerCase()),
+      );
+    };
+
+    // Helper: Click a filter button.
+    const clickFilter = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      label: string,
+    ): Promise<void> => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const filterButton = buttons.find(
+        (button) => button.textContent?.trim() === label,
+      );
+
+      expect(filterButton).toBeDefined();
+
+      filterButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Verify sorting in component, HTML, and localStorage.
+    const expectAscendingSorting = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): void => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(currentFixture.componentInstance.sortOrder).toBe('asc');
+      expect(select.value).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+    };
+
+    // Track the current fixture for cleanup.
+    let currentFixture: ComponentFixture<TodoListComponent> = fixture;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+
+      // STEP 2: Select Z-A.
+      await selectSorting(currentFixture, 'desc');
+
+      expect(component.sortOrder).toBe('desc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Zebra Angular',
+        'Mango Portfolio',
+        'Banana Angular',
+        'Apple TypeScript',
+        'Apple Angular',
+      ]);
+
+      // STEP 3: Click the actual Reset Sorting button.
+      const resetButton = findButton(currentFixture, 'reset sorting');
+
+      expect(resetButton).toBeDefined();
+
+      resetButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // Verify the original Todo order returned.
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Zebra Angular',
+        'Apple TypeScript',
+        'Banana Angular',
+        'Mango Portfolio',
+        'Apple Angular',
+      ]);
+
+      // STEP 4: Select A-Z after resetting.
+      await selectSorting(currentFixture, 'asc');
+
+      expectAscendingSorting(currentFixture);
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Apple Angular',
+        'Apple TypeScript',
+        'Banana Angular',
+        'Mango Portfolio',
+        'Zebra Angular',
+      ]);
+
+      // STEP 5: Search for Angular.
+      const searchInput = currentFixture.nativeElement.querySelector(
+        'input[placeholder*="Search"]',
+      ) as HTMLInputElement;
+
+      expect(searchInput).not.toBeNull();
+
+      searchInput.value = 'angular';
+      searchInput.dispatchEvent(new Event('input'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.searchTerm).toBe('angular');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Apple Angular',
+        'Banana Angular',
+        'Zebra Angular',
+      ]);
+
+      expectAscendingSorting(currentFixture);
+
+      // STEP 6: Select Active.
+      await clickFilter(currentFixture, 'Active');
+
+      expect(component.filter).toBe('active');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Apple Angular',
+        'Zebra Angular',
+      ]);
+
+      expectAscendingSorting(currentFixture);
+
+      // STEP 7: Select Completed.
+      await clickFilter(currentFixture, 'Completed');
+
+      expect(component.filter).toBe('completed');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual(['Banana Angular']);
+
+      expectAscendingSorting(currentFixture);
+
+      // STEP 8: Click the real Clear Search button.
+      const clearButton = findButton(currentFixture, 'clear search');
+
+      expect(clearButton).toBeDefined();
+
+      clearButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Search is cleared, but Completed remains selected.
+      expect(component.searchTerm).toBe('');
+      expect(component.filter).toBe('completed');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Apple TypeScript',
+        'Banana Angular',
+      ]);
+
+      expectAscendingSorting(currentFixture);
+
+      // STEP 9: Destroy the original component.
+      currentFixture.destroy();
+
+      // A-Z should still be saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // Create a new component.
+      currentFixture = TestBed.createComponent(TodoListComponent);
+
+      // Trigger ngOnInit(), including loadSortOrder().
+      currentFixture.detectChanges();
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // STEP 10: Verify the new component restored A-Z.
+      expectAscendingSorting(currentFixture);
+
+      // Search and filter start with their own defaults.
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // All five Todos should appear in A-Z order.
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Apple Angular',
+        'Apple TypeScript',
+        'Banana Angular',
+        'Mango Portfolio',
+        'Zebra Angular',
+      ]);
+
+      // Verify the original Todo data remains unchanged.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Destroy the currently active component.
+      currentFixture.destroy();
+
+      // Remove the saved sorting preference after this test.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 105. Jasmine
+  // Lesson 175 - Part 2:
+  // Verify that Z-A sorting remains saved after resetting A-Z,
+  // producing empty search/filter results, recovering,
+  // and recreating TodoListComponent.
+  it('should preserve descending sorting through empty search and filter recovery', async () => {
+    // ARRANGE: Create five predictable Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 17511,
+        title: 'Zebra Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17512,
+        title: 'Apple Portfolio',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17513,
+        title: 'Mango TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17514,
+        title: 'Banana Angular',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17515,
+        title: 'Orange Portfolio',
+        completed: false,
+      }),
+    ];
+
+    // Preserve source data for mutation checking.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Return predictable Todos from TodoService.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Helper: Read titles from the rendered Todo items.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const items: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return items.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Select sorting using the actual HTML dropdown.
+    const selectSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Find a button using its visible text.
+    const findButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      label: string,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes(label.toLowerCase()),
+      );
+    };
+
+    // Helper: Click a filter button by its exact visible label.
+    const clickFilter = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      label: string,
+    ): Promise<void> => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const button = buttons.find((item) => item.textContent?.trim() === label);
+
+      expect(button).toBeDefined();
+
+      button!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Verify Z-A sorting in three different places.
+    const expectDescendingSorting = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): void => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(currentFixture.componentInstance.sortOrder).toBe('desc');
+      expect(select.value).toBe('desc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+    };
+
+    // Track the active component for cleanup.
+    let currentFixture: ComponentFixture<TodoListComponent> = fixture;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+
+      // STEP 2: Select A-Z.
+      await selectSorting(currentFixture, 'asc');
+
+      expect(component.sortOrder).toBe('asc');
+      expect(localStorage.getItem('todoSortOrder')).toBe('asc');
+
+      // STEP 3: Reset A-Z using the actual button.
+      const resetButton = findButton(currentFixture, 'reset sorting');
+
+      expect(resetButton).toBeDefined();
+
+      resetButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // STEP 4: Select Z-A as the new preference.
+      await selectSorting(currentFixture, 'desc');
+
+      expectDescendingSorting(currentFixture);
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Zebra Angular',
+        'Orange Portfolio',
+        'Mango TypeScript',
+        'Banana Angular',
+        'Apple Portfolio',
+      ]);
+
+      // STEP 5: Select Completed filtering.
+      await clickFilter(currentFixture, 'Completed');
+
+      expect(component.filter).toBe('completed');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Mango TypeScript',
+        'Banana Angular',
+      ]);
+
+      expectDescendingSorting(currentFixture);
+
+      // STEP 6: Search for "portfolio".
+      const searchInput = currentFixture.nativeElement.querySelector(
+        'input[placeholder*="Search"]',
+      ) as HTMLInputElement;
+
+      expect(searchInput).not.toBeNull();
+
+      searchInput.value = 'portfolio';
+      searchInput.dispatchEvent(new Event('input'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.searchTerm).toBe('portfolio');
+
+      // No completed Todo contains "portfolio".
+      expect(getDisplayedTitles(currentFixture)).toEqual([]);
+      expect(component.filteredTodos).toEqual([]);
+
+      // Empty results must not reset sorting.
+      expectDescendingSorting(currentFixture);
+
+      // STEP 7: Switch to Active without clearing the search.
+      await clickFilter(currentFixture, 'Active');
+
+      expect(component.filter).toBe('active');
+      expect(component.searchTerm).toBe('portfolio');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Orange Portfolio',
+        'Apple Portfolio',
+      ]);
+
+      expectDescendingSorting(currentFixture);
+
+      // STEP 8: Clear search using the actual Clear Search button.
+      const clearButton = findButton(currentFixture, 'clear search');
+
+      expect(clearButton).toBeDefined();
+
+      clearButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // Search is cleared, but Active remains selected.
+      expect(component.searchTerm).toBe('');
+      expect(searchInput.value).toBe('');
+      expect(component.filter).toBe('active');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Zebra Angular',
+        'Orange Portfolio',
+        'Apple Portfolio',
+      ]);
+
+      expectDescendingSorting(currentFixture);
+
+      // STEP 9: Destroy the original component.
+      currentFixture.destroy();
+
+      // Z-A remains saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('desc');
+
+      // Create a replacement component.
+      currentFixture = TestBed.createComponent(TodoListComponent);
+
+      // Trigger ngOnInit() and restore sorting.
+      currentFixture.detectChanges();
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // STEP 10: Verify Z-A was restored.
+      expectDescendingSorting(currentFixture);
+
+      // Search and filter initialize to their defaults.
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // All Todos return in descending order.
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Zebra Angular',
+        'Orange Portfolio',
+        'Mango TypeScript',
+        'Banana Angular',
+        'Apple Portfolio',
+      ]);
+
+      // Verify no source mutation occurred.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Destroy the currently active fixture.
+      currentFixture.destroy();
+
+      // Remove this test's sorting preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 106. Jasmine
+  // Lesson 175 - Part 3:
+  // Verify that Completed First sorting remains saved and applied
+  // through reset, search, filter, empty results, and recreation.
+  it('should preserve completed-first sorting through combined user interactions', async () => {
+    // ARRANGE: Create five Todos with mixed completion states.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 17521,
+        title: 'Study Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17522,
+        title: 'Submit Angular Report',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17523,
+        title: 'Build Portfolio',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17524,
+        title: 'Review TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17525,
+        title: 'Practice Angular',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original data to detect unintended mutations.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Provide predictable data through TodoService.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Define the expected Completed First order.
+    const completedFirstTitles = [
+      'Submit Angular Report',
+      'Review TypeScript',
+      'Study Angular',
+      'Build Portfolio',
+      'Practice Angular',
+    ];
+
+    // Helper: Read actual displayed Todo titles.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const items: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return items.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Select sorting through the HTML dropdown.
+    const selectSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Find a button by its visible text.
+    const findButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      label: string,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes(label.toLowerCase()),
+      );
+    };
+
+    // Helper: Click a filter button by its exact text.
+    const clickFilter = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      label: string,
+    ): Promise<void> => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const button = buttons.find((item) => item.textContent?.trim() === label);
+
+      expect(button).toBeDefined();
+
+      button!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Type into the real search input.
+    const changeSearch = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const input = currentFixture.nativeElement.querySelector(
+        'input[placeholder*="Search"]',
+      ) as HTMLInputElement;
+
+      expect(input).not.toBeNull();
+
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Verify the saved Completed First preference.
+    const expectCompletedFirstSorting = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): void => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(currentFixture.componentInstance.sortOrder).toBe(
+        'completed-first',
+      );
+
+      expect(select.value).toBe('completed-first');
+
+      expect(localStorage.getItem('todoSortOrder')).toBe('completed-first');
+    };
+
+    // Track the current component for cleanup.
+    let currentFixture: ComponentFixture<TodoListComponent> = fixture;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+
+      // STEP 2: Select Active First.
+      await selectSorting(currentFixture, 'active-first');
+
+      expect(component.sortOrder).toBe('active-first');
+      expect(localStorage.getItem('todoSortOrder')).toBe('active-first');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Study Angular',
+        'Build Portfolio',
+        'Practice Angular',
+        'Submit Angular Report',
+        'Review TypeScript',
+      ]);
+
+      // STEP 3: Reset Active First.
+      const resetButton = findButton(currentFixture, 'reset sorting');
+
+      expect(resetButton).toBeDefined();
+
+      resetButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+      expect(localStorage.getItem('todoSortOrder')).toBe('default');
+
+      // Verify the original source order is restored.
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Study Angular',
+        'Submit Angular Report',
+        'Build Portfolio',
+        'Review TypeScript',
+        'Practice Angular',
+      ]);
+
+      // STEP 4: Select Completed First after reset.
+      await selectSorting(currentFixture, 'completed-first');
+
+      expectCompletedFirstSorting(currentFixture);
+
+      expect(getDisplayedTitles(currentFixture)).toEqual(completedFirstTitles);
+
+      // STEP 5: Search for Angular.
+      await changeSearch(currentFixture, 'angular');
+
+      expect(component.searchTerm).toBe('angular');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Submit Angular Report',
+        'Study Angular',
+        'Practice Angular',
+      ]);
+
+      expectCompletedFirstSorting(currentFixture);
+
+      // STEP 6: Switch to Active.
+      await clickFilter(currentFixture, 'Active');
+
+      expect(component.filter).toBe('active');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Study Angular',
+        'Practice Angular',
+      ]);
+
+      expectCompletedFirstSorting(currentFixture);
+
+      // STEP 7: Search for TypeScript.
+      await changeSearch(currentFixture, 'typescript');
+
+      expect(component.searchTerm).toBe('typescript');
+
+      // Review TypeScript is completed, so it is excluded.
+      expect(getDisplayedTitles(currentFixture)).toEqual([]);
+      expect(component.filteredTodos).toEqual([]);
+
+      // An empty result must not reset sorting.
+      expectCompletedFirstSorting(currentFixture);
+
+      // STEP 8: Switch to Completed.
+      await clickFilter(currentFixture, 'Completed');
+
+      expect(component.filter).toBe('completed');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual(['Review TypeScript']);
+
+      expectCompletedFirstSorting(currentFixture);
+
+      // STEP 9: Clear search with the actual button.
+      const clearButton = findButton(currentFixture, 'clear search');
+
+      expect(clearButton).toBeDefined();
+
+      clearButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.searchTerm).toBe('');
+      expect(component.filter).toBe('completed');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual([
+        'Submit Angular Report',
+        'Review TypeScript',
+      ]);
+
+      expectCompletedFirstSorting(currentFixture);
+
+      // STEP 10: Return to the All filter.
+      await clickFilter(currentFixture, 'All');
+
+      expect(component.filter).toBe('all');
+
+      expect(getDisplayedTitles(currentFixture)).toEqual(completedFirstTitles);
+
+      expectCompletedFirstSorting(currentFixture);
+
+      // STEP 11: Destroy the original component.
+      currentFixture.destroy();
+
+      // The preference should remain saved.
+      expect(localStorage.getItem('todoSortOrder')).toBe('completed-first');
+
+      // Create a replacement component.
+      currentFixture = TestBed.createComponent(TodoListComponent);
+
+      // Trigger ngOnInit() and restore saved sorting.
+      currentFixture.detectChanges();
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      // STEP 12: Verify the saved preference was restored.
+      expectCompletedFirstSorting(currentFixture);
+
+      expect(getDisplayedTitles(currentFixture)).toEqual(completedFirstTitles);
+
+      // Search and filter should start at their defaults.
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // Confirm no mutation occurred.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Destroy the currently active component.
+      currentFixture.destroy();
+
+      // Remove the saved sorting preference.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
+
+  // 107. Jasmine
+  // Lesson 175 - Part 4:
+  // Verify a complete sorting, searching, filtering, resetting,
+  // and preference restoration workflow.
+  it('should keep sorting consistent across combined user workflows and recreations', async () => {
+    // ARRANGE: Create five predictable Todos.
+    const mockTodos: Todo[] = [
+      createMockTodo({
+        id: 17531,
+        title: 'Zebra Angular',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17532,
+        title: 'Apple TypeScript',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17533,
+        title: 'Mango Angular',
+        completed: true,
+      }),
+      createMockTodo({
+        id: 17534,
+        title: 'Banana Portfolio',
+        completed: false,
+      }),
+      createMockTodo({
+        id: 17535,
+        title: 'Orange Angular',
+        completed: false,
+      }),
+    ];
+
+    // Preserve the original data to detect mutations.
+    const originalTodos = mockTodos.map((todo) => ({ ...todo }));
+
+    // Mock the service's Todo collection.
+    spyOn(TestBed.inject(TodoService), 'getTodos').and.returnValue(mockTodos);
+
+    // Store expected Todo orders.
+    const defaultTitles = [
+      'Zebra Angular',
+      'Apple TypeScript',
+      'Mango Angular',
+      'Banana Portfolio',
+      'Orange Angular',
+    ];
+
+    const ascendingTitles = [
+      'Apple TypeScript',
+      'Banana Portfolio',
+      'Mango Angular',
+      'Orange Angular',
+      'Zebra Angular',
+    ];
+
+    const activeFirstTitles = [
+      'Zebra Angular',
+      'Banana Portfolio',
+      'Orange Angular',
+      'Apple TypeScript',
+      'Mango Angular',
+    ];
+
+    const descendingTitles = [
+      'Zebra Angular',
+      'Orange Angular',
+      'Mango Angular',
+      'Banana Portfolio',
+      'Apple TypeScript',
+    ];
+
+    // Helper: Read titles displayed in the HTML.
+    const getDisplayedTitles = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+    ): string[] => {
+      const items: HTMLElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('app-todo-item'),
+      );
+
+      return items.map(
+        (item) => item.querySelector('.todo-title')?.textContent?.trim() ?? '',
+      );
+    };
+
+    // Helper: Find a button by its visible text.
+    const findButton = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      label: string,
+    ): HTMLButtonElement | undefined => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      return buttons.find((button) =>
+        button.textContent?.trim().toLowerCase().includes(label.toLowerCase()),
+      );
+    };
+
+    // Helper: Change sorting through the real dropdown.
+    const selectSorting = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      select.value = value;
+      select.dispatchEvent(new Event('change'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Enter a search term using the real input.
+    const changeSearch = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      value: string,
+    ): Promise<void> => {
+      const input = currentFixture.nativeElement.querySelector(
+        'input[placeholder*="Search"]',
+      ) as HTMLInputElement;
+
+      expect(input).not.toBeNull();
+
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Click an exact filter button.
+    const clickFilter = async (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      label: string,
+    ): Promise<void> => {
+      const buttons: HTMLButtonElement[] = Array.from(
+        currentFixture.nativeElement.querySelectorAll('button'),
+      );
+
+      const button = buttons.find((item) => item.textContent?.trim() === label);
+
+      expect(button).toBeDefined();
+
+      button!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+    };
+
+    // Helper: Verify sorting and persistence.
+    const expectSorting = (
+      currentFixture: ComponentFixture<TodoListComponent>,
+      expectedValue: string,
+      expectedTitles: string[],
+      context: string,
+    ): void => {
+      const select = currentFixture.nativeElement.querySelector(
+        '#todo-sort-select',
+      ) as HTMLSelectElement;
+
+      expect(select).not.toBeNull();
+
+      expect(currentFixture.componentInstance.sortOrder)
+        .withContext(`${context}: component state`)
+        .toBe(expectedValue);
+
+      expect(select.value)
+        .withContext(`${context}: dropdown value`)
+        .toBe(expectedValue);
+
+      expect(localStorage.getItem('todoSortOrder'))
+        .withContext(`${context}: saved preference`)
+        .toBe(expectedValue);
+
+      expect(getDisplayedTitles(currentFixture))
+        .withContext(`${context}: displayed Todos`)
+        .toEqual(expectedTitles);
+    };
+
+    // Helper: Recreate TodoListComponent.
+    const recreateComponent = async (
+      oldFixture: ComponentFixture<TodoListComponent>,
+    ): Promise<ComponentFixture<TodoListComponent>> => {
+      oldFixture.destroy();
+
+      const replacement = TestBed.createComponent(TodoListComponent);
+
+      replacement.detectChanges();
+
+      await replacement.whenStable();
+      replacement.detectChanges();
+
+      return replacement;
+    };
+
+    // Track the active fixture.
+    let currentFixture: ComponentFixture<TodoListComponent> = fixture;
+
+    try {
+      // STEP 1: Initialize the original component.
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.sortOrder).toBe('default');
+      expect(getDisplayedTitles(currentFixture)).toEqual(defaultTitles);
+
+      // STEP 2: Select A-Z sorting.
+      await selectSorting(currentFixture, 'asc');
+
+      expectSorting(
+        currentFixture,
+        'asc',
+        ascendingTitles,
+        'Original - selected A-Z',
+      );
+
+      // STEP 3: Search for Angular.
+      await changeSearch(currentFixture, 'angular');
+
+      expect(component.searchTerm).toBe('angular');
+
+      // STEP 4: Select Active filtering.
+      await clickFilter(currentFixture, 'Active');
+
+      expect(component.filter).toBe('active');
+
+      expectSorting(
+        currentFixture,
+        'asc',
+        ['Orange Angular', 'Zebra Angular'],
+        'Original - A-Z, Angular search, Active filter',
+      );
+
+      // STEP 5: Select Completed First while search and filter are active.
+      await selectSorting(currentFixture, 'completed-first');
+
+      // Both matching Todos are active, so their original relative
+      // order is preserved under Completed First.
+      expectSorting(
+        currentFixture,
+        'completed-first',
+        ['Zebra Angular', 'Orange Angular'],
+        'Original - Completed First, Angular search, Active filter',
+      );
+
+      // Search and filter remain unchanged.
+      expect(component.searchTerm).toBe('angular');
+      expect(component.filter).toBe('active');
+
+      // STEP 6: Switch to All filtering.
+      await clickFilter(currentFixture, 'All');
+
+      expect(component.filter).toBe('all');
+
+      expectSorting(
+        currentFixture,
+        'completed-first',
+        ['Mango Angular', 'Zebra Angular', 'Orange Angular'],
+        'Original - Completed First, Angular search, All filter',
+      );
+
+      // STEP 7: Reset sorting without clearing the search.
+      const resetButton = findButton(currentFixture, 'reset sorting');
+
+      expect(resetButton).toBeDefined();
+
+      resetButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expectSorting(
+        currentFixture,
+        'default',
+        ['Zebra Angular', 'Mango Angular', 'Orange Angular'],
+        'Original - reset sorting with search active',
+      );
+
+      // Reset Sorting must not clear the search term.
+      expect(component.searchTerm).toBe('angular');
+      expect(component.filter).toBe('all');
+
+      // Reset Sorting should now be hidden.
+      expect(findButton(currentFixture, 'reset sorting')).toBeUndefined();
+
+      // STEP 8: Clear search.
+      const clearButton = findButton(currentFixture, 'clear search');
+
+      expect(clearButton).toBeDefined();
+
+      clearButton!.click();
+
+      currentFixture.detectChanges();
+      await currentFixture.whenStable();
+      currentFixture.detectChanges();
+
+      expect(component.searchTerm).toBe('');
+
+      expectSorting(
+        currentFixture,
+        'default',
+        defaultTitles,
+        'Original - cleared search under Default',
+      );
+
+      // STEP 9: Select Active First.
+      await selectSorting(currentFixture, 'active-first');
+
+      expectSorting(
+        currentFixture,
+        'active-first',
+        activeFirstTitles,
+        'Original - selected Active First',
+      );
+
+      // STEP 10: Recreate component #1.
+      currentFixture = await recreateComponent(currentFixture);
+
+      expectSorting(
+        currentFixture,
+        'active-first',
+        activeFirstTitles,
+        'Recreation 1 - restored Active First',
+      );
+
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // STEP 11: Change to Z-A in the recreated component.
+      await selectSorting(currentFixture, 'desc');
+
+      expectSorting(
+        currentFixture,
+        'desc',
+        descendingTitles,
+        'Recreation 1 - selected Z-A',
+      );
+
+      // STEP 12: Recreate component #2.
+      currentFixture = await recreateComponent(currentFixture);
+
+      expectSorting(
+        currentFixture,
+        'desc',
+        descendingTitles,
+        'Recreation 2 - restored Z-A',
+      );
+
+      // Verify latest selection survived recreation.
+      expect(currentFixture.componentInstance.filter).toBe('all');
+      expect(currentFixture.componentInstance.searchTerm).toBe('');
+
+      // Confirm the original service data was never mutated.
+      expect(mockTodos).toEqual(originalTodos);
+    } finally {
+      // Destroy the currently active component.
+      currentFixture.destroy();
+
+      // Remove the saved sorting preference after testing.
+      localStorage.removeItem('todoSortOrder');
+    }
+  });
 });
