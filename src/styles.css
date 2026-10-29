@@ -1,20 +1,51 @@
-/* You can add global styles to this file, and also import other style files */
-/* Global styles for the Angular Todo List application */
+/* Portfolio UI Redesign - Modern Light Theme */
 
-/* Make element widths include padding and borders. */
+/* Define reusable application colors. */
+:root {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-background: #f3f7fc;
+  --color-surface: #ffffff;
+  --color-text: #1e293b;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-success: #16a34a;
+  --color-danger: #ef4444;
+}
+
+/* Keep sizing consistent across all elements. */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* Remove the browser's default page margin. */
+/* Apply the new background and typography. */
 body {
   margin: 0;
+  min-height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.5;
 }
 
-/* Keep the main application container responsive. */
+/* Maintain a responsive application width. */
 .container {
   width: 100%;
   max-width: 600px;
+}
+
+/* Make interactive controls use the same font. */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+/* Make keyboard focus clearly visible. */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
