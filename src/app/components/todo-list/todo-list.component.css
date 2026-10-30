@@ -1,3 +1,4 @@
+/* My API Todos — loading messages, refresh button, fetched Todo items, and error states. */
 .filters .active {
   font-weight: bold;
 }
@@ -313,4 +314,451 @@ ul {
 .api-todos li {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* ======================================================================================================================================================================*/
+
+/* =====================================
+   Modern Light Theme — Todo List Controls - My Todo List — progress, search, filters, sorting, and task feedback.
+   ===================================== */
+
+/* Main heading for personal tasks */
+.todo-list-heading {
+  margin: 0 0 18px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Todo completion count */
+.todo-count {
+  margin-bottom: 12px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+/* Modern progress bar */
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 24px;
+
+  margin-top: 8px;
+  margin-bottom: 24px;
+
+  background-color: #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Progress indicator */
+.progress-fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 100%;
+  width: 0;
+
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-radius: 12px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  transition: width 0.3s ease;
+}
+
+/* The 0% label */
+.progress-zero-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Search and sort sections */
+.todo-search,
+.todo-sort {
+  margin: 18px 0;
+}
+
+/* Search and sort labels */
+.todo-search label,
+.todo-sort label {
+  display: block;
+  margin-bottom: 8px;
+
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Search input and sort dropdown */
+.todo-search input,
+.todo-sort select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+
+  padding: 12px 14px;
+
+  color: var(--color-text);
+  background-color: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  font-size: 16px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Focus feedback */
+.todo-search input:focus,
+.todo-sort select:focus {
+  border-color: var(--color-primary);
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Filter button layout */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+/* Default filter button */
+.filters button {
+  padding: 10px 16px;
+
+  color: var(--color-primary);
+  background-color: #eff6ff;
+
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Active filter button */
+.filters button.active {
+  color: #ffffff;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Hover for inactive filters */
+.filters button:hover:not(.active) {
+  background-color: #dbeafe;
+}
+
+/* Keyboard focus for filters */
+.filters button:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Clear Completed button */
+.clear-completed {
+  display: block;
+  margin: 0 auto 20px;
+  padding: 10px 16px;
+
+  color: var(--color-danger);
+  background-color: #fef2f2;
+
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+/* Clear Completed hover */
+.clear-completed:hover {
+  background-color: #fee2e2;
+}
+
+/* Secondary action buttons */
+.clear-search,
+.reset-sort {
+  display: block;
+  margin: 10px 0 0 auto;
+  padding: 9px 14px;
+
+  color: var(--color-muted);
+  background-color: #f8fafc;
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+/* Secondary button hover */
+.clear-search:hover,
+.reset-sort:hover {
+  color: var(--color-text);
+  background-color: #f1f5f9;
+}
+
+/* Accessible keyboard focus */
+.clear-completed:focus-visible,
+.clear-search:focus-visible,
+.reset-sort:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Todo count and feedback messages */
+.no-completed-message,
+.todo-result-count {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+/* Empty and no-results states */
+.empty-state,
+.todo-no-results,
+.todo-filter-empty {
+  margin: 20px 0;
+  padding: 24px 20px;
+
+  color: var(--color-muted);
+  text-align: center;
+
+  background-color: #f8fafc;
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .progress-bar {
+    height: 20px;
+  }
+
+  .progress-fill,
+  .progress-zero-label {
+    font-size: 11px;
+  }
+
+  .filters {
+    gap: 8px;
+  }
+
+  .filters button {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .todo-list-heading {
+    font-size: 20px;
+  }
+}
+
+/*=====================================================================================================================================================================================*/
+
+/* =====================================
+   Modern Light Theme — API Todos
+   ===================================== */
+
+/* API section heading */
+.api-todos h3 {
+  margin: 0 0 16px;
+
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* API information and refresh controls */
+.api-info {
+  margin-bottom: 20px;
+  padding: 16px;
+
+  color: var(--color-muted);
+  background-color: #f8fafc;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Refresh API button */
+.api-refresh {
+  display: block;
+  margin: 12px auto 0;
+  padding: 10px 18px;
+
+  color: var(--color-primary);
+  background-color: #eff6ff;
+
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Refresh button hover */
+.api-refresh:hover:not(:disabled) {
+  background-color: #dbeafe;
+}
+
+/* Disabled refresh button */
+.api-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Keyboard focus for refresh button */
+.api-refresh:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* API loading message */
+.api-loading {
+  margin-bottom: 16px;
+  padding: 14px;
+
+  color: var(--color-primary);
+  background-color: #eff6ff;
+
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* API refresh status text */
+.api-refresh-status {
+  margin: 12px 0 18px;
+
+  color: var(--color-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+/* API Todo list container */
+.api-todos {
+  margin-bottom: 32px;
+}
+
+/* Remove list markers and default spacing */
+.api-todos ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Individual API Todo */
+.api-todos li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  min-width: 0;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+
+  color: var(--color-text);
+  background-color: #f8fafc;
+
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  overflow-wrap: anywhere;
+}
+
+/* API Todo completion icon */
+.api-todos-status {
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Let long API Todo titles wrap */
+.api-todos li span:last-child {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Empty API response */
+.api-empty {
+  margin: 20px 0;
+  padding: 24px;
+
+  color: var(--color-muted);
+  background-color: #f8fafc;
+
+  border: 1px dashed var(--color-border);
+  border-radius: 12px;
+
+  text-align: center;
+}
+
+/* Empty-state heading */
+.api-empty h3 {
+  margin: 0 0 8px;
+  color: var(--color-text);
+}
+
+/* Empty-state description */
+.api-empty p {
+  margin: 0;
+}
+
+/* Mobile API section */
+@media (max-width: 600px) {
+  .api-info {
+    padding: 12px;
+  }
+
+  .api-refresh {
+    width: 100%;
+  }
+
+  .api-todos li {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .api-todos h3 {
+    font-size: 18px;
+  }
 }

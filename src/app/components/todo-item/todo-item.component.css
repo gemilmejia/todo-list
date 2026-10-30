@@ -1,65 +1,183 @@
+/* A. Card styling */
+/* Main Todo item card */
 li {
-  display: flex; /*Puts the Todo content and buttons into a flexible row.*/
-  align-items: center; /*Vertically centers everything.*/
-  gap: 10px; /*Adds spacing between the elements.*/
-  padding: 12px; /*Creates space inside each Todo item.*/
-  margin-bottom: 10px; /*Creates space between Todo items.*/
-  border: 1px solid #ddd; /*Adds a subtle border.*/
-  border-radius: 8px; /*Rounds the corners of the border.*/
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  padding: 16px;
+  margin-bottom: 12px;
+
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
+/* Subtle hover feedback for the card */
+li:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+/* B. Long task titles */
+/* Task title */
+.todo-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+/* C. Completed task styling */
+/* Completed Todo appearance */
+li.completed {
+  background-color: #f8fafc;
+  border-color: #bbf7d0;
+}
+
+/* Strike through only the task title */
+li.completed .todo-title {
+  text-decoration: line-through;
+  color: var(--color-muted);
+}
+
+/* Relative completion time */
+.completion-relative-time {
+  font-size: 11px;
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+/* D. Modern action buttons */
+/* Shared action button styling */
 button {
-  padding: 6px 12px; /*Makes the buttons easier to click.*/
-  border: none; /*Removes the default button border.*/
-  border-radius: 5px; /*Makes the corners slightly rounded.*/
-  cursor: pointer; /*Shows the hand cursor when hovering over the button.*/
+  padding: 8px 12px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  background-color: #eff6ff;
+  color: var(--color-primary);
+
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.1s ease;
 }
 
-/*Add hover feedback*/
-button:hover {
-  opacity: 0.85; /*Slightly fades the button when hovered.*/
+/* Hover feedback */
+button:hover:not(:disabled) {
+  background-color: #dbeafe;
 }
 
-button:focus-visible {
-  outline: 3px solid #1976d2;
+/* Keyboard focus indicator */
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
+/* Disabled buttons */
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-button {
-  transition:
-    opacity 0.2s ease,
-    transform 0.1s ease;
-}
-
-button:active {
+/* Button press animation */
+button:active:not(:disabled) {
   transform: scale(0.96);
 }
 
+/* Shared input styles */
 input {
   flex: 1;
-  padding: 8px;
+  min-width: 0;
+  padding: 10px 12px;
   font-size: 16px;
 }
 
-input:focus-visible {
-  outline: 3px solid #1976d2;
-  outline-offset: 2px;
+/* E. Edit form preservation */
+/* Edit form */
+.edit-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
 }
 
-/* Make the Todo App Responsive */
+/* Edit input */
+.edit-form input {
+  flex: 1;
+  min-width: 0;
+
+  padding: 10px 12px;
+
+  color: var(--color-text);
+  background-color: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+/* Save and Cancel buttons */
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Validation error */
+.edit-error {
+  display: block;
+  width: 100%;
+  margin-top: -5px;
+
+  color: var(--color-danger);
+  font-size: 12px;
+}
+
+/* Edit character counter */
+.edit-character-count {
+  width: 100%;
+  text-align: right;
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+/* Character count warning */
+.edit-character-count.warning {
+  color: #d97706;
+  font-weight: 600;
+}
+
+/* Character limit reached */
+.edit-character-count.limit {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
+/* Mobile responsive layout */
 @media (max-width: 600px) {
   li {
-    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px;
   }
 
   button {
-    padding: 5px 8px;
-    font-size: 14px;
+    padding: 8px 10px;
+    font-size: 13px;
   }
 
   .edit-form {
@@ -73,72 +191,4 @@ input:focus-visible {
   .edit-actions button {
     flex: 1;
   }
-}
-
-li.completed {
-  text-decoration: line-through; /*Adds the strikethrough.*/
-  opacity: 0.6; /*Makes completed tasks look less prominent.*/
-}
-
-.todo-title {
-  flex: 1;
-}
-
-/* Style for the completed date changed name from recently-completed into completion-relative-time */
-.completion-relative-time {
-  font-size: 11px;
-  color: #777;
-  font-style: italic;
-}
-
-/* Style for the edit error message */
-.edit-error {
-  display: block;
-  width: 100%;
-  color: #d32f2f;
-  font-size: 12px;
-  margin-top: -5px;
-}
-
-/* Style for the edit form */
-.edit-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-}
-
-/* Style for the input field in the edit form */
-.edit-form input {
-  flex: 1;
-  min-width: 0;
-  padding: 8px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-
-/* Style for the buttons in the edit form */
-.edit-actions {
-  display: flex;
-  gap: 6px;
-}
-
-/* Style for the character count in the edit form */
-.edit-character-count {
-  width: 100%;
-  text-align: right;
-  font-size: 11px;
-  color: #777;
-}
-
-/* Add warning and limit styles for character count */
-.edit-character-count.warning {
-  color: #f57c00;
-}
-
-.edit-character-count.limit {
-  color: #d32f2f;
-  font-weight: bold;
 }

@@ -1,12 +1,28 @@
+/* Main application card */
 .container {
-  max-width: 600px; /*Keeps the Todo app from becoming extremely wide on a large screen.*/
-  margin: 50px auto; /*The "50px" gives space above/below.  "auto" centers the container horizontally.*/
-  padding: 30px; /*Adds space inside the container. */
+  width: 100%;
+  max-width: 700px; /*Keeps the Todo app from becoming extremely wide on a large screen.*/
+  margin: 40px auto; /*The "40px" gives space above/below.  "auto" centers the container horizontally.*/
+  padding: 32px; /*Adds space inside the container. */
+
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
 }
 
+/* Main application heading */
 h1 {
+  margin: 0 0 28px;
+
+  color: var(--color-text);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+
   text-align: center; /*This centers the heading.*/
-  margin-bottom: 30px;
 }
 
 .filters {

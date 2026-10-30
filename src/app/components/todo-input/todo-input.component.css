@@ -1,50 +1,84 @@
-/* Open the input component CSS */
+/* Arrange the task input and Add Task button */
 .todo-input {
-  display: flex; /*Places the input and button beside each other. */
-  gap: 10px; /*Creates space between them.*/
-  margin-bottom: 20px; /*Creates space between the input area and the filters/list below it.*/
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: stretch;
 }
 
-/* Style the input field */
+/* Modern task input field */
 .todo-input input {
-  flex: 1; /*"Take up the remaining available space."*/
-  padding: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 16px;
+
   font-size: 16px;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-/* Style the Add button */
+/* Highlight the input when selected */
+.todo-input input:focus {
+  border-color: var(--color-primary);
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* Modern primary action button */
 .todo-input button {
-  padding: 10px 20px;
+  padding: 12px 20px;
+
   font-size: 16px;
-  cursor: pointer; /*cursor: pointer makes the mouse cursor become a hand when hovering over the button. */
+  font-weight: 600;
+  color: #ffffff;
+  background-color: var(--color-primary);
+
+  border: none;
+  border-radius: 10px;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-/* Style the disabled button - (Class, CSS pseudo-class)*/
+/* Darken the button when hovered */
+.todo-input button:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+/* Make disabled buttons visibly inactive */
 .todo-input button:disabled {
-  /* background-color: #ccc; Gray background for disabled state. */
-  opacity: 0.5; /*Makes the button look faded when disabled.*/
-  cursor: not-allowed; /*Changes the cursor to indicate the button is not clickable.*/
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Character count styling */
+/* Character count below the input */
 .character-count {
   text-align: right;
   margin-top: 5px;
   font-size: 13px;
-  color: #777;
+  color: var(--color-muted);
 }
 
+/* Warn when approaching the character limit */
 .character-count.warning {
-  color: #ff9800; /* Orange color for warning state */
-  font-weight: bold;
+  color: #d97706;
+  font-weight: 700;
 }
 
+/* Highlight when the character limit is reached */
 .character-count.limit {
-  color: #f44336; /* Red color for limit state */
-  font-weight: bold;
+  color: var(--color-danger);
+  font-weight: 700;
 }
 
-/* Make Add Task controls fit mobile screens */
+/* Adapt the input and button to smaller screens */
 @media (max-width: 600px) {
   .todo-input {
     flex-direction: column;
