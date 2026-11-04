@@ -69,19 +69,47 @@
     <section class="api-todos" aria-labelledby="api-todos-heading">
       <h3 id="api-todos-heading">API Todos</h3>
 
-      <ul>
-        @for (todo of apiTodos; track todo.id) {
+      <!-- A. Display the number of visible Todos -->
+      <!-- Explain how many API Todos are currently visible. -->
+      <p class="api-display-count">
+        Showing {{ visibleApiTodos.length }} of {{ apiTodoCount }} API Todos
+      </p>
+
+      <!-- Display either the first five or all API Todos. -->
+      <ul id="api-todo-items">
+        <!-- B. Change the @for loop -->
+        @for (todo of visibleApiTodos; track todo.id) {
           <li>
             <span class="api-todos-status">
               {{ todo.completed ? "✅" : "⬜" }}
             </span>
 
-            <span> {{ todo.title }} </span>
+            <span>{{ todo.title }}</span>
           </li>
         }
       </ul>
+
+      <!-- Only show the button when there are more than five API Todos. -->
+      @if (apiTodoCount > apiTodoPreviewLimit) {
+        <!-- C. Add the toggle button -->
+        <button
+          type="button"
+          class="api-toggle"
+          (click)="toggleApiTodos()"
+          [attr.aria-expanded]="showAllApiTodos"
+          aria-controls="api-todo-items"
+        >
+          <!-- D. Show the correct button label -->
+          {{
+            showAllApiTodos
+              ? "Show Less"
+              : "Show All " + apiTodoCount + " API Todos"
+          }}
+        </button>
+      }
     </section>
   }
+
   <h2 id="todo-list-heading" class="todo-list-heading">Your Tasks</h2>
 
   <!-- Todo count -->

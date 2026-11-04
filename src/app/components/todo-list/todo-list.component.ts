@@ -79,6 +79,7 @@ export class TodoListComponent implements OnInit {
           console.log('Todos received from API:', apiTodos);
 
           this.apiTodos = apiTodos; // change from apiTodos to [] for testing the loading spinner and error handling.
+          this.showAllApiTodos = false; // This ensures that after a successful refresh, the API list returns to its five-item preview.
           this.hasLoadedApiTodos = true; // Set the flag to true to indicate that API todos have been loaded
           this.apiError = null; // Clear any previous API error when the request is successful
         },
@@ -106,6 +107,12 @@ export class TodoListComponent implements OnInit {
   apiTodos: Todo[] = []; // Stores the API Todos as an array of Todo objects.
   hasLoadedApiTodos = false; // Tracks whether at least one API request has succeeded.
 
+  // Maximum number of API Todos displayed when the list is collapsed.
+  readonly apiTodoPreviewLimit = 5;
+
+  // Tracks whether the visitor wants to see every API Todo.
+  showAllApiTodos = false;
+
   /// B. filteredTodos
   // "When someone asks me for filteredTodos..." then // "Give them the todos from TodoService, filtered based on the current filter state." //
   get filteredTodos(): Todo[] {
@@ -124,6 +131,20 @@ export class TodoListComponent implements OnInit {
 
   get apiTodoCount(): number {
     return this.apiTodos.length;
+  }
+
+  // Returns the API Todos that should currently be displayed.
+  get visibleApiTodos(): Todo[] {
+    if (this.showAllApiTodos) {
+      return this.apiTodos;
+    }
+
+    return this.apiTodos.slice(0, this.apiTodoPreviewLimit);
+  }
+
+  // Switches between showing the preview and the full API Todo list.
+  toggleApiTodos(): void {
+    this.showAllApiTodos = !this.showAllApiTodos;
   }
 
   // "When someone asks me for completedTodoCount..." then // "Give them the count of todos from TodoService that are completed." //

@@ -1,11 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { of } from 'rxjs';
 
 import { TodoListComponent } from './todo-list.component';
 import { TodoItemComponent } from '../todo-item/todo-item.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+
+import {
+  provideHttpClientTesting,
+  HttpTestingController,
+} from '@angular/common/http/testing';
 
 import { TodoService } from '../../services/todo.service';
 import { createMockTodo } from '../../testing/todo-test.factory';
@@ -15883,5 +15888,206 @@ describe('TodoListComponent', () => {
       // Remove the saved preference after testing.
       localStorage.removeItem('todoSortOrder');
     }
+  });
+
+  // ==========================================
+  // API Todo Show 5 / Show All Tests
+  // ==========================================
+
+  // 116. Jasmine
+  // Test 1: Show only five API Todos initially.
+  it('should display only five API Todos by default', () => {
+    // ARRANGE: Create eight sample API Todos.
+    const mockApiTodos: Todo[] = Array.from({ length: 8 }, (_, index) =>
+      createMockTodo({
+        id: index + 1,
+        title: `API Task ${index + 1}`,
+        completed: false,
+      }),
+    );
+
+    // Provide the mock API data to the component.
+    component.apiTodos = mockApiTodos;
+
+    // ACT: Update the Angular template.
+    fixture.detectChanges();
+
+    // Find the API Todo items rendered in HTML.
+    const displayedTodos =
+      fixture.nativeElement.querySelectorAll('.api-todos li');
+
+    // ASSERT: Only five are displayed.
+    expect(displayedTodos.length).toBe(5);
+    expect(component.visibleApiTodos.length).toBe(5);
+
+    // The original eight Todos remain available.
+    expect(component.apiTodos.length).toBe(8);
+    expect(component.showAllApiTodos).toBeFalse();
+  });
+
+  // 117. Jasmine
+  // Test 2: Expand the API Todo list.
+  it('should show all API Todos when Show All is clicked', () => {
+    // ARRANGE: Create eight API Todos.
+    component.apiTodos = Array.from({ length: 8 }, (_, index) =>
+      createMockTodo({
+        id: index + 1,
+        title: `API Task ${index + 1}`,
+        completed: false,
+      }),
+    );
+
+    fixture.detectChanges();
+
+    // Find the real Show All button.
+    const toggleButton: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.api-toggle');
+
+    expect(toggleButton).not.toBeNull();
+
+    // ACT: Click the button.
+    toggleButton.click();
+    fixture.detectChanges();
+
+    // ASSERT: All eight Todos are visible.
+    const displayedTodos =
+      fixture.nativeElement.querySelectorAll('.api-todos li');
+
+    expect(displayedTodos.length).toBe(8);
+    expect(component.showAllApiTodos).toBeTrue();
+    expect(toggleButton.textContent).toContain('Show Less');
+    expect(toggleButton.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  // 118. Jasmine
+  // Test 3: Collapse the API Todo list.
+  it('should show five API Todos again when Show Less is clicked', () => {
+    // ARRANGE: Create eight API Todos.
+    component.apiTodos = Array.from({ length: 8 }, (_, index) =>
+      createMockTodo({
+        id: index + 1,
+        title: `API Task ${index + 1}`,
+        completed: false,
+      }),
+    );
+
+    // Begin in expanded mode.
+    component.showAllApiTodos = true;
+    fixture.detectChanges();
+
+    // Find the Show Less button.
+    const toggleButton: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.api-toggle');
+
+    expect(toggleButton).not.toBeNull();
+
+    // ACT: Click Show Less.
+    toggleButton.click();
+    fixture.detectChanges();
+
+    // ASSERT: Only five Todos remain visible.
+    const displayedTodos =
+      fixture.nativeElement.querySelectorAll('.api-todos li');
+
+    expect(displayedTodos.length).toBe(5);
+    expect(component.showAllApiTodos).toBeFalse();
+    expect(toggleButton.textContent).toContain('Show All 8 API Todos');
+    expect(toggleButton.getAttribute('aria-expanded')).toBe('false');
+
+    // No API Todos were deleted.
+    expect(component.apiTodos.length).toBe(8);
+  });
+
+  // 119. Jasmine
+  // Test 4: Hide the toggle when five or fewer Todos exist.
+  it('should hide the Show All button when API Todos do not exceed five', () => {
+    // ARRANGE: Create exactly five API Todos.
+    component.apiTodos = Array.from({ length: 5 }, (_, index) =>
+      createMockTodo({
+        id: index + 1,
+        title: `API Task ${index + 1}`,
+        completed: false,
+      }),
+    );
+
+    // ACT: Render the component.
+    fixture.detectChanges();
+
+    // Find the toggle button and rendered Todos.
+    const toggleButton = fixture.nativeElement.querySelector('.api-toggle');
+
+    const displayedTodos =
+      fixture.nativeElement.querySelectorAll('.api-todos li');
+
+    // ASSERT: Five Todos are displayed without a toggle.
+    expect(displayedTodos.length).toBe(5);
+    expect(toggleButton).toBeNull();
+  });
+
+  // 120. Jasmine
+  // Test 5: A successful API refresh resets the list to five items.
+  it('should reset the API Todo display after a successful refresh', () => {
+    // Complete the HTTP request started by ngOnInit().
+    const httpTesting = TestBed.inject(HttpTestingController);
+
+    const pendingRequests = httpTesting.match(() => true);
+
+    pendingRequests.forEach((request) => {
+      request.flush([]);
+    });
+
+    // The initial API loading state should now be finished.
+    expect(component.isApiLoading).toBeFalse();
+
+    // ARRANGE: Create eight sample API Todos.
+    const mockApiTodos: Todo[] = Array.from({ length: 8 }, (_, index) =>
+      createMockTodo({
+        id: index + 1,
+        title: `API Task ${index + 1}`,
+        completed: false,
+      }),
+    );
+
+    // Retrieve the TodoService used by the component.
+    const todoService = TestBed.inject(TodoService);
+
+    // Replace the real API method with a successful mock response.
+    spyOn(todoService, 'getTodosFromApi').and.returnValue(of(mockApiTodos));
+
+    // Simulate a previously loaded, expanded API list.
+    component.apiTodos = mockApiTodos;
+    component.showAllApiTodos = true;
+
+    // Confirm that all eight items are initially visible.
+    expect(component.visibleApiTodos.length).toBe(8);
+
+    // ACT: Refresh the API Todos.
+    component.loadApiTodos();
+
+    // Update the rendered Angular template.
+    fixture.detectChanges();
+
+    // ASSERT: The API Todos were loaded successfully.
+    expect(component.apiTodos.length).toBe(8);
+    expect(component.hasLoadedApiTodos).toBeTrue();
+    expect(component.apiError).toBeNull();
+    expect(component.isApiLoading).toBeFalse();
+
+    // The expanded state should reset to collapsed.
+    expect(component.showAllApiTodos).toBeFalse();
+    expect(component.visibleApiTodos.length).toBe(5);
+
+    // Only five API Todo elements should be rendered.
+    const displayedTodos =
+      fixture.nativeElement.querySelectorAll('.api-todos li');
+
+    expect(displayedTodos.length).toBe(5);
+
+    // The button should offer to expand the list again.
+    const toggleButton: HTMLButtonElement | null =
+      fixture.nativeElement.querySelector('.api-toggle');
+
+    expect(toggleButton).not.toBeNull();
+    expect(toggleButton?.textContent).toContain('Show All 8 API Todos');
   });
 });
