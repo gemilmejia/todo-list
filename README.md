@@ -4,6 +4,14 @@ A responsive task management application built with **Angular 19 and TypeScript*
 
 This project was developed as a hands-on learning experience focused on Angular application architecture, component communication, state management, asynchronous operations, and front-end testing.
 
+## Live Demo
+
+**Try the Angular To-Do List online:**
+
+[View Live Application](https://gemilmejia.github.io/todo-list/)
+
+The application is deployed automatically using GitHub Actions and GitHub Pages.
+
 ## Features
 
 ### Task Management
@@ -63,17 +71,6 @@ This project was developed as a hands-on learning experience focused on Angular 
 | Jasmine        | Unit and component testing                   |
 | Karma          | Automated test execution                     |
 | Git & GitHub   | Version control                              |
-
-<!-- ## Screenshots
-
-Screenshots will be added after the final visual review.
-
-Suggested screenshots:
-
-- Desktop application overview
-- Mobile responsive layout
-- Task management interface
-- Search, filtering, and sorting controls -->
 
 ## Screenshots
 
@@ -205,10 +202,6 @@ The sample API Todos are fetched independently from the JSONPlaceholder API and 
 
 **Note:** localStorage data is browser-specific and is not synchronized between devices.
 
-## Live Demo
-
-Deployment URL: _To be added after deployment._
-
 ## Future Improvements
 
 Potential improvements include:
@@ -223,7 +216,9 @@ Potential improvements include:
 
 The original 177-lesson Angular To-Do List learning roadmap is complete.
 
-The project has passed its latest automated testing and production build checks and is undergoing final portfolio documentation and deployment preparation.
+The application is deployed to GitHub Pages and has successfully passed its latest production build and all 187 Jasmine/Karma automated tests.
+
+The Modern Light redesign is complete, and the application has been verified on desktop and mobile screens.
 
 ## Developer
 
