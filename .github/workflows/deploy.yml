@@ -1,0 +1,76 @@
+name: Deploy Angular Todo List to GitHub Pages
+
+# Run when changes are pushed to main.
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Permissions required for GitHub Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Prevent overlapping deployments.
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      # Download the repository code.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install Node.js.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      # Install exact dependencies from package-lock.json.
+      - name: Install dependencies
+        run: npm ci
+
+      # Build Angular with the GitHub Pages base path.
+      - name: Build Angular application
+        run: npm run build -- --configuration production --base-href /todo-list/
+
+      # Configure GitHub Pages.
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      # Locate the browser-ready production files.
+      - name: Find production output
+        id: output
+        shell: bash
+        run: |
+          if [ -f "dist/todo-list/browser/index.html" ]; then
+            echo "path=dist/todo-list/browser" >> "$GITHUB_OUTPUT"
+          elif [ -f "dist/todo-list/index.html" ]; then
+            echo "path=dist/todo-list" >> "$GITHUB_OUTPUT"
+          else
+            echo "Angular index.html was not found."
+            exit 1
+          fi
+
+      # Upload the built application.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ steps.output.outputs.path }}
+
+      # Publish the website.
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
