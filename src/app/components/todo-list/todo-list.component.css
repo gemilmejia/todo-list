@@ -1,366 +1,75 @@
-/* My API Todos — loading messages, refresh button, fetched Todo items, and error states. */
-.filters .active {
-  font-weight: bold;
-}
 
-.filters button:focus-visible {
-  outline: 3px solid #1976d2;
-  outline-offset: 2px;
-}
+/* ==========================================
+   Modern Light Theme — Todo List and API Todos
+   ========================================== */
 
-/*Normally, <ul> has browser-default bullets and padding. We're removing those because our Todo application doesn't need bullet points.*/
+/* Remove default list bullets and spacing */
 ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 30px 20px;
-  color: #777;
-  border: 1px dashed #ccc;
-  border-radius: 8px;
-  margin-top: 20px;
-}
+/* ==========================================
+   1. PERSONAL TODO LIST
+   ========================================== */
 
-/* Style the task counter */
-.todo-count {
-  text-align: center;
-  margin-bottom: 15px;
-  font-size: 14px;
-  color: #777;
-}
-
-/* Style the progress bar */
-.progress-bar {
-  width: 100%;
-  height: 24px;
-  background: #e5e5e5;
-  /* background: linear-gradient(to right, #4caf50, #8bc34a); */
-  border-radius: 4px;
-  overflow: hidden;
-  margin-top: 8px;
-  margin-bottom: 20px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #4caf50;
-  width: 0;
-  transition: width 0.3s ease;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.progress-bar {
-  position: relative;
-}
-
-.progress-zero-label {
-  position: absolute; /* allows us to position 0% inside the progress bar. */
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-
-  font-size: 12px;
-  font-weight: bold;
-}
-
-@media (max-width: 600px) {
-  .progress-bar {
-    height: 20px;
-  }
-
-  .progress-fill {
-    font-size: 11px;
-  }
-
-  .progress-zero-label {
-    font-size: 11px;
-  }
-}
-
-/* Style the "Clear Completed" button */
-.clear-completed {
-  display: block;
-  margin: 0 auto 20px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.clear-completed:hover {
-  opacity: 0.85;
-}
-
-/* Style the message that appears when there are tasks but no completed tasks */
-.no-completed-message {
-  text-align: center;
-  margin-bottom: 10px;
-  font-size: 13px;
-  color: #777;
-}
-
-.todo-list-heading {
-  margin: 0 0 15px;
-  font-size: 20px;
-  font-weight: 600;
-  color: #333;
-}
-
-.api-loading {
-  text-align: center;
-  margin-bottom: 15px;
-  font-size: 14px;
-}
-
-.api-info {
-  text-align: center;
-  margin-bottom: 15px;
-  font-size: 14px;
-}
-
-/* Style the API todos list */
-.api-todos {
-  margin-bottom: 30px;
-}
-
-.api-todos h3 {
-  margin-bottom: 10px;
-}
-
-.api-todos ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.api-todos li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-  border-bottom: 1px solid #ddd;
-}
-
-.api-todo-status {
-  flex-shrink: 0;
-}
-
-.api-refresh {
-  display: block;
-  margin: 10px auto 0;
-  padding: 6px 12px;
-  cursor: pointer;
-}
-
-.api-refresh:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Style the message that appears when there are no API todos */
-.api-empty {
-  margin: 20px 0;
-  padding: 20px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.api-empty h3 {
-  margin-bottom: 8px;
-}
-
-.api-empty p {
-  margin: 0;
-}
-
-/* Style the message that appears when the API is refreshing todos */
-.api-refresh-status {
-  margin-top: 10px;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-/* Style the message that appears when there is an API error */
-.todo-search {
-  margin: 15px 0;
-}
-
-.todo-search label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-}
-
-.todo-search input {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-/* Style the message that appears when there are no matching todos after a search */
-.todo-no-results {
-  margin: 20px 0;
-  padding: 20px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.todo-no-results p {
-  margin: 5px 0;
-}
-
-/* Style the "Clear Search" button */
-.clear-search {
-  display: block;
-  margin: 10px 0 0 auto;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #f5f5f5;
-  cursor: pointer;
-}
-
-.clear-search:hover {
-  background-color: #e5e5e5;
-}
-
-.clear-search:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-/* Style the result count message */
-.todo-result-count {
-  margin: 10px 0;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-/* Style the message that appears when there are no todos after applying a filter */
-.todo-filter-empty {
-  margin: 20px 0;
-  padding: 20px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
-.todo-filter-empty p {
-  margin: 5px 0;
-}
-
-/* Style the sort dropdown */
-.todo-sort {
-  margin: 15px 0;
-}
-
-.todo-sort label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-}
-
-.todo-sort select {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  background-color: #fff;
-}
-
-.todo-sort select:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-/* Style the "Reset Sorting" button */
-.reset-sort {
-  display: block;
-  margin: 10px 0 0 auto;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background-color: #f5f5f5;
-  cursor: pointer;
-}
-
-.reset-sort:hover {
-  background-color: #e5e5e5;
-}
-
-.reset-sort:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}
-
-/* Prevent long API Todo titles from overflowing */
-.api-todos li {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-/* ======================================================================================================================================================================*/
-
-/* =====================================
-   Modern Light Theme — Todo List Controls - My Todo List — progress, search, filters, sorting, and task feedback.
-   ===================================== */
-
-/* Main heading for personal tasks */
+/* Your Tasks heading */
 .todo-list-heading {
   margin: 0 0 18px;
+  color: var(--color-text);
   font-size: 22px;
   font-weight: 700;
-  color: var(--color-text);
 }
 
-/* Todo completion count */
+/* Number of active tasks remaining */
 .todo-count {
   margin-bottom: 12px;
+  color: var(--color-muted);
   text-align: center;
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-muted);
 }
 
-/* Modern progress bar */
+/* Message when no tasks have been completed */
+.no-completed-message {
+  margin-bottom: 10px;
+  color: var(--color-muted);
+  text-align: center;
+  font-size: 13px;
+}
+
+/* Number of tasks displayed after filtering */
+.todo-result-count {
+  margin: 10px 0;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+/* ==========================================
+   2. PROGRESS BAR
+   ========================================== */
+
+/* Outer progress bar */
 .progress-bar {
   position: relative;
   width: 100%;
   height: 24px;
-
   margin-top: 8px;
   margin-bottom: 24px;
-
   background-color: #e2e8f0;
   border-radius: 12px;
   overflow: hidden;
 }
 
-/* Progress indicator */
+/* Blue progress fill controlled by Angular */
 .progress-fill {
   display: flex;
   align-items: center;
   justify-content: center;
 
-  height: 100%;
   width: 0;
+  height: 100%;
 
   background-color: var(--color-primary);
   color: #ffffff;
@@ -372,26 +81,29 @@ ul {
   transition: width 0.3s ease;
 }
 
-/* The 0% label */
+/* Label displayed when progress is 0% */
 .progress-zero-label {
   position: absolute;
-  left: 50%;
   top: 50%;
-
+  left: 50%;
   transform: translate(-50%, -50%);
 
+  color: var(--color-text);
   font-size: 12px;
   font-weight: 700;
-  color: var(--color-text);
 }
 
-/* Search and sort sections */
+/* ==========================================
+   3. SEARCH AND SORTING
+   ========================================== */
+
+/* Search and sort containers */
 .todo-search,
 .todo-sort {
   margin: 18px 0;
 }
 
-/* Search and sort labels */
+/* Input labels */
 .todo-search label,
 .todo-sort label {
   display: block;
@@ -402,13 +114,12 @@ ul {
   font-weight: 600;
 }
 
-/* Search input and sort dropdown */
+/* Search field and sort dropdown */
 .todo-search input,
 .todo-sort select {
   display: block;
   width: 100%;
   min-width: 0;
-
   padding: 12px 14px;
 
   color: var(--color-text);
@@ -424,7 +135,7 @@ ul {
     box-shadow 0.2s ease;
 }
 
-/* Focus feedback */
+/* Focus effects */
 .todo-search input:focus,
 .todo-sort select:focus {
   border-color: var(--color-primary);
@@ -432,7 +143,11 @@ ul {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-/* Filter button layout */
+/* ==========================================
+   4. FILTER BUTTONS
+   ========================================== */
+
+/* Container for All, Active, Completed */
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -452,32 +167,36 @@ ul {
 
   font-size: 14px;
   font-weight: 600;
-
   cursor: pointer;
+
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
 }
 
-/* Active filter button */
+/* Selected filter */
 .filters button.active {
   color: #ffffff;
   background-color: var(--color-primary);
   border-color: var(--color-primary);
 }
 
-/* Hover for inactive filters */
+/* Hover effect for unselected filters */
 .filters button:hover:not(.active) {
   background-color: #dbeafe;
 }
 
-/* Keyboard focus for filters */
+/* Keyboard focus */
 .filters button:focus-visible {
   outline: 3px solid var(--color-primary);
   outline-offset: 2px;
 }
 
-/* Clear Completed button */
+/* ==========================================
+   5. ACTION BUTTONS
+   ========================================== */
+
+/* Clear Completed — destructive action */
 .clear-completed {
   display: block;
   margin: 0 auto 20px;
@@ -491,16 +210,14 @@ ul {
 
   font-size: 14px;
   font-weight: 600;
-
   cursor: pointer;
 }
 
-/* Clear Completed hover */
 .clear-completed:hover {
   background-color: #fee2e2;
 }
 
-/* Secondary action buttons */
+/* Clear Search and Reset Sorting */
 .clear-search,
 .reset-sort {
   display: block;
@@ -515,7 +232,6 @@ ul {
 
   font-size: 14px;
   font-weight: 600;
-
   cursor: pointer;
 }
 
@@ -526,7 +242,7 @@ ul {
   background-color: #f1f5f9;
 }
 
-/* Accessible keyboard focus */
+/* Keyboard focus for action buttons */
 .clear-completed:focus-visible,
 .clear-search:focus-visible,
 .reset-sort:focus-visible {
@@ -534,14 +250,11 @@ ul {
   outline-offset: 2px;
 }
 
-/* Todo count and feedback messages */
-.no-completed-message,
-.todo-result-count {
-  color: var(--color-muted);
-  font-size: 13px;
-}
+/* ==========================================
+   6. EMPTY STATES AND MESSAGES
+   ========================================== */
 
-/* Empty and no-results states */
+/* Empty Todo List and filtering messages */
 .empty-state,
 .todo-no-results,
 .todo-filter-empty {
@@ -556,48 +269,33 @@ ul {
   border-radius: 12px;
 }
 
-/* Mobile responsiveness */
-@media (max-width: 600px) {
-  .progress-bar {
-    height: 20px;
-  }
-
-  .progress-fill,
-  .progress-zero-label {
-    font-size: 11px;
-  }
-
-  .filters {
-    gap: 8px;
-  }
-
-  .filters button {
-    flex: 1;
-    padding: 10px 8px;
-    font-size: 13px;
-  }
-
-  .todo-list-heading {
-    font-size: 20px;
-  }
+/* Paragraph spacing in feedback messages */
+.todo-no-results p,
+.todo-filter-empty p {
+  margin: 5px 0;
 }
 
-/*=====================================================================================================================================================================================*/
+/* ==========================================
+   7. API LOADING AND REFRESH
+   ========================================== */
 
-/* =====================================
-   Modern Light Theme — API Todos
-   ===================================== */
+/* API loading message */
+.api-loading {
+  margin-bottom: 16px;
+  padding: 14px;
 
-/* API section heading */
-.api-todos h3 {
-  margin: 0 0 16px;
+  color: var(--color-primary);
+  background-color: #eff6ff;
 
-  color: var(--color-text);
-  font-size: 20px;
-  font-weight: 700;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-/* API information and refresh controls */
+/* API information panel */
 .api-info {
   margin-bottom: 20px;
   padding: 16px;
@@ -612,7 +310,7 @@ ul {
   font-size: 14px;
 }
 
-/* Refresh API button */
+/* Refresh API Todos button */
 .api-refresh {
   display: block;
   margin: 12px auto 0;
@@ -626,8 +324,8 @@ ul {
 
   font-size: 14px;
   font-weight: 600;
-
   cursor: pointer;
+
   transition: background-color 0.2s ease;
 }
 
@@ -648,44 +346,39 @@ ul {
   outline-offset: 2px;
 }
 
-/* API loading message */
-.api-loading {
-  margin-bottom: 16px;
-  padding: 14px;
-
-  color: var(--color-primary);
-  background-color: #eff6ff;
-
-  border: 1px solid #dbeafe;
-  border-radius: 10px;
-
-  text-align: center;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* API refresh status text */
+/* Refresh status message */
 .api-refresh-status {
   margin: 12px 0 18px;
-
   color: var(--color-muted);
   text-align: center;
   font-size: 13px;
 }
 
-/* API Todo list container */
+/* ==========================================
+   8. API TODO CARDS
+   ========================================== */
+
+/* API Todo section */
 .api-todos {
   margin-bottom: 32px;
 }
 
-/* Remove list markers and default spacing */
+/* API Todos heading */
+.api-todos h3 {
+  margin: 0 0 16px;
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Remove API list bullets */
 .api-todos ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* Individual API Todo */
+/* Individual API Todo card */
 .api-todos li {
   display: flex;
   align-items: flex-start;
@@ -711,14 +404,18 @@ ul {
   line-height: 1.5;
 }
 
-/* Let long API Todo titles wrap */
+/* Allow long API Todo titles to wrap */
 .api-todos li span:last-child {
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-/* Empty API response */
+/* ==========================================
+   9. API EMPTY STATE
+   ========================================== */
+
+/* Message when the API returns no Todos */
 .api-empty {
   margin: 20px 0;
   padding: 24px;
@@ -743,21 +440,56 @@ ul {
   margin: 0;
 }
 
-/* Mobile API section */
+/* ==========================================
+   10. MOBILE RESPONSIVE DESIGN
+   ========================================== */
+
 @media (max-width: 600px) {
+  /* Reduce progress bar height */
+  .progress-bar {
+    height: 20px;
+  }
+
+  /* Make progress text smaller */
+  .progress-fill,
+  .progress-zero-label {
+    font-size: 11px;
+  }
+
+  /* Keep filter spacing consistent */
+  .filters {
+    gap: 8px;
+  }
+
+  /* Allow filters to share mobile width */
+  .filters button {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  /* Adjust personal task heading */
+  .todo-list-heading {
+    font-size: 20px;
+  }
+
+  /* Reduce API panel padding */
   .api-info {
     padding: 12px;
   }
 
+  /* Make API refresh button full width */
   .api-refresh {
     width: 100%;
   }
 
+  /* Reduce API card spacing */
   .api-todos li {
     gap: 10px;
     padding: 10px 12px;
   }
 
+  /* Adjust API heading */
   .api-todos h3 {
     font-size: 18px;
   }
